@@ -38,10 +38,7 @@ async function fetchForumPosts(category = null) {
     try {
         let query = supabase
             .from('forum_posts')
-            .select(`
-                *,
-                user_profiles (full_name, user_type)
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
 
         if (category && category !== 'all') {
@@ -94,10 +91,7 @@ async function fetchPostComments(postId) {
     try {
         const { data, error } = await supabase
             .from('forum_comments')
-            .select(`
-                *,
-                user_profiles (full_name, user_type)
-            `)
+            .select('*')
             .eq('post_id', postId)
             .order('created_at', { ascending: true });
 
