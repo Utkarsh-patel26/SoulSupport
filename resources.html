@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - BetterLyf</title>
+    <meta name="description" content="Curated mental health resources: articles, videos, guided meditations, and crisis support to help you thrive.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                Better<span>Lyf</span>
+                <div class="logo-dot"></div>
+            </a>
+
+            <nav class="nav" id="nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+                    <li class="nav-item"><a href="resources.html" class="nav-link active">Resources</a></li>
+                    <li class="nav-item"><a href="forum.html" class="nav-link">Community</a></li>
+                </ul>
+                <div class="nav-buttons">
+                    <a href="auth.html" class="btn btn-primary">Login</a>
+                </div>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-book"></i> Resource Hub
+                </div>
+                <h1 class="hero-title">
+                    Mental Health <span class="highlight">Resources & Tools</span>
+                </h1>
+                <p class="hero-description">
+                    Trusted, curated content to support your mental wellbeing journey. From self-help tools to crisis support.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Resources -->
+    <section class="section resources-section" id="resources">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Explore Curated Collections</h2>
+                <div class="section-line"></div>
+                <p class="section-subtitle">Click any card to open the resource in a new tab</p>
+            </div>
+
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Self-Help Tools</h3>
+                    <p>Worksheets and exercises for thought tracking, sleep hygiene, and study stress.</p>
+                    <div class="resource-actions">
+                        <a href="https://www.cci.health.wa.gov.au/Resources/Looking-After-Yourself" target="_blank" rel="noopener" class="resource-link">CCI Self-Help <i class="fas fa-arrow-right"></i></a>
+                        <a href="https://www.getselfhelp.co.uk/" target="_blank" rel="noopener" class="resource-link">Get Self Help (CBT) <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <h3>Crisis & Support</h3>
+                    <p>If you or someone else is in danger or experiencing a crisis, get help right now.</p>
+                    <div class="resource-actions">
+                        <a href="https://988lifeline.org/" target="_blank" rel="noopener" class="resource-link">988 Lifeline <i class="fas fa-arrow-right"></i></a>
+                        <a href="https://www.crisistextline.org/" target="_blank" rel="noopener" class="resource-link">Crisis Text Line <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Campus & Community</h3>
+                    <p>Connect with peers and schedule time with a professional when you're ready.</p>
+                    <div class="resource-actions">
+                        <a href="about.html" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                        <a href="#community" class="resource-link">Community Forum <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Wellness Articles -->
+    <section class="section" style="background: var(--white);">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Wellness Articles</h2>
+                <div class="section-line"></div>
+                <p class="section-subtitle">Trusted reading to deepen your understanding and toolkit</p>
+            </div>
+
+            <div class="resources-grid">
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>NIMH — Stress: Coping With Everyday Problems</h3>
+                    <p>National Institute of Mental Health on recognizing and managing stress.</p>
+                    <a href="https://www.nimh.nih.gov/health/publications/stress" target="_blank" rel="noopener" class="resource-link">Read Article <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-book-medical"></i>
+                    </div>
+                    <h3>APA — Topics: Stress</h3>
+                    <p>American Psychological Association resources on stress and coping.</p>
+                    <a href="https://www.apa.org/topics/stress" target="_blank" rel="noopener" class="resource-link">Read Articles <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <h3>NHS — Tips to Reduce Stress</h3>
+                    <p>Practical, evidence-based tips from the UK National Health Service.</p>
+                    <a href="https://www.nhs.uk/mental-health/self-help/guides-tools-and-activities/tips-to-reduce-stress/" target="_blank" rel="noopener" class="resource-link">View Guide <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-hospital"></i>
+                    </div>
+                    <h3>CDC — Learn About Mental Health</h3>
+                    <p>Core concepts and links to further resources from the CDC.</p>
+                    <a href="https://www.cdc.gov/mentalhealth/learn/index.htm" target="_blank" rel="noopener" class="resource-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                </div>
+
+                <div class="resource-card">
+                    <div class="resource-icon">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                    <h3>Sleep Foundation — Sleep Hygiene</h3>
+                    <p>How better sleep supports mental wellbeing and performance.</p>
+                    <a href="https://www.sleepfoundation.org/sleep-hygiene" target="_blank" rel="noopener" class="resource-link">Read Guide <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guided Meditation Audios -->
+    <section class="section resources-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Guided Meditation Audios</h2>
+                <div class="section-line"></div>
+                <p class="section-subtitle">Press play to start a session. Curated playlists from Spotify.</p>
+            </div>
+
+            <div class="meditation-grid">
+                <div class="meditation-card">
+                    <h3>Peaceful Meditation — Spotify</h3>
+                    <p>Gentle ambient tracks for calm and focus.</p>
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u?utm_source=generator" width="100%" height="352" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="embed-note">If the player doesn't load, <a href="https://open.spotify.com/playlist/37i9dQZF1DWZqd5JICZI0u" target="_blank" rel="noopener">open on Spotify</a>.</p>
+                </div>
+
+                <div class="meditation-card">
+                    <h3>Ambient Relaxation — Spotify</h3>
+                    <p>Relax and unwind with chill, ambient music.</p>
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX3Ogo9pFvBkY?utm_source=generator" width="100%" height="352" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="embed-note">If the player doesn't load, <a href="https://open.spotify.com/playlist/37i9dQZF1DX3Ogo9pFvBkY" target="_blank" rel="noopener">open on Spotify</a>.</p>
+                </div>
+
+                <div class="meditation-card">
+                    <h3>Nature Sounds — Spotify</h3>
+                    <p>Sounds of birds, rain, and forest ambience.</p>
+                    <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/37i9dQZF1DX4PP3DA4J0N8?utm_source=generator" width="100%" height="352" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                    <p class="embed-note">If the player doesn't load, <a href="https://open.spotify.com/playlist/37i9dQZF1DX4PP3DA4J0N8" target="_blank" rel="noopener">open on Spotify</a>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stress Management Videos -->
+    <section class="section" style="background: var(--white);">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2 class="section-title">Stress Management Videos</h2>
+                <div class="section-line"></div>
+                <p class="section-subtitle">Short, effective practices you can try right now</p>
+            </div>
+
+            <div class="video-grid">
+                <div class="video-card">
+                    <h3>5-Minute Meditation You Can Do Anywhere</h3>
+                    <p>Quick breathing and presence practice to reduce stress.</p>
+                    <div class="video-embed">
+                        <iframe src="https://www.youtube.com/embed/inpok4MKVLM" title="5-Minute Meditation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p class="embed-note">If the video doesn't load, <a href="https://www.youtube.com/watch?v=inpok4MKVLM" target="_blank" rel="noopener">watch on YouTube</a>.</p>
+                </div>
+
+                <div class="video-card">
+                    <h3>Headspace | Mini Meditation: Breathe</h3>
+                    <p>Guided mini-meditation to help pause and reset.</p>
+                    <div class="video-embed">
+                        <iframe src="https://www.youtube.com/embed/YFSc7Ck0Ao0" title="Headspace Mini Meditation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p class="embed-note">If the video doesn't load, <a href="https://www.youtube.com/watch?v=YFSc7Ck0Ao0" target="_blank" rel="noopener">watch on YouTube</a>.</p>
+                </div>
+
+                <div class="video-card">
+                    <h3>UCLA Mindful — 5-Minute Guided Meditation</h3>
+                    <p>A brief, evidence-based mindfulness practice.</p>
+                    <div class="video-embed">
+                        <iframe src="https://www.youtube.com/embed/ZToicYcHIOU" title="UCLA Mindful Meditation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <p class="embed-note">If the video doesn't load, <a href="https://www.youtube.com/watch?v=ZToicYcHIOU" target="_blank" rel="noopener">watch on YouTube</a>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo text-white">Better<span>Lyf</span></a>
+                    <p>Your partner in emotional wellness and personal growth.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="#">Individual Therapy</a></li>
+                        <li><a href="#">Couples Therapy</a></li>
+                        <li><a href="#">Family Therapy</a></li>
+                        <li><a href="#">Psychiatry</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cancellation Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BetterLyf. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Action Button -->
+    <a href="#" class="fab-whatsapp" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="script.js"></script>
+    <script src="supabase-client.js"></script>
+    <script src="navbar-auth.js"></script>
+</body>
+</html>

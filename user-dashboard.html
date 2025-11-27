@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - BetterLyf</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        .dashboard-container {
+            min-height: 100vh;
+            background: var(--bg-light);
+            padding-top: 100px;
+        }
+
+        .welcome-section {
+            background: var(--gradient-primary);
+            color: var(--white);
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .welcome-section h1 {
+            font-size: 3rem;
+            margin-bottom: 16px;
+        }
+
+        .welcome-section p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .dashboard-content {
+            max-width: 1200px;
+            margin: -40px auto 0;
+            padding: 0 20px 60px;
+        }
+
+        .welcome-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 60px 40px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-soft);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .welcome-icon i {
+            font-size: 3rem;
+            color: var(--primary);
+        }
+
+        .welcome-card h2 {
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 16px;
+        }
+
+        .welcome-card p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .info-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .info-card i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .info-card h3 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .info-card p {
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .quick-actions {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .quick-actions h3 {
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 24px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container header-container">
+            <a href="index.html" class="logo">
+                Better<span>Lyf</span>
+                <div class="logo-dot"></div>
+            </a>
+
+            <nav class="nav" id="nav">
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
+                    <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
+                    <li class="nav-item"><a href="resources.html" class="nav-link">Resources</a></li>
+                    <li class="nav-item"><a href="forum.html" class="nav-link">Community</a></li>
+                </ul>
+                <div class="nav-buttons">
+                    <button onclick="logout()" class="btn btn-primary">Logout</button>
+                </div>
+                <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <div class="welcome-section">
+            <div class="container">
+                <h1>Welcome Back!</h1>
+                <p>Your journey to better mental health continues here</p>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="welcome-card">
+                <div class="welcome-icon">
+                    <i class="fas fa-smile-beam"></i>
+                </div>
+                <h2>Hello, Welcome!</h2>
+                <p>We're so glad you're here. Your BetterLyf dashboard is your personal space for managing your mental wellness journey, connecting with therapists, and accessing helpful resources.</p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>My Appointments</h3>
+                    <p>View and manage your upcoming therapy sessions</p>
+                </div>
+
+                <div class="info-card">
+                    <i class="fas fa-comment-medical"></i>
+                    <h3>Find a Therapist</h3>
+                    <p>Connect with licensed mental health professionals</p>
+                </div>
+
+                <div class="info-card">
+                    <i class="fas fa-book-medical"></i>
+                    <h3>Self-Help Tools</h3>
+                    <p>Access guided meditations and wellness exercises</p>
+                </div>
+
+                <div class="info-card">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Track Progress</h3>
+                    <p>Monitor your mental health journey over time</p>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <a href="#" class="action-btn">
+                        <i class="fas fa-search"></i> Find a Therapist
+                    </a>
+                    <a href="resources.html" class="action-btn">
+                        <i class="fas fa-book"></i> Browse Resources
+                    </a>
+                    <a href="forum.html" class="action-btn">
+                        <i class="fas fa-users"></i> Join Community
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo text-white">Better<span>Lyf</span></a>
+                    <p>Your partner in emotional wellness and personal growth.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="#">Individual Therapy</a></li>
+                        <li><a href="#">Couples Therapy</a></li>
+                        <li><a href="#">Family Therapy</a></li>
+                        <li><a href="#">Psychiatry</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cancellation Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 BetterLyf. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="supabase-client.js"></script>
+
+    <script>
+        // Logout function
+        async function logout() {
+            const result = await signOutUser();
+            if (result.success) {
+                window.location.href = 'auth.html';
+            }
+        }
+
+        // Check authentication and display user info
+        async function init() {
+            const user = await checkAuth();
+            if (user) {
+                const profile = await getUserProfile(user.id);
+                if (profile) {
+                    document.querySelector('.welcome-section h1').textContent = `Welcome Back, ${profile.full_name}!`;
+                    document.querySelector('.welcome-card h2').textContent = `Hello, ${profile.full_name.split(' ')[0]}!`;
+                }
+            }
+        }
+
+        // Run initialization on page load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
