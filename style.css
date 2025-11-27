@@ -166,29 +166,56 @@ img {
 }
 
 .logo {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary-dark);
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #115E59 0%, #0F766E 40%, #2DD4BF 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     position: relative;
     display: flex;
     align-items: center;
-    transition: var(--transition);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 2px 8px rgba(15, 118, 110, 0.3));
+    letter-spacing: -0.5px;
 }
 
 .logo:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    filter: drop-shadow(0 4px 16px rgba(45, 212, 191, 0.5));
+    background: linear-gradient(135deg, #2DD4BF 0%, #0F766E 60%, #115E59 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .logo span {
-    color: var(--primary-light);
+    background: linear-gradient(135deg, #2DD4BF 0%, #F43F5E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 900;
 }
 
 .logo-dot {
-    width: 8px;
-    height: 8px;
-    background: var(--secondary);
+    width: 10px;
+    height: 10px;
+    background: linear-gradient(135deg, #2DD4BF 0%, #F43F5E 100%);
     border-radius: 50%;
-    margin-left: 4px;
+    margin-left: 6px;
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+    animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+    }
+    50% {
+        transform: scale(1.2);
+        box-shadow: 0 0 20px rgba(244, 63, 94, 0.8);
+    }
 }
 
 .nav {

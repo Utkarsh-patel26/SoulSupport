@@ -1,4 +1,4 @@
-# BetterLyf - Setup Instructions
+# SoulSupport - Setup Instructions
 
 ## Step 1: Setup Supabase Database
 

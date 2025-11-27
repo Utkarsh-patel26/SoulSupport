@@ -1,5 +1,5 @@
 -- ============================================
--- BETTERLYF DATABASE SCHEMA
+-- SOULSUPPORT DATABASE SCHEMA
 -- Run this in Supabase SQL Editor
 -- ============================================
 
@@ -246,7 +246,7 @@ CREATE TRIGGER update_likes_count_on_delete
 -- Example:
 -- INSERT INTO forum_posts (user_id, category, content, is_anonymous)
 -- VALUES
---     (auth.uid(), 'general', 'Welcome to BetterLyf community!', true);
+--     (auth.uid(), 'general', 'Welcome to SoulSupport community!', true);
 
 -- ============================================
 -- SETUP COMPLETE!

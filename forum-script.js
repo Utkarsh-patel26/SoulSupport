@@ -1,5 +1,5 @@
 // ============================================
-// BETTERLYF FORUM - SUPABASE CONNECTED
+// SOULSUPPORT FORUM - SUPABASE CONNECTED
 // All posts, comments, and likes are stored in Supabase
 // ============================================
 
