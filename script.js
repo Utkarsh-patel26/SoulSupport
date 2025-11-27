@@ -35,36 +35,208 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Scroll Reveal Animation using Intersection Observer
+    // ============================================
+    // SCROLL REVEAL ANIMATIONS
+    // ============================================
+
+    // Intersection Observer for scroll animations
     const observerOptions = {
-        threshold: 0.1
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
     };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
+    const scrollObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('animate-in');
-                observer.unobserve(entry.target);
+                // Add stagger delay for multiple elements
+                setTimeout(() => {
+                    entry.target.classList.add('active');
+                }, index * 100);
+                scrollObserver.unobserve(entry.target);
             }
         });
     }, observerOptions);
 
-    // Add animation classes to elements
-    const animatedElements = document.querySelectorAll('.hero-content, .hero-image-wrapper, .section-title, .help-card, .improve-card');
-    animatedElements.forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-        observer.observe(el);
+    // Observe scroll-reveal elements
+    const revealElements = document.querySelectorAll(
+        '.scroll-reveal, .scroll-reveal-left, .scroll-reveal-right, .scroll-reveal-scale, ' +
+        '.feature-card, .service-card, .resource-card, .improve-card, ' +
+        '.team-card, .stat-box, .info-card'
+    );
+
+    revealElements.forEach(el => {
+        el.classList.add('scroll-reveal');
+        scrollObserver.observe(el);
     });
 
-    // Add CSS class for animation via JS to avoid cluttering CSS file with initial states if JS fails
-    const style = document.createElement('style');
-    style.innerHTML = `
-        .animate-in {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
+    // ============================================
+    // COUNTER ANIMATION FOR STATS
+    // ============================================
+
+    const animateCounter = (element, target, duration = 2000) => {
+        let start = 0;
+        const increment = target / (duration / 16);
+
+        const updateCounter = () => {
+            start += increment;
+            if (start < target) {
+                element.textContent = Math.floor(start) + '+';
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.textContent = target + '+';
+            }
+        };
+
+        updateCounter();
+    };
+
+    // Observe stat counters
+    const statObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumber = entry.target.querySelector('.stat-number');
+                if (statNumber && !statNumber.classList.contains('counted')) {
+                    const target = parseInt(statNumber.textContent);
+                    statNumber.classList.add('counted');
+                    animateCounter(statNumber, target);
+                }
+                statObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-box').forEach(box => {
+        statObserver.observe(box);
+    });
+
+    // ============================================
+    // PARALLAX EFFECT FOR HERO SECTION
+    // ============================================
+
+    const heroSection = document.querySelector('.hero');
+    if (heroSection) {
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroContent = document.querySelector('.hero-content');
+            const heroImage = document.querySelector('.hero-image');
+
+            if (heroContent && scrolled < 600) {
+                heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
+                heroContent.style.opacity = 1 - (scrolled * 0.002);
+            }
+
+            if (heroImage && scrolled < 600) {
+                heroImage.style.transform = `translateY(${scrolled * 0.2}px)`;
+            }
+        });
+    }
+
+    // ============================================
+    // FLOATING ANIMATION FOR ILLUSTRATIONS
+    // ============================================
+
+    const floatingElements = document.querySelectorAll('.hero-illustration, .about-img img');
+    floatingElements.forEach(el => {
+        el.classList.add('floating');
+    });
+
+    // ============================================
+    // FORM INPUT ANIMATIONS
+    // ============================================
+
+    const formInputs = document.querySelectorAll('input, textarea');
+    formInputs.forEach(input => {
+        // Add focus animation
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('input-focused');
+        });
+
+        input.addEventListener('blur', function() {
+            this.parentElement.classList.remove('input-focused');
+        });
+
+        // Add filled class if input has value
+        input.addEventListener('input', function() {
+            if (this.value.length > 0) {
+                this.classList.add('has-content');
+            } else {
+                this.classList.remove('has-content');
+            }
+        });
+    });
+
+    // ============================================
+    // BUTTON RIPPLE EFFECT
+    // ============================================
+
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const ripple = document.createElement('span');
+            ripple.style.cssText = `
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.7);
+                transform: translate(-50%, -50%) scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+                left: ${x}px;
+                top: ${y}px;
+            `;
+
+            this.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+
+    // Add ripple animation CSS
+    const rippleStyle = document.createElement('style');
+    rippleStyle.innerHTML = `
+        @keyframes ripple {
+            to {
+                transform: translate(-50%, -50%) scale(20);
+                opacity: 0;
+            }
         }
     `;
-    document.head.appendChild(style);
+    document.head.appendChild(rippleStyle);
+
+    // ============================================
+    // NAVBAR ACTIVE STATE
+    // ============================================
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+
+    navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPage) {
+            link.classList.add('active');
+        }
+    });
+
+    // ============================================
+    // LOADING ANIMATION
+    // ============================================
+
+    window.addEventListener('load', () => {
+        document.body.classList.add('loaded');
+
+        // Trigger animations on page load
+        setTimeout(() => {
+            const heroElements = document.querySelectorAll('.hero-content, .hero-image');
+            heroElements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }, 100);
+    });
 });
