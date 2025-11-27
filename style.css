@@ -26,6 +26,37 @@
     --transition: all 0.3s ease;
 }
 
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --primary: #14B8A6; /* Brighter Teal for dark mode */
+    --primary-light: #5EEAD4; /* Lighter Mint */
+    --primary-dark: #0D9488;
+    --secondary: #FB7185; /* Softer Rose */
+    --text-dark: #F9FAFB; /* Light text */
+    --text-light: #D1D5DB; /* Lighter gray */
+    --bg-light: #0F172A; /* Dark navy background */
+    --white: #1E293B; /* Dark card background */
+
+    /* Dark mode specific colors */
+    --bg-card: #1E293B;
+    --bg-elevated: #334155;
+    --border-color: #334155;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, #14B8A6 0%, #5EEAD4 100%);
+    --gradient-soft: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+}
+
+/* Dark mode transition */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 /* Reset & Base */
 * {
     margin: 0;
@@ -1499,5 +1530,105 @@ html {
     to {
         backdrop-filter: blur(5px);
         background: rgba(0, 0, 0, 0.5);
+    }
+}
+
+/* ============================================
+   DARK MODE TOGGLE
+   ============================================ */
+
+.theme-toggle {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: var(--bg-light);
+    border-radius: 50px;
+    border: 2px solid var(--primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 20px;
+}
+
+.theme-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(15, 118, 110, 0.3);
+}
+
+.theme-toggle-slider {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle-slider i {
+    font-size: 10px;
+    color: white;
+}
+
+[data-theme="dark"] .theme-toggle {
+    background: var(--bg-elevated);
+}
+
+[data-theme="dark"] .theme-toggle-slider {
+    transform: translateX(24px);
+    background: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+}
+
+/* Dark mode specific adjustments */
+[data-theme="dark"] .header {
+    background: rgba(30, 41, 59, 0.95);
+    border-bottom: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .footer {
+    background: #1E293B;
+    border-top: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .post-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .service-card,
+[data-theme="dark"] .resource-card,
+[data-theme="dark"] .improve-card,
+[data-theme="dark"] .team-card,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .auth-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea {
+    background: var(--bg-elevated);
+    border-color: var(--border-color);
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: var(--text-light);
+    opacity: 0.6;
+}
+
+[data-theme="dark"] .logo {
+    filter: brightness(1.2);
+}
+
+[data-theme="dark"] .empty-state {
+    color: var(--text-light);
+}
+
+/* Responsive dark mode toggle */
+@media (max-width: 768px) {
+    .theme-toggle {
+        margin-left: 10px;
     }
 }
