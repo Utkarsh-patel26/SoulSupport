@@ -306,18 +306,41 @@ async function addSessionReview(sessionId, therapistId, rating, reviewText) {
 // Get reviews for a therapist
 async function getTherapistReviews(therapistId) {
     try {
-        const { data, error } = await supabase
+        // If no ID provided, try to get current user
+        if (!therapistId) {
+            const user = await getCurrentUser();
+            if (user) therapistId = user.id;
+            else throw new Error('Therapist ID required');
+        }
+
+        // First get reviews
+        const { data: reviews, error: reviewsError } = await supabase
             .from('session_reviews')
-            .select(`
-                *,
-                user_profile:user_profiles!user_id(full_name)
-            `)
+            .select('*')
             .eq('therapist_id', therapistId)
             .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (reviewsError) throw reviewsError;
 
-        return { success: true, reviews: data || [] };
+        // Then get user profiles for each review
+        if (reviews && reviews.length > 0) {
+            const userIds = reviews.map(r => r.user_id);
+            const { data: profiles, error: profilesError } = await supabase
+                .from('user_profiles')
+                .select('id, full_name, avatar_url')
+                .in('id', userIds);
+
+            if (profilesError) {
+                console.error('Error fetching profiles:', profilesError);
+            } else {
+                // Map profiles to reviews
+                reviews.forEach(review => {
+                    review.user_profile = profiles.find(p => p.id === review.user_id);
+                });
+            }
+        }
+
+        return { success: true, reviews: reviews || [] };
     } catch (error) {
         console.error('Error fetching reviews:', error);
         return { success: false, error: error.message };
