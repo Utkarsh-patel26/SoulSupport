@@ -163,6 +163,189 @@
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
+
+        /* Sessions Styles */
+        .sessions-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .session-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            display: flex;
+            gap: 20px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+
+        .session-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateX(5px);
+        }
+
+        .session-card.completed {
+            border-left-color: #10B981;
+        }
+
+        .session-card.cancelled {
+            border-left-color: #EF4444;
+            opacity: 0.7;
+        }
+
+        .session-therapist-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .session-therapist-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .session-therapist-photo i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .session-info {
+            flex: 1;
+        }
+
+        .session-therapist-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .session-details {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .session-detail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .session-detail i {
+            color: var(--primary);
+        }
+
+        .session-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .session-status.pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .session-status.confirmed {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .session-status.completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .session-status.cancelled {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .session-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .session-btn-cancel {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .session-btn-cancel:hover {
+            background: #EF4444;
+            color: white;
+        }
+
+        .session-btn-review {
+            background: var(--gradient-soft);
+            color: var(--primary);
+        }
+
+        .session-btn-review:hover {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .no-sessions {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--white);
+            border-radius: 16px;
+        }
+
+        .no-sessions i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .no-sessions h4 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .no-sessions p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .session-card {
+                flex-direction: column;
+            }
+
+            .session-details {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -241,10 +424,21 @@
                 </div>
             </div>
 
+            <!-- My Sessions Section -->
+            <div class="sessions-section" style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; color: var(--text-dark); margin-bottom: 24px;">
+                    <i class="fas fa-calendar-check" style="color: var(--primary);"></i> My Sessions
+                </h3>
+
+                <div id="sessions-container">
+                    <p style="text-align: center; color: var(--text-light); padding: 40px;">Loading sessions...</p>
+                </div>
+            </div>
+
             <div class="quick-actions">
                 <h3>Quick Actions</h3>
                 <div class="action-buttons">
-                    <a href="#" class="action-btn">
+                    <a href="find-therapists.html" class="action-btn">
                         <i class="fas fa-search"></i> Find a Therapist
                     </a>
                     <a href="resources.html" class="action-btn">
@@ -307,6 +501,7 @@
 
     <script src="script.js"></script>
     <script src="supabase-client.js"></script>
+    <script src="therapist-db.js"></script>
 
     <script>
         // Logout function
@@ -314,6 +509,152 @@
             const result = await signOutUser();
             if (result.success) {
                 window.location.href = 'auth.html';
+            }
+        }
+
+        // Load user sessions
+        async function loadSessions() {
+            const container = document.getElementById('sessions-container');
+
+            try {
+                const result = await getUserSessions();
+
+                if (result.success && result.sessions && result.sessions.length > 0) {
+                    const upcomingSessions = result.sessions.filter(s =>
+                        s.status !== 'cancelled' && s.status !== 'completed'
+                    );
+                    const pastSessions = result.sessions.filter(s =>
+                        s.status === 'completed' || s.status === 'cancelled'
+                    );
+
+                    let html = '';
+
+                    // Upcoming Sessions
+                    if (upcomingSessions.length > 0) {
+                        html += '<h4 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 16px;">Upcoming Sessions</h4>';
+                        html += '<div class="sessions-grid">';
+                        upcomingSessions.forEach(session => {
+                            html += createSessionCard(session);
+                        });
+                        html += '</div>';
+                    }
+
+                    // Past Sessions
+                    if (pastSessions.length > 0) {
+                        html += '<h4 style="font-size: 1.2rem; color: var(--text-dark); margin: 32px 0 16px;">Past Sessions</h4>';
+                        html += '<div class="sessions-grid">';
+                        pastSessions.forEach(session => {
+                            html += createSessionCard(session);
+                        });
+                        html += '</div>';
+                    }
+
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `
+                        <div class="no-sessions">
+                            <i class="fas fa-calendar-times"></i>
+                            <h4>No sessions yet</h4>
+                            <p>Book your first therapy session to get started</p>
+                            <a href="find-therapists.html" class="action-btn">
+                                <i class="fas fa-search"></i> Find a Therapist
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                container.innerHTML = `
+                    <div class="no-sessions">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h4>Error loading sessions</h4>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Create session card HTML
+        function createSessionCard(session) {
+            const statusClass = session.status || 'pending';
+            const statusText = session.status.charAt(0).toUpperCase() + session.status.slice(1);
+
+            const therapistName = session.user_profile?.full_name || 'Therapist';
+            const therapistPhoto = session.therapist_profile?.photo_url;
+
+            const photoHTML = therapistPhoto
+                ? `<img src="${therapistPhoto}" alt="${therapistName}">`
+                : '<i class="fas fa-user-md"></i>';
+
+            const sessionDate = new Date(session.session_date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            let actionsHTML = '';
+            if (session.status === 'pending' || session.status === 'confirmed') {
+                actionsHTML = `
+                    <div class="session-actions">
+                        <button class="session-btn session-btn-cancel" onclick="cancelSessionHandler('${session.id}')">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                `;
+            } else if (session.status === 'completed') {
+                actionsHTML = `
+                    <div class="session-actions">
+                        <button class="session-btn session-btn-review" onclick="alert('Review feature coming soon!')">
+                            <i class="fas fa-star"></i> Write Review
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="session-card ${statusClass}">
+                    <div class="session-therapist-photo">
+                        ${photoHTML}
+                    </div>
+                    <div class="session-info">
+                        <div class="session-therapist-name">${therapistName}</div>
+                        <div class="session-details">
+                            <span class="session-detail">
+                                <i class="fas fa-calendar"></i> ${sessionDate}
+                            </span>
+                            <span class="session-detail">
+                                <i class="fas fa-clock"></i> ${session.session_time}
+                            </span>
+                            <span class="session-detail">
+                                <i class="fas fa-hourglass-half"></i> ${session.duration_minutes} minutes
+                            </span>
+                        </div>
+                        <span class="session-status ${statusClass}">${statusText}</span>
+                        ${session.notes ? `<p style="color: var(--text-light); margin-top: 8px; font-size: 0.9rem;"><i class="fas fa-sticky-note"></i> ${session.notes}</p>` : ''}
+                        ${actionsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Cancel session handler
+        async function cancelSessionHandler(sessionId) {
+            if (!confirm('Are you sure you want to cancel this session?')) {
+                return;
+            }
+
+            try {
+                const result = await cancelSession(sessionId);
+                if (result.success) {
+                    alert('Session cancelled successfully');
+                    loadSessions();
+                } else {
+                    alert('Failed to cancel session. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error cancelling session:', error);
+                alert('An error occurred. Please try again.');
             }
         }
 
@@ -326,6 +667,9 @@
                     document.querySelector('.welcome-section h1').textContent = `Welcome Back, ${profile.full_name}!`;
                     document.querySelector('.welcome-card h2').textContent = `Hello, ${profile.full_name.split(' ')[0]}!`;
                 }
+
+                // Load sessions
+                loadSessions();
             }
         }
 

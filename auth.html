@@ -184,13 +184,21 @@
 
         .user-type-option.selected {
             border-color: var(--primary);
-            background: rgba(15, 118, 110, 0.05);
+            border-width: 3px;
+            background: rgba(15, 118, 110, 0.15);
+            box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+            transform: scale(1.02);
         }
 
         .user-type-option i {
             font-size: 2rem;
             color: var(--primary);
             margin-bottom: 8px;
+        }
+
+        .user-type-option.selected h4 {
+            color: var(--primary);
+            font-weight: 700;
         }
 
         .user-type-option h4 {
@@ -446,6 +454,9 @@
                                 <p>Providing support</p>
                             </div>
                         </div>
+                        <p id="user-type-indicator" style="text-align: center; margin-top: 12px; font-weight: 600; color: var(--primary);">
+                            Selected: <span id="selected-type-text">User</span>
+                        </p>
                     </div>
 
                     <div class="form-group">
@@ -539,10 +550,20 @@
         // Select user type
         function selectUserType(type) {
             selectedUserType = type;
+            console.log('User type selected:', type);
+
+            // Update visual selection
             document.querySelectorAll('.user-type-option').forEach(opt => {
                 opt.classList.remove('selected');
             });
             document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+
+            // Update text indicator
+            const indicator = document.getElementById('selected-type-text');
+            if (indicator) {
+                indicator.textContent = type === 'therapist' ? 'Therapist' : 'User';
+                indicator.style.color = type === 'therapist' ? '#10B981' : 'var(--primary)';
+            }
         }
 
         // Toggle password visibility
@@ -622,6 +643,23 @@
             const confirmPassword = document.getElementById('signupConfirmPassword').value;
             const submitBtn = this.querySelector('.auth-submit');
 
+            // Get selected user type from DOM (more reliable than global variable)
+            const selectedOption = document.querySelector('.user-type-option.selected');
+            const userType = selectedOption ? selectedOption.getAttribute('data-type') : 'user';
+
+            console.log('Selected user type from DOM:', userType);
+            console.log('Global selectedUserType variable:', selectedUserType);
+            console.log('Selected option element:', selectedOption);
+
+            // Show confirmation for therapist signups
+            if (userType === 'therapist') {
+                const confirmTherapist = confirm('You are signing up as a THERAPIST. Is this correct?');
+                if (!confirmTherapist) {
+                    showError('Please select "User" if you want to book therapy sessions.');
+                    return;
+                }
+            }
+
             // Validate passwords match
             if (password !== confirmPassword) {
                 showError('Passwords do not match!');
@@ -638,26 +676,18 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating account...';
 
-            // Sign up with Supabase
-            const result = await signUpUser(email, password, name, selectedUserType);
+            // Sign up with Supabase using userType from DOM
+            const result = await signUpUser(email, password, name, userType);
 
             if (result.success) {
-                if (result.needsConfirmation) {
-                    // Email confirmation required
-                    showSuccess(result.message || 'Account created! Please check your email to confirm.');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
-                    // Switch to login tab after a delay
-                    setTimeout(() => {
-                        switchTab('login');
-                    }, 3000);
-                } else {
-                    // No email confirmation - logged in immediately
-                    showSuccess('Account created successfully! Redirecting...');
-                    setTimeout(() => {
-                        redirectToDashboard(result.user.id);
-                    }, 1500);
-                }
+                showSuccess(result.message || 'Account created successfully!');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+
+                // Switch to login tab after a delay
+                setTimeout(() => {
+                    switchTab('login');
+                }, 2000);
             } else {
                 showError(result.error || 'Signup failed. Please try again.');
                 submitBtn.disabled = false;

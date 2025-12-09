@@ -239,7 +239,137 @@ CREATE TRIGGER update_likes_count_on_delete
     EXECUTE FUNCTION update_post_likes_count();
 
 -- ============================================
--- 6. SAMPLE DATA (OPTIONAL - for testing)
+-- 6. THERAPIST PROFILES TABLE
+-- Extended information for therapist users
+-- ============================================
+CREATE TABLE IF NOT EXISTS therapist_profiles (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+    specializations TEXT[] DEFAULT '{}',
+    bio TEXT,
+    qualifications TEXT,
+    experience_years INTEGER DEFAULT 0,
+    hourly_rate DECIMAL(10, 2),
+    photo_url TEXT,
+    available_days TEXT[] DEFAULT '{}',
+    available_time_start TIME,
+    available_time_end TIME,
+    is_verified BOOLEAN DEFAULT false,
+    rating DECIMAL(3, 2) DEFAULT 0.0,
+    total_sessions INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS for therapist_profiles
+ALTER TABLE therapist_profiles ENABLE ROW LEVEL SECURITY;
+
+-- Therapists can read and update their own profile
+CREATE POLICY "Therapists can manage own profile"
+    ON therapist_profiles
+    FOR ALL
+    USING (auth.uid() = user_id);
+
+-- Everyone can view verified therapist profiles
+CREATE POLICY "Anyone can view verified therapist profiles"
+    ON therapist_profiles
+    FOR SELECT
+    USING (is_verified = true);
+
+-- ============================================
+-- 7. SESSIONS TABLE
+-- Therapy session bookings
+-- ============================================
+CREATE TABLE IF NOT EXISTS sessions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    therapist_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    session_date DATE NOT NULL,
+    session_time TIME NOT NULL,
+    duration_minutes INTEGER DEFAULT 60,
+    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'completed', 'cancelled')),
+    notes TEXT,
+    meeting_link TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(therapist_id, session_date, session_time)
+);
+
+-- RLS for sessions
+ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+
+-- Users can view their own sessions
+CREATE POLICY "Users can view own sessions"
+    ON sessions
+    FOR SELECT
+    USING (auth.uid() = user_id OR auth.uid() = therapist_id);
+
+-- Users can create sessions
+CREATE POLICY "Users can book sessions"
+    ON sessions
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+-- Users and therapists can update their sessions
+CREATE POLICY "Users and therapists can update sessions"
+    ON sessions
+    FOR UPDATE
+    USING (auth.uid() = user_id OR auth.uid() = therapist_id);
+
+-- ============================================
+-- 8. SESSION REVIEWS TABLE
+-- User reviews for completed sessions
+-- ============================================
+CREATE TABLE IF NOT EXISTS session_reviews (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    session_id UUID REFERENCES sessions(id) ON DELETE CASCADE UNIQUE NOT NULL,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    therapist_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+    rating INTEGER CHECK (rating >= 1 AND rating <= 5) NOT NULL,
+    review_text TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- RLS for session_reviews
+ALTER TABLE session_reviews ENABLE ROW LEVEL SECURITY;
+
+-- Users can create reviews for their sessions
+CREATE POLICY "Users can create reviews"
+    ON session_reviews
+    FOR INSERT
+    WITH CHECK (auth.uid() = user_id);
+
+-- Everyone can view reviews
+CREATE POLICY "Anyone can view reviews"
+    ON session_reviews
+    FOR SELECT
+    USING (true);
+
+-- ============================================
+-- 9. TRIGGERS FOR THERAPIST RATINGS
+-- Auto-update therapist rating when reviews are added
+-- ============================================
+CREATE OR REPLACE FUNCTION update_therapist_rating()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE therapist_profiles
+    SET rating = (
+        SELECT COALESCE(AVG(rating), 0)
+        FROM session_reviews
+        WHERE therapist_id = NEW.therapist_id
+    )
+    WHERE user_id = NEW.therapist_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER trigger_update_therapist_rating
+    AFTER INSERT OR UPDATE ON session_reviews
+    FOR EACH ROW
+    EXECUTE FUNCTION update_therapist_rating();
+
+-- ============================================
+-- 10. SAMPLE DATA (OPTIONAL - for testing)
 -- ============================================
 
 -- You can add sample data after users sign up

@@ -127,6 +127,210 @@
             color: var(--text-light);
             font-size: 0.95rem;
         }
+
+        /* Sessions Styles */
+        .sessions-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .session-card {
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            display: flex;
+            gap: 20px;
+            transition: var(--transition);
+            border-left: 4px solid var(--primary);
+        }
+
+        .session-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateX(5px);
+        }
+
+        .session-card.completed {
+            border-left-color: #10B981;
+        }
+
+        .session-card.cancelled {
+            border-left-color: #EF4444;
+            opacity: 0.7;
+        }
+
+        .session-card.pending {
+            border-left-color: #F59E0B;
+        }
+
+        .session-client-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: var(--bg-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .session-client-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .session-client-photo i {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .session-info {
+            flex: 1;
+        }
+
+        .session-client-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .session-details {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .session-detail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+
+        .session-detail i {
+            color: var(--primary);
+        }
+
+        .session-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .session-status.pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        .session-status.confirmed {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .session-status.completed {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .session-status.cancelled {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .session-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .session-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .session-btn-approve {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .session-btn-approve:hover {
+            background: #10B981;
+            color: white;
+        }
+
+        .session-btn-decline {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .session-btn-decline:hover {
+            background: #EF4444;
+            color: white;
+        }
+
+        .session-btn-complete {
+            background: var(--gradient-soft);
+            color: var(--primary);
+        }
+
+        .session-btn-complete:hover {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .no-sessions {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--white);
+            border-radius: 16px;
+        }
+
+        .no-sessions i {
+            font-size: 4rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .no-sessions h4 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .no-sessions p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .session-card {
+                flex-direction: column;
+            }
+
+            .session-details {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .session-actions {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -193,15 +397,26 @@
                 </div>
 
                 <div class="info-card">
-                    <i class="fas fa-comments"></i>
-                    <h3>Messages</h3>
-                    <p>Communicate securely with your clients</p>
+                    <i class="fas fa-star"></i>
+                    <h3 id="rating-display">Rating: 0.0</h3>
+                    <p id="sessions-count">0 Total Sessions</p>
                 </div>
 
                 <div class="info-card">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Analytics</h3>
-                    <p>Track your impact and session statistics</p>
+                    <i class="fas fa-cog"></i>
+                    <h3>Profile Settings</h3>
+                    <p><a href="therapist-profile-form.html" style="color: var(--primary);">Update Profile</a></p>
+                </div>
+            </div>
+
+            <!-- Sessions Section -->
+            <div class="sessions-section" style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; color: var(--text-dark); margin-bottom: 24px;">
+                    <i class="fas fa-calendar-alt" style="color: var(--primary);"></i> My Client Sessions
+                </h3>
+
+                <div id="sessions-container">
+                    <p style="text-align: center; color: var(--text-light); padding: 40px;">Loading sessions...</p>
                 </div>
             </div>
         </div>
@@ -256,6 +471,7 @@
 
     <script src="script.js"></script>
     <script src="supabase-client.js"></script>
+    <script src="therapist-db.js"></script>
 
     <script>
         // Logout function
@@ -263,6 +479,215 @@
             const result = await signOutUser();
             if (result.success) {
                 window.location.href = 'auth.html';
+            }
+        }
+
+        // Load therapist profile stats
+        async function loadProfileStats(userId) {
+            try {
+                const result = await getTherapistProfile(userId);
+                if (result.success && result.profile) {
+                    const profile = result.profile;
+                    document.getElementById('rating-display').textContent = `Rating: ${(profile.rating || 0).toFixed(1)} ⭐`;
+                    document.getElementById('sessions-count').textContent = `${profile.total_sessions || 0} Total Sessions`;
+                }
+            } catch (error) {
+                console.error('Error loading profile stats:', error);
+            }
+        }
+
+        // Load therapist sessions
+        async function loadSessions() {
+            const container = document.getElementById('sessions-container');
+
+            try {
+                const result = await getTherapistSessions();
+
+                if (result.success && result.sessions && result.sessions.length > 0) {
+                    const pendingSessions = result.sessions.filter(s => s.status === 'pending');
+                    const upcomingSessions = result.sessions.filter(s => s.status === 'confirmed');
+                    const completedSessions = result.sessions.filter(s =>
+                        s.status === 'completed' || s.status === 'cancelled'
+                    );
+
+                    let html = '';
+
+                    // Pending Sessions
+                    if (pendingSessions.length > 0) {
+                        html += '<h4 style="font-size: 1.2rem; color: var(--text-dark); margin-bottom: 16px;">Pending Approval</h4>';
+                        html += '<div class="sessions-grid">';
+                        pendingSessions.forEach(session => {
+                            html += createSessionCard(session);
+                        });
+                        html += '</div>';
+                    }
+
+                    // Upcoming Confirmed Sessions
+                    if (upcomingSessions.length > 0) {
+                        html += '<h4 style="font-size: 1.2rem; color: var(--text-dark); margin: 32px 0 16px;">Upcoming Sessions</h4>';
+                        html += '<div class="sessions-grid">';
+                        upcomingSessions.forEach(session => {
+                            html += createSessionCard(session);
+                        });
+                        html += '</div>';
+                    }
+
+                    // Past Sessions
+                    if (completedSessions.length > 0) {
+                        html += '<h4 style="font-size: 1.2rem; color: var(--text-dark); margin: 32px 0 16px;">Past Sessions</h4>';
+                        html += '<div class="sessions-grid">';
+                        completedSessions.forEach(session => {
+                            html += createSessionCard(session);
+                        });
+                        html += '</div>';
+                    }
+
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = `
+                        <div class="no-sessions">
+                            <i class="fas fa-calendar-times"></i>
+                            <h4>No client sessions yet</h4>
+                            <p>Session bookings will appear here once clients book with you</p>
+                            <a href="therapist-profile-form.html" class="action-btn" style="display: inline-flex; align-items: center; gap: 10px; padding: 12px 24px; background: var(--gradient-primary); color: var(--white); border-radius: 12px; text-decoration: none; font-weight: 600;">
+                                <i class="fas fa-user-edit"></i> Complete Your Profile
+                            </a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+                container.innerHTML = `
+                    <div class="no-sessions">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <h4>Error loading sessions</h4>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Create session card HTML
+        function createSessionCard(session) {
+            const statusClass = session.status || 'pending';
+            const statusText = session.status.charAt(0).toUpperCase() + session.status.slice(1);
+
+            const clientName = session.user_profile?.full_name || 'Client';
+            const clientEmail = session.user_profile?.email || '';
+
+            const sessionDate = new Date(session.session_date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            let actionsHTML = '';
+            if (session.status === 'pending') {
+                actionsHTML = `
+                    <div class="session-actions">
+                        <button class="session-btn session-btn-approve" onclick="approveSession('${session.id}')">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                        <button class="session-btn session-btn-decline" onclick="declineSession('${session.id}')">
+                            <i class="fas fa-times"></i> Decline
+                        </button>
+                    </div>
+                `;
+            } else if (session.status === 'confirmed') {
+                actionsHTML = `
+                    <div class="session-actions">
+                        <button class="session-btn session-btn-complete" onclick="completeSession('${session.id}')">
+                            <i class="fas fa-check-circle"></i> Mark as Completed
+                        </button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="session-card ${statusClass}">
+                    <div class="session-client-photo">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="session-info">
+                        <div class="session-client-name">${clientName}</div>
+                        <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 12px;">${clientEmail}</p>
+                        <div class="session-details">
+                            <span class="session-detail">
+                                <i class="fas fa-calendar"></i> ${sessionDate}
+                            </span>
+                            <span class="session-detail">
+                                <i class="fas fa-clock"></i> ${session.session_time}
+                            </span>
+                            <span class="session-detail">
+                                <i class="fas fa-hourglass-half"></i> ${session.duration_minutes} minutes
+                            </span>
+                        </div>
+                        <span class="session-status ${statusClass}">${statusText}</span>
+                        ${session.notes ? `<p style="color: var(--text-light); margin-top: 8px; font-size: 0.9rem;"><strong>Client Notes:</strong> ${session.notes}</p>` : ''}
+                        ${actionsHTML}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Approve session
+        async function approveSession(sessionId) {
+            if (!confirm('Approve this session request?')) {
+                return;
+            }
+
+            try {
+                const result = await updateSessionStatus(sessionId, 'confirmed');
+                if (result.success) {
+                    alert('Session approved successfully');
+                    loadSessions();
+                } else {
+                    alert('Failed to approve session. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error approving session:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Decline session
+        async function declineSession(sessionId) {
+            if (!confirm('Decline this session request? The client will be notified.')) {
+                return;
+            }
+
+            try {
+                const result = await updateSessionStatus(sessionId, 'cancelled');
+                if (result.success) {
+                    alert('Session declined');
+                    loadSessions();
+                } else {
+                    alert('Failed to decline session. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error declining session:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Complete session
+        async function completeSession(sessionId) {
+            if (!confirm('Mark this session as completed?')) {
+                return;
+            }
+
+            try {
+                const result = await updateSessionStatus(sessionId, 'completed');
+                if (result.success) {
+                    alert('Session marked as completed');
+                    loadSessions();
+                } else {
+                    alert('Failed to update session. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error completing session:', error);
+                alert('An error occurred. Please try again.');
             }
         }
 
@@ -275,6 +700,10 @@
                     document.querySelector('.welcome-section h1').textContent = `Welcome, Dr. ${profile.full_name}!`;
                     document.querySelector('.welcome-card h2').textContent = `Hello, Dr. ${profile.full_name.split(' ')[0]}!`;
                 }
+
+                // Load profile stats and sessions
+                loadProfileStats(user.id);
+                loadSessions();
             }
         }
 

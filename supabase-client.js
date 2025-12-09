@@ -36,8 +36,13 @@ async function getUserProfile(userId) {
 // Sign up new user
 async function signUpUser(email, password, fullName, userType) {
     try {
-        // 1. Sign up user with Supabase Auth
-        // Store full_name and user_type in user_metadata for later profile creation
+        // ✅ DEBUG: Verify userType parameter received
+        console.log('=== SIGNUP DEBUG ===');
+        console.log('signUpUser() received userType:', userType);
+        console.log('signUpUser() received fullName:', fullName);
+        console.log('signUpUser() received email:', email);
+
+        // 1. Create user in Supabase Auth with metadata
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: email,
             password: password,
@@ -49,51 +54,95 @@ async function signUpUser(email, password, fullName, userType) {
             }
         });
 
-        if (authError) throw authError;
+        if (authError) {
+            console.error('Auth signup error:', authError);
+            throw authError;
+        }
 
-        // Check if user was created successfully
         if (!authData.user) {
-            throw new Error('User creation failed');
+            throw new Error('User creation failed - no user returned from auth');
         }
 
-        // Check if email confirmation is required
-        if (authData.session === null) {
-            // Email confirmation is enabled - user needs to verify email first
-            // Profile will be created during first login
-            return {
-                success: true,
-                needsConfirmation: true,
-                message: 'Please check your email to confirm your account before logging in.'
-            };
-        }
+        console.log('✅ User created in auth system:', authData.user.id);
+        console.log('User metadata saved:', authData.user.user_metadata);
 
-        // 2. Session exists - user is authenticated immediately (no email confirmation)
-        // Create user profile now
-        const { error: profileError } = await supabase
+        // 2. ALWAYS insert into user_profiles (for ALL users)
+        console.log('Inserting into user_profiles table...');
+        const { data: userProfileData, error: userProfileError } = await supabase
             .from('user_profiles')
             .insert({
-                user_id: authData.user.id,  // This matches auth.uid()
+                user_id: authData.user.id,
                 full_name: fullName,
                 email: email,
-                user_type: userType
-            });
+                user_type: userType,
+                avatar_url: null,
+                bio: null
+            })
+            .select()
+            .single();
 
-        if (profileError) {
-            console.error('Profile creation error:', profileError);
-            throw profileError;
+        if (userProfileError) {
+            console.error('❌ user_profiles insert error:', userProfileError);
+            throw new Error(`Failed to create user profile: ${userProfileError.message}`);
         }
 
-        return { success: true, user: authData.user };
+        console.log('✅ user_profiles row created:', userProfileData);
+
+        // 3. If therapist, ALSO insert into therapist_profiles
+        if (userType === 'therapist') {
+            console.log('User is therapist - inserting into therapist_profiles...');
+
+            const { data: therapistProfileData, error: therapistProfileError } = await supabase
+                .from('therapist_profiles')
+                .insert({
+                    user_id: authData.user.id,
+                    specializations: [],
+                    qualifications: null,
+                    experience_years: 0,
+                    hourly_rate: null,
+                    available_days: [],
+                    available_time_start: null,
+                    available_time_end: null,
+                    bio: null,
+                    photo_url: null
+                })
+                .select()
+                .single();
+
+            if (therapistProfileError) {
+                console.error('❌ therapist_profiles insert error:', therapistProfileError);
+                throw new Error(`Failed to create therapist profile: ${therapistProfileError.message}`);
+            }
+
+            console.log('✅ therapist_profiles row created:', therapistProfileData);
+        }
+
+        console.log('✅ ALL PROFILES CREATED SUCCESSFULLY');
+
+        return {
+            success: true,
+            user: authData.user,
+            userProfile: userProfileData,
+            message: authData.session
+                ? `Account created successfully as ${userType}!`
+                : 'Account created! Please check your email to confirm before logging in.'
+        };
+
     } catch (error) {
         console.error('Signup error:', error);
-        return { success: false, error: error.message };
+        return {
+            success: false,
+            error: error.message || 'An unexpected error occurred during signup'
+        };
     }
 }
 
 // Sign in user
 async function signInUser(email, password) {
     try {
-        // Step A: Authenticate user with Supabase
+        console.log('=== LOGIN DEBUG ===');
+
+        // 1. Authenticate with password
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: email,
             password: password
@@ -101,54 +150,58 @@ async function signInUser(email, password) {
 
         if (authError) throw authError;
 
-        // Verify user was authenticated
         if (!authData.user) {
             throw new Error('Authentication failed - no user returned');
         }
 
         const user = authData.user;
+        console.log('✅ User authenticated:', user.id);
+        console.log('User metadata:', user.user_metadata);
 
-        // Step B: Check if user profile exists in user_profiles table
-        const { data: existingProfile, error: profileCheckError } = await supabase
+        // 2. Check if user_profiles exists (required for ALL users)
+        console.log('Checking for user_profiles row...');
+        const { data: userProfile, error: profileCheckError } = await supabase
             .from('user_profiles')
             .select('*')
             .eq('user_id', user.id)
             .maybeSingle();
 
         if (profileCheckError) {
-            console.error('Error checking profile:', profileCheckError);
-            throw profileCheckError;
+            console.error('❌ Error checking user_profiles:', profileCheckError);
+            throw new Error(`Database error: ${profileCheckError.message}`);
         }
 
-        // Step C: If profile doesn't exist, create it
-        // This happens when user signed up with email confirmation enabled
-        if (!existingProfile) {
-            console.log('Profile not found, creating new profile...');
+        // 3. Profile MUST exist - if not, signup was incomplete
+        if (!userProfile) {
+            console.error('❌ No user_profiles row found for user:', user.id);
+            throw new Error('Profile not found. Please contact support or sign up again.');
+        }
 
-            // Get user data from metadata (stored during signup) or use defaults
-            const fullName = user.user_metadata?.full_name || 'User';
-            const userType = user.user_metadata?.user_type || 'user';
+        console.log('✅ user_profiles row found:', userProfile);
 
-            // Insert new profile - RLS allows this because auth.uid() = user.id
-            const { error: insertError } = await supabase
-                .from('user_profiles')
-                .insert({
-                    user_id: user.id,           // Matches auth.uid()
-                    full_name: fullName,        // From signup metadata
-                    email: user.email,          // From auth user
-                    user_type: userType         // From signup metadata
-                });
+        // 4. If therapist, verify therapist_profiles also exists
+        if (userProfile.user_type === 'therapist') {
+            console.log('User is therapist - checking therapist_profiles...');
 
-            if (insertError) {
-                console.error('Error creating profile:', insertError);
-                throw insertError;
+            const { data: therapistProfile, error: therapistCheckError } = await supabase
+                .from('therapist_profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            if (therapistCheckError) {
+                console.error('❌ Error checking therapist_profiles:', therapistCheckError);
             }
 
-            console.log('Profile created successfully');
+            if (!therapistProfile) {
+                console.warn('⚠️ Warning: therapist_profiles row missing for therapist user');
+            } else {
+                console.log('✅ therapist_profiles row found:', therapistProfile);
+            }
         }
 
-        // Step D: Return success with user data
-        return { success: true, user: user };
+        console.log('✅ Login successful - all profiles verified');
+        return { success: true, user: authData.user };
 
     } catch (error) {
         console.error('Login error:', error);
