@@ -490,6 +490,14 @@
                     const profile = result.profile;
                     document.getElementById('rating-display').textContent = `Rating: ${(profile.rating || 0).toFixed(1)} ⭐`;
                     document.getElementById('sessions-count').textContent = `${profile.total_sessions || 0} Total Sessions`;
+
+                    // Update profile picture if exists
+                    if (profile.photo_url) {
+                        const welcomeIcon = document.querySelector('.welcome-icon');
+                        if (welcomeIcon) {
+                            welcomeIcon.innerHTML = `<img src="${profile.photo_url}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Error loading profile stats:', error);

@@ -29,7 +29,7 @@ async function saveTherapistProfile(profileData) {
                 available_time_start: profileData.available_time_start,
                 available_time_end: profileData.available_time_end,
                 updated_at: new Date().toISOString()
-            })
+            }, { onConflict: 'user_id' })
             .select()
             .single();
 
@@ -121,14 +121,14 @@ async function uploadTherapistPhoto(file) {
         const filePath = `therapist-photos/${fileName}`;
 
         const { data, error } = await supabase.storage
-            .from('avatars')
+            .from('therapist_profile_pics')
             .upload(filePath, file);
 
         if (error) throw error;
 
         // Get public URL
         const { data: urlData } = supabase.storage
-            .from('avatars')
+            .from('therapist_profile_pics')
             .getPublicUrl(filePath);
 
         return { success: true, url: urlData.publicUrl };
@@ -185,10 +185,8 @@ async function getUserSessions(status = null) {
             .from('sessions')
             .select(`
                 *,
-                therapist:therapist_id(
-                    id,
-                    email
-                )
+                therapist_user:user_profiles!fk_sessions_therapist_user_profile(full_name, email),
+                therapist_profile:therapist_profiles!fk_sessions_therapist_details(photo_url)
             `)
             .eq('user_id', user.id)
             .order('session_date', { ascending: true });
@@ -220,10 +218,7 @@ async function getTherapistSessions(status = null) {
             .from('sessions')
             .select(`
                 *,
-                user:user_id(
-                    id,
-                    email
-                )
+                user_profile:user_profiles!fk_sessions_client_profile(full_name, email, avatar_url)
             `)
             .eq('therapist_id', user.id)
             .order('session_date', { ascending: true });

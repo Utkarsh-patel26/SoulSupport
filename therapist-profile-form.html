@@ -383,7 +383,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="hourly_rate">Hourly Rate ($)</label>
+                            <label for="hourly_rate">Hourly Rate (₹)</label>
                             <input type="number" id="hourly_rate" min="0" step="0.01" placeholder="e.g., 150.00" required>
                         </div>
                     </div>
@@ -516,6 +516,7 @@
     <script>
         let uploadedPhotoUrl = null;
         let selectedPhotoFile = null;
+        let initialProfileData = null;
 
         // Logout function
         async function logout() {
@@ -580,6 +581,19 @@
                         if (checkbox) checkbox.checked = true;
                     });
                 }
+
+                // Store initial state for change detection
+                initialProfileData = {
+                    bio: profile.bio || '',
+                    qualifications: profile.qualifications || '',
+                    experience_years: profile.experience_years || 0,
+                    hourly_rate: parseFloat(profile.hourly_rate) || 0,
+                    photo_url: profile.photo_url || null,
+                    specializations: (profile.specializations || []).sort(),
+                    available_days: (profile.available_days || []).sort(),
+                    available_time_start: profile.available_time_start || '',
+                    available_time_end: profile.available_time_end || ''
+                };
             }
         }
 
@@ -622,14 +636,28 @@
                 const profileData = {
                     bio: document.getElementById('bio').value,
                     qualifications: document.getElementById('qualifications').value,
-                    experience_years: parseInt(document.getElementById('experience_years').value),
-                    hourly_rate: parseFloat(document.getElementById('hourly_rate').value),
+                    experience_years: parseInt(document.getElementById('experience_years').value) || 0,
+                    hourly_rate: parseFloat(document.getElementById('hourly_rate').value) || 0,
                     photo_url: uploadedPhotoUrl,
-                    specializations: specializations,
-                    available_days: availableDays,
+                    specializations: specializations.sort(),
+                    available_days: availableDays.sort(),
                     available_time_start: document.getElementById('available_time_start').value,
                     available_time_end: document.getElementById('available_time_end').value
                 };
+
+                // Check if changes were made (unless a new photo is selected)
+                if (initialProfileData && !selectedPhotoFile) {
+                    // Helper to compare objects
+                    const isChanged = JSON.stringify(profileData) !== JSON.stringify(initialProfileData);
+                    
+                    if (!isChanged) {
+                        document.getElementById('error-text').textContent = "Make changes to save";
+                        errorMsg.classList.add('show');
+                        submitBtn.classList.remove('loading');
+                        submitBtn.disabled = false;
+                        return;
+                    }
+                }
 
                 // Save profile
                 const result = await saveTherapistProfile(profileData);

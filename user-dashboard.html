@@ -397,44 +397,6 @@
                 <h2>Hello, Welcome!</h2>
                 <p>We're so glad you're here. Your SoulSupport dashboard is your personal space for managing your mental wellness journey, connecting with therapists, and accessing helpful resources.</p>
             </div>
-
-            <div class="info-grid">
-                <div class="info-card">
-                    <i class="fas fa-calendar-alt"></i>
-                    <h3>My Appointments</h3>
-                    <p>View and manage your upcoming therapy sessions</p>
-                </div>
-
-                <div class="info-card">
-                    <i class="fas fa-comment-medical"></i>
-                    <h3>Find a Therapist</h3>
-                    <p>Connect with licensed mental health professionals</p>
-                </div>
-
-                <div class="info-card">
-                    <i class="fas fa-book-medical"></i>
-                    <h3>Self-Help Tools</h3>
-                    <p>Access guided meditations and wellness exercises</p>
-                </div>
-
-                <div class="info-card">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Track Progress</h3>
-                    <p>Monitor your mental health journey over time</p>
-                </div>
-            </div>
-
-            <!-- My Sessions Section -->
-            <div class="sessions-section" style="margin-top: 40px;">
-                <h3 style="font-size: 1.8rem; color: var(--text-dark); margin-bottom: 24px;">
-                    <i class="fas fa-calendar-check" style="color: var(--primary);"></i> My Sessions
-                </h3>
-
-                <div id="sessions-container">
-                    <p style="text-align: center; color: var(--text-light); padding: 40px;">Loading sessions...</p>
-                </div>
-            </div>
-
             <div class="quick-actions">
                 <h3>Quick Actions</h3>
                 <div class="action-buttons">
@@ -449,6 +411,17 @@
                     </a>
                 </div>
             </div>
+            <!-- My Sessions Section -->
+            <div class="sessions-section" style="margin-top: 40px;">
+                <h3 style="font-size: 1.8rem; color: var(--text-dark); margin-bottom: 24px;">
+                    <i class="fas fa-calendar-check" style="color: var(--primary);"></i> My Sessions
+                </h3>
+
+                <div id="sessions-container">
+                    <p style="text-align: center; color: var(--text-light); padding: 40px;">Loading sessions...</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -579,7 +552,8 @@
             const statusClass = session.status || 'pending';
             const statusText = session.status.charAt(0).toUpperCase() + session.status.slice(1);
 
-            const therapistName = session.user_profile?.full_name || 'Therapist';
+            // Updated to match new query structure
+            const therapistName = session.therapist_user?.full_name || 'Therapist';
             const therapistPhoto = session.therapist_profile?.photo_url;
 
             const photoHTML = therapistPhoto

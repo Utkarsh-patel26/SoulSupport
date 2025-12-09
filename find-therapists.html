@@ -24,14 +24,13 @@
         .find-therapists-container {
             min-height: 100vh;
             background: var(--bg-light);
-            padding-top: 100px;
             padding-bottom: 60px;
         }
 
         .page-header {
             background: var(--gradient-primary);
             color: var(--white);
-            padding: 60px 0;
+            padding: 140px 0 60px;
             text-align: center;
             margin-bottom: 40px;
         }
@@ -784,6 +783,9 @@
 
         // Create therapist card HTML
         function createTherapistCard(therapist) {
+            // Defensive check for missing user profile data
+            const userProfile = therapist.user_profiles || { full_name: 'Unknown Therapist', photo_url: null };
+            
             const rating = parseFloat(therapist.rating || 0);
             const fullStars = Math.floor(rating);
             const hasHalfStar = rating % 1 >= 0.5;
@@ -795,7 +797,7 @@
             for (let i = 0; i < emptyStars; i++) starsHTML += '<i class="far fa-star"></i>';
 
             const photoHTML = therapist.photo_url
-                ? `<img src="${therapist.photo_url}" alt="${therapist.user_profiles.full_name}">`
+                ? `<img src="${therapist.photo_url}" alt="${userProfile.full_name}">`
                 : '<i class="fas fa-user-md"></i>';
 
             const specsHTML = (therapist.specializations || []).slice(0, 3).map(spec =>
@@ -811,7 +813,7 @@
                         </div>
                     </div>
                     <div class="therapist-info">
-                        <h3 class="therapist-name">${therapist.user_profiles.full_name}</h3>
+                        <h3 class="therapist-name">${userProfile.full_name}</h3>
                         <p class="therapist-qualifications">${therapist.qualifications || 'Licensed Therapist'}</p>
 
                         <div class="rating-section">
@@ -828,7 +830,7 @@
 
                         <div class="therapist-footer">
                             <div class="price">
-                                $${therapist.hourly_rate || 0} <span>/hour</span>
+                                ₹${therapist.hourly_rate || 0} <span>/hour</span>
                             </div>
                             <button class="book-btn" onclick='openBookingModal(${JSON.stringify(therapist).replace(/'/g, "&apos;")})'>
                                 <i class="fas fa-calendar-plus"></i> Book
@@ -856,7 +858,7 @@
                 <div class="therapist-summary-info">
                     <h3>${therapist.user_profiles.full_name}</h3>
                     <p>${therapist.qualifications || 'Licensed Therapist'}</p>
-                    <p style="color: var(--primary); font-weight: 600;">$${therapist.hourly_rate}/hour</p>
+                    <p style="color: var(--primary); font-weight: 600;">₹${therapist.hourly_rate}/hour</p>
                 </div>
             `;
 
