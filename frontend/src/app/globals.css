@@ -1,0 +1,180 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  background-color: #f8fafc;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  color: #0f172a;
+  background: radial-gradient(circle at 20% 20%, rgba(20, 184, 166, 0.08), transparent 28%),
+    radial-gradient(circle at 80% 0%, rgba(239, 68, 68, 0.06), transparent 32%),
+    #f8fafc;
+  min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html.dark {
+  background: radial-gradient(circle at 20% 20%, rgba(20, 184, 166, 0.1), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(239, 68, 68, 0.08), transparent 35%),
+    #0f172a;
+}
+
+html.dark body {
+  color: #f1f5f9;
+  background: transparent;
+}
+
+html.dark .bg-white {
+  @apply bg-slate-800;
+}
+
+html.dark .bg-gray-50 {
+  @apply bg-slate-900;
+}
+
+html.dark .bg-gray-100 {
+  @apply bg-slate-800;
+}
+
+html.dark .card {
+  @apply bg-slate-800 border-slate-700;
+}
+
+html.dark .text-charcoal {
+  @apply text-slate-50;
+}
+
+html.dark .text-gray-900 {
+  @apply text-slate-50;
+}
+
+html.dark .text-slate-700 {
+  @apply text-slate-200;
+}
+
+html.dark .text-slate-600 {
+  @apply text-slate-300;
+}
+
+html.dark .text-gray-600 {
+  @apply text-slate-300;
+}
+
+html.dark .text-slate-500 {
+  color: #94a3b8;
+}
+
+html.dark .border-gray-100 {
+  @apply border-slate-700;
+}
+
+html.dark .border-gray-200 {
+  @apply border-slate-700;
+}
+
+html.dark .border-gray-300 {
+  @apply border-slate-600;
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  @apply bg-slate-900 border-slate-700 text-slate-50;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+html.dark .bg-primary-50 {
+  @apply bg-teal-900;
+}
+
+html.dark .bg-primary-100 {
+  @apply bg-teal-800;
+}
+
+html.dark .shadow-soft {
+  @apply shadow-lg;
+}
+
+html.dark header {
+  @apply bg-slate-900/95 border-slate-700;
+}
+
+html.dark footer {
+  @apply bg-slate-800 border-slate-700;
+}
+
+html.dark .hover\:bg-gray-100:hover {
+  @apply bg-slate-700;
+}
+
+html.dark .hover\:bg-gray-200:hover {
+  @apply bg-slate-600;
+}
+
+html.dark .divide-gray-200 {
+  @apply divide-slate-700;
+}
+
+html.dark .ring-gray-300 {
+  @apply ring-slate-600;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading), var(--font-sans), system-ui, -apple-system, sans-serif;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors dark:bg-slate-700 dark:text-slate-50 dark:hover:bg-slate-600;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:scale-105;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
+  }
+
+  .card {
+    @apply bg-white rounded-lg shadow-md p-6;
+  }
+
+  [contenteditable] {
+  direction: ltr !important;
+  unicode-bidi: embed;
+  text-align: left !important;
+}
+
+[contenteditable][data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #94a3b8;
+  }
+}
