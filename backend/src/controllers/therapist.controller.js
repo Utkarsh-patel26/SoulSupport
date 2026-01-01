@@ -29,7 +29,7 @@ exports.getTherapists = asyncHandler(async (req, res) => {
     limit = 12,
   } = req.query;
 
-  const filter = { isVerified: true };
+  const filter = {}; // Removed isVerified requirement for now
 
   if (specialization) {
     filter.specializations = specialization;
@@ -93,6 +93,32 @@ exports.getTherapist = asyncHandler(async (req, res) => {
       200,
       { therapist: { ...therapist.toObject(), user: therapist.userId } },
       'Therapist retrieved successfully'
+    )
+  );
+});
+
+/**
+ * @desc    Get current therapist's own profile
+ * @route   GET /api/therapists/profile
+ * @access  Private (Therapist only)
+ */
+exports.getMyProfile = asyncHandler(async (req, res) => {
+  if (req.user.userType !== 'therapist') {
+    throw new ApiError(403, 'Only therapists can access this endpoint');
+  }
+
+  const therapist = await TherapistProfile.findOne({ userId: req.user.id })
+    .populate('userId', 'fullName email avatarUrl bio');
+
+  if (!therapist) {
+    throw new ApiError(404, 'Therapist profile not found');
+  }
+
+  res.json(
+    new ApiResponse(
+      200,
+      { ...therapist.toObject(), user: therapist.userId },
+      'Profile retrieved successfully'
     )
   );
 });

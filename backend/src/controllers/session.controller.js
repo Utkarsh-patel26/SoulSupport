@@ -145,7 +145,7 @@ exports.getAvailableSlots = asyncHandler(async (req, res) => {
   }
 
   if (therapistUser.userType !== 'therapist') {
-    throw new ApiError(404, 'Therapist not found or not verified');
+    throw new ApiError(404, 'Therapist not found');
   }
 
   // Parse date string (YYYY-MM-DD)
@@ -186,13 +186,18 @@ exports.getAvailableSlots = asyncHandler(async (req, res) => {
 exports.createSession = asyncHandler(async (req, res) => {
   const { therapistId, sessionDate, durationMinutes, notes } = req.body;
 
+  // Prevent therapists from booking sessions
+  if (req.user.userType === 'therapist') {
+    throw new ApiError(403, 'Therapists cannot book sessions');
+  }
+
   // Check if therapist exists
   const therapistProfile = await TherapistProfile.findOne({
     userId: therapistId,
   }).populate('userId');
 
-  if (!therapistProfile || !therapistProfile.isVerified) {
-    throw new ApiError(404, 'Therapist not found or not verified');
+  if (!therapistProfile) {
+    throw new ApiError(404, 'Therapist not found');
   }
 
   const sessionDateTime = new Date(sessionDate);
@@ -211,7 +216,7 @@ exports.createSession = asyncHandler(async (req, res) => {
   endOfHour.setHours(endOfHour.getHours() + 1);
 
   const existingSession = await Session.findOne({
-    therapistId,
+    therapistId: therapistProfile.userId._id,
     sessionDate: {
       $gte: startOfHour,
       $lt: endOfHour,
@@ -226,9 +231,9 @@ exports.createSession = asyncHandler(async (req, res) => {
   // Get user info
   const user = await User.findById(req.user.id);
 
-  // Create session
+  // Create session (use the actual therapist User ID, not the passed parameter)
   const session = await Session.create({
-    therapistId,
+    therapistId: therapistProfile.userId._id,
     userId: req.user.id,
     therapist: {
       name: therapistProfile.userId.fullName,

@@ -11,6 +11,9 @@ const {
 router.get('/', therapistController.getTherapists);
 router.get('/search', therapistController.getTherapists);
 
+// Protected route - must come before :id route
+router.get('/profile', protect, restrictTo('therapist'), therapistController.getMyProfile);
+
 router.get('/:id', therapistController.getTherapist);
 
 router.put(

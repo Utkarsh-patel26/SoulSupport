@@ -2,6 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useTherapist } from '@/hooks/useTherapists';
+import { useAuth } from '@/hooks/useAuth';
 import { ReviewCard } from '@/components/therapist/ReviewCard';
 import { BookingModal } from '@/components/therapist/BookingModal';
 import { useState } from 'react';
@@ -16,12 +17,14 @@ import toast from 'react-hot-toast';
 export default function TherapistPage() {
   const params = useParams();
   const therapistId = params?.id;
+  const { user } = useAuth();
   const { data, isLoading, error } = useTherapist(therapistId);
   const { createSession } = useSessionMutations();
   const [open, setOpen] = useState(false);
 
   const therapist = data?.data?.therapist || data?.therapist;
   const reviews = data?.data?.reviews || therapist?.reviews || [];
+  const isTherapist = user?.userType === 'therapist';
 
   const handleBook = async (payload) => {
     // Extract the userId from the therapist object
@@ -52,9 +55,15 @@ export default function TherapistPage() {
                 ))}
               </div>
             </div>
-            <Button className="ml-auto" onClick={() => setOpen(true)}>
-              Book session
-            </Button>
+            {isTherapist ? (
+              <div className="ml-auto px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-md text-sm">
+                Therapists cannot book sessions
+              </div>
+            ) : (
+              <Button className="ml-auto" onClick={() => setOpen(true)}>
+                Book session
+              </Button>
+            )}
           </div>
           <p className="text-slate-700">{therapist.bio}</p>
         </div>

@@ -17,14 +17,14 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${heading.variable} ${sans.variable}`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${heading.variable} ${sans.variable} bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 transition-colors`}>
         <Providers>
           <ThemeProvider>
             <AuthProvider>
               <NotificationProvider>
                 <Header />
-                <main className="bg-transparent">{children}</main>
+                <main>{children}</main>
                 <Toaster position="top-right" />
               </NotificationProvider>
             </AuthProvider>

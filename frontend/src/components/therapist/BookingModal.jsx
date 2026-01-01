@@ -38,13 +38,15 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
         const response = await sessionService.getAvailableSlots(therapistUserId, selectedDate);
         const bookedHours = response.data?.bookedHours || [];
         
-        const allSlots = generateTimeSlots();
-        const available = allSlots.filter(slot => !bookedHours.includes(slot.hour));
-        setAvailableSlots(available);
+        const allSlots = generateTimeSlots().map(slot => ({
+          ...slot,
+          isBooked: bookedHours.includes(slot.hour)
+        }));
+        setAvailableSlots(allSlots);
       } catch (error) {
         console.error('Failed to fetch available slots:', error);
-        // If fetch fails, show all slots
-        setAvailableSlots(generateTimeSlots());
+        // If fetch fails, show all slots as available
+        setAvailableSlots(generateTimeSlots().map(slot => ({ ...slot, isBooked: false })));
       } finally {
         setFetchingSlots(false);
       }
@@ -140,23 +142,26 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
         {/* Time Selection */}
         {selectedDate && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               Select Time (1-hour session)
             </label>
             {fetchingSlots ? (
               <div className="text-center py-4">
-                <p className="text-sm text-slate-500">Loading available slots...</p>
+                <p className="text-sm text-slate-500 dark:text-gray-400">Loading available slots...</p>
               </div>
             ) : availableSlots.length > 0 ? (
               <div className="grid grid-cols-3 gap-2">
                 {availableSlots.map((slot) => (
                   <button
                     key={slot.hour}
-                    onClick={() => handleTimeSelect(slot)}
+                    onClick={() => !slot.isBooked && handleTimeSelect(slot)}
+                    disabled={slot.isBooked}
                     className={`p-2 rounded-lg text-sm font-medium transition-colors ${
-                      selectedTime?.hour === slot.hour
+                      slot.isBooked
+                        ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 line-through cursor-not-allowed opacity-60'
+                        : selectedTime?.hour === slot.hour
                         ? 'bg-teal-500 text-white'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        : 'bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-gray-600'
                     }`}
                   >
                     {slot.time}
@@ -164,7 +169,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-slate-500 py-4 text-center">
+              <p className="text-sm text-slate-500 dark:text-gray-400 py-4 text-center">
                 No available slots for this date. Please select another date.
               </p>
             )}

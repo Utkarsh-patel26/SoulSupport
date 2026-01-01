@@ -1,114 +1,160 @@
 "use client";
 
-import { useState } from 'react';
-import { useTherapists } from '@/hooks/useTherapists';
-import { TherapistFilter } from '@/components/therapist/TherapistFilter';
-import { TherapistGrid } from '@/components/therapist/TherapistGrid';
-import { BookingModal } from '@/components/therapist/BookingModal';
-import { useSessionMutations } from '@/hooks/useSessions';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import axios from 'axios';
+import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
-import { AnimatedSection } from '@/components/common/AnimatedSection';
 import toast from 'react-hot-toast';
 
-const HERO_STATS = [
-  { label: 'Licensed Therapists', value: '100+' },
-  { label: 'Average Rating', value: '4.9★' },
-  { label: 'Sessions Completed', value: '3L+' },
-];
-
 export default function TherapistsPage() {
-  const [filters, setFilters] = useState({});
-  const [selected, setSelected] = useState(null);
-  const { list } = useTherapists(filters);
-  const { createSession } = useSessionMutations();
+  const { user } = useAuth();
+  const [therapists, setTherapists] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const isTherapist = user?.userType === 'therapist';
 
-  const therapists = list.data?.data?.therapists || list.data?.therapists || [];
+  useEffect(() => {
+    const fetchTherapists = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/therapists`);
+        const data = response.data?.data?.therapists || [];
+        setTherapists(data);
+      } catch (err) {
+        console.error('Failed to fetch therapists:', err);
+        setError('Failed to load therapists');
+        toast.error('Failed to load therapists');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const keyword = (filters.q || '').toLowerCase().trim();
-  const specialization = filters.specialization && filters.specialization !== 'all' ? filters.specialization : null;
-
-  const filtered = therapists.filter((t) => {
-    const name = (t.fullName || t.user?.fullName || '').toLowerCase();
-    const bio = (t.bio || t.user?.bio || '').toLowerCase();
-    const tags = (t.tags || t.specializations || []).map((x) => (x || '').toLowerCase());
-    const matchesKeyword = !keyword || name.includes(keyword) || bio.includes(keyword) || tags.some((x) => x.includes(keyword));
-    const matchesSpec = !specialization || tags.includes(specialization.toLowerCase());
-    return matchesKeyword && matchesSpec;
-  });
-
-  const handleBook = async (payload) => {
-    await createSession.mutateAsync(payload);
-    toast.success('Session requested');
-  };
+    fetchTherapists();
+  }, []);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Hero */}
-      <AnimatedSection className="relative overflow-hidden bg-gradient-to-br from-teal-50 to-cyan-50 pb-16 pt-20 dark:from-gray-900 dark:to-gray-800">
-        <div className="absolute inset-0 pointer-events-none" />
+      <section className="bg-teal-600 dark:bg-teal-900 text-white py-16">
         <div className="container mx-auto px-4">
-          <div className="grid gap-10 lg:grid-cols-2 lg:items-center">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full bg-teal-100 px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm dark:bg-teal-900 dark:text-teal-100">
-                <span className="text-base">🧑‍⚕️</span>
-                <span>Therapist Network</span>
-              </div>
-              <h1 className="text-4xl font-bold leading-tight sm:text-5xl">
-                Find the right match <span className="text-teal-600 dark:text-teal-400">for you</span>
-              </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-300">
-                Filter by specialization, style, and experience. Book a secure session in minutes.
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800">
-              {HERO_STATS.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{stat.value}</p>
-                  <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <h1 className="text-4xl font-bold mb-4">Find Your Therapist</h1>
+          <p className="text-xl text-teal-50">
+            Browse our network of licensed professionals
+          </p>
         </div>
-      </AnimatedSection>
+      </section>
 
-      {/* Filters & Results */}
-      <section className="py-16">
-        <div className="container mx-auto px-4 space-y-8">
-          <AnimatedSection className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800">
-            <TherapistFilter onFilter={setFilters} />
-          </AnimatedSection>
-
-          {list.isLoading && (
-            <div className="flex min-h-[300px] items-center justify-center">
+      {/* Therapists Grid */}
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          {loading && (
+            <div className="flex justify-center py-20">
               <LoadingSpinner label="Loading therapists..." />
             </div>
           )}
 
-          {list.error && <ErrorMessage message={String(list.error)} />}
-
-          {!list.isLoading && filtered.length === 0 && (
-            <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-12 text-center dark:border-gray-700 dark:bg-gray-900">
-              <p className="text-xl font-semibold text-gray-900 dark:text-white">No therapists found</p>
-              <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Try adjusting your filters or check back later.</p>
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
+              <p className="text-red-800 dark:text-red-200">{error}</p>
             </div>
           )}
 
-          {!list.isLoading && filtered.length > 0 && (
-            <AnimatedSection className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gray-100 dark:bg-gray-900 dark:ring-gray-800">
-              <TherapistGrid therapists={filtered} onBook={setSelected} />
-            </AnimatedSection>
+          {!loading && !error && therapists.length === 0 && (
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-12 text-center">
+              <div className="text-6xl mb-4">👨‍⚕️</div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                No Therapists Available Yet
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Be the first to join our network as a therapist!
+              </p>
+              <Link
+                href="/register"
+                className="inline-block px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+              >
+                Register as Therapist
+              </Link>
+            </div>
+          )}
+
+          {!loading && !error && therapists.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {therapists.map((therapist) => (
+                <div
+                  key={therapist._id}
+                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/20 rounded-full flex items-center justify-center text-2xl">
+                      {therapist.user?.avatarUrl ? (
+                        <img
+                          src={therapist.user.avatarUrl}
+                          alt={therapist.user?.fullName}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        '👤'
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                        {therapist.user?.fullName || 'Therapist'}
+                      </h3>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        <span>{therapist.rating?.toFixed(1) || '0.0'} ★</span>
+                        <span>•</span>
+                        <span>${therapist.hourlyRate || 0}/hr</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {therapist.specializations && therapist.specializations.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {therapist.specializations.slice(0, 3).map((spec) => (
+                        <span
+                          key={spec}
+                          className="px-2 py-1 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 text-xs rounded"
+                        >
+                          {spec}
+                        </span>
+                      ))}
+                      {therapist.specializations.length > 3 && (
+                        <span className="px-2 py-1 text-gray-600 dark:text-gray-400 text-xs">
+                          +{therapist.specializations.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {therapist.user?.bio && (
+                    <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                      {therapist.user.bio}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex gap-2">
+                    <Link
+                      href={`/therapists/${therapist._id}`}
+                      className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors text-center text-sm font-medium"
+                    >
+                      View Profile
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loading && !error && therapists.length > 0 && (
+            <div className="mt-8 text-center">
+              <p className="text-gray-600 dark:text-gray-400">
+                Showing {therapists.length} therapist{therapists.length !== 1 ? 's' : ''}
+              </p>
+            </div>
           )}
         </div>
       </section>
-
-      <BookingModal
-        open={!!selected}
-        therapist={selected}
-        onClose={() => setSelected(null)}
-        onBook={handleBook}
-      />
     </div>
   );
 }

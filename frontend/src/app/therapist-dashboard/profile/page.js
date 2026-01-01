@@ -1,70 +1,272 @@
 "use client";
 
-import { useTherapist, useTherapistMutations } from '@/hooks/useTherapists';
-import { useAuth } from '@/hooks/useAuth';
-import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { ErrorMessage } from '@/components/common/ErrorMessage';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
-import { AnimatedSection } from '@/components/common/AnimatedSection';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
-export default function TherapistProfilePage() {
+const SPECIALIZATIONS = [
+  'anxiety', 'depression', 'relationships', 'stress',
+  'trauma', 'addiction', 'grief', 'self-esteem', 'career', 'family',
+];
+
+const DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+function TherapistProfileContent() {
   const { user } = useAuth();
-  const id = user?._id;
-  const { data, isLoading, error } = useTherapist(id);
-  const { updateProfile, uploadPhoto } = useTherapistMutations();
-  const therapist = data?.data?.therapist || data?.therapist;
-  const email = therapist?.user?.email || therapist?.email || user?.email;
-  const [fullName, setFullName] = useState('');
-  const [bio, setBio] = useState('');
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [formData, setFormData] = useState({
+    qualifications: '',
+    experienceYears: 0,
+    hourlyRate: 0,
+    specializations: [],
+    availability: { days: [], timeStart: '09:00', timeEnd: '17:00' },
+  });
 
   useEffect(() => {
-    if (therapist) {
-      setFullName(therapist.fullName || therapist.user?.fullName || '');
-      setBio(therapist.bio || therapist.user?.bio || '');
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/therapists/profile`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const data = response.data.data;
+        setProfile(data);
+        setFormData({
+          qualifications: data.qualifications || '',
+          experienceYears: data.experienceYears || 0,
+          hourlyRate: data.hourlyRate || 0,
+          specializations: data.specializations || [],
+          availability: data.availability || { days: [], timeStart: '09:00', timeEnd: '17:00' },
+        });
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+        toast.error('Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.userType === 'therapist') {
+      fetchProfile();
     }
-  }, [therapist]);
+  }, [user]);
 
-  const handleSave = async () => {
-    if (!id) return;
-    await updateProfile.mutateAsync({ id, data: { fullName, bio } });
-    toast.success('Profile updated');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/therapists/${profile._id}`,
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Profile updated successfully!');
+      router.push('/therapist-dashboard');
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handlePhoto = async (file) => {
-    if (!id) return;
-    await uploadPhoto.mutateAsync({ id, file });
-    toast.success('Photo updated');
+  const handleSpecializationToggle = (spec) => {
+    setFormData(prev => ({
+      ...prev,
+      specializations: prev.specializations.includes(spec)
+        ? prev.specializations.filter(s => s !== spec)
+        : [...prev.specializations, spec]
+    }));
   };
+
+  const handleDayToggle = (day) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        days: prev.availability.days.includes(day)
+          ? prev.availability.days.filter(d => d !== day)
+          : [...prev.availability.days, day]
+      }
+    }));
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner label="Loading profile..." />
+      </div>
+    );
+  }
 
   return (
-    <AnimatedSection className="space-y-4">
-      <h1 className="font-heading text-2xl font-bold text-charcoal">Profile</h1>
-      {isLoading && <LoadingSpinner label="Loading profile..." />}
-      {error && <ErrorMessage message={String(error)} />}
-      {therapist && (
-        <div className="space-y-3">
-          <p className="text-sm text-slate-700">Email: {email}</p>
-          <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" />
-          <textarea
-            className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-charcoal shadow-sm focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
-            rows={3}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="Bio"
-          />
-          <Button onClick={handleSave} disabled={updateProfile.isPending}>
-            {updateProfile.isPending ? 'Saving...' : 'Save profile'}
-          </Button>
-          <div className="space-y-2">
-            <p className="text-sm font-semibold text-charcoal">Profile photo</p>
-            <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])} />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-8">
+          <div className="flex items-center justify-between mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Edit Profile</h1>
+            <button
+              onClick={() => router.push('/therapist-dashboard')}
+              className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            >
+              ← Back
+            </button>
           </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Qualifications
+              </label>
+              <textarea
+                rows={4}
+                value={formData.qualifications}
+                onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                placeholder="List your degrees, certifications, and licenses..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Years of Experience
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.experienceYears}
+                onChange={(e) => setFormData({ ...formData, experienceYears: parseInt(e.target.value) })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Hourly Rate ($)
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.hourlyRate}
+                onChange={(e) => setFormData({ ...formData, hourlyRate: parseFloat(e.target.value) })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Specializations
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {SPECIALIZATIONS.map((spec) => (
+                  <button
+                    key={spec}
+                    type="button"
+                    onClick={() => handleSpecializationToggle(spec)}
+                    className={`px-4 py-2 rounded-md border transition-colors ${
+                      formData.specializations.includes(spec)
+                        ? 'bg-teal-600 text-white border-teal-600'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-teal-500'
+                    }`}
+                  >
+                    {spec}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Available Days
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                {DAYS.map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => handleDayToggle(day)}
+                    className={`px-4 py-2 rounded-md border transition-colors capitalize ${
+                      formData.availability.days.includes(day)
+                        ? 'bg-teal-600 text-white border-teal-600'
+                        : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-teal-500'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Start Time
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.availability.timeStart}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      availability: { ...formData.availability, timeStart: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    End Time
+                  </label>
+                  <input
+                    type="time"
+                    value={formData.availability.timeEnd}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      availability: { ...formData.availability, timeEnd: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex-1 py-3 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push('/therapist-dashboard')}
+                className="px-6 py-3 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
-      )}
-      {!id && <p className="text-sm text-slate-600">Login as therapist to load your profile.</p>}
-    </AnimatedSection>
+      </div>
+    </div>
+  );
+}
+
+export default function TherapistProfilePage() {
+  return (
+    <ProtectedRoute requiredRole="therapist">
+      <TherapistProfileContent />
+    </ProtectedRoute>
   );
 }
