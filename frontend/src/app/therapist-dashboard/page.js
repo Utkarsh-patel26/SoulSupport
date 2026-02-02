@@ -7,7 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 
 function TherapistDashboardContent() {
   const { user } = useAuth();
@@ -26,12 +26,8 @@ function TherapistDashboardContent() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/therapists/profile`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setProfile(response.data.data);
+        const data = await api.get('/therapists/profile');
+        setProfile(data);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
       } finally {

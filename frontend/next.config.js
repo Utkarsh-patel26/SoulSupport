@@ -1,13 +1,28 @@
 /** @type {import('next').NextConfig} */
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 const nextConfig = {
   images: {
     domains: ['res.cloudinary.com', 'localhost'],
-  },
-  env: {
-    API_BASE_URL: process.env.NEXT_PUBLIC_API_URL,
+    formats: ['image/avif', 'image/webp'],
   },
   reactStrictMode: true,
   swcMinify: true,
+  experimental: {
+    turbo: {
+      rules: {
+        '*.svg': {
+          loaders: ['@svgr/webpack'],
+          as: '*.js',
+        },
+      },
+    },
+  },
+  compress: true,
+  productionBrowserSourceMaps: false,
+  optimizeFonts: true,
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

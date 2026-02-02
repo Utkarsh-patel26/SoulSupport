@@ -76,7 +76,7 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-center justify-end">
-              <Link href="/forgot-password" className="text-sm font-medium text-teal-600 hover:text-teal-500">
+              <Link href="/forgot-password" prefetch={true} className="text-sm font-medium text-teal-600 hover:text-teal-500">
                 Forgot password?
               </Link>
             </div>
@@ -92,7 +92,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link href="/register" className="font-medium text-teal-600 hover:text-teal-500">
+            <Link href="/register" prefetch={true} className="font-medium text-teal-600 hover:text-teal-500">
               Create Account
             </Link>
           </p>

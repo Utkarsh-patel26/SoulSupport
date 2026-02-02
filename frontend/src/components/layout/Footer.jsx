@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function Footer() {
   return (
     <footer className="border-t border-gray-100 bg-white">
@@ -7,15 +9,15 @@ export function Footer() {
           <p className="text-slate-500">Healing, learning, and thriving together.</p>
         </div>
         <div className="flex items-center gap-6">
-          <a href="/about" className="hover:text-primary-700">
+          <Link href="/about" prefetch={true} className="hover:text-primary-700">
             About
-          </a>
-          <a href="/resources" className="hover:text-primary-700">
+          </Link>
+          <Link href="/resources" prefetch={true} className="hover:text-primary-700">
             Resources
-          </a>
-          <a href="/forum" className="hover:text-primary-700">
+          </Link>
+          <Link href="/forum" prefetch={true} className="hover:text-primary-700">
             Community
-          </a>
+          </Link>
         </div>
       </div>
     </footer>

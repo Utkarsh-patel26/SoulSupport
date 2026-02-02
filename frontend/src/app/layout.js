@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import { Providers } from './providers';
 import { Header } from '@/components/layout/Header';
+import { PrefetchRoutes } from '@/components/PrefetchRoutes';
 
 const heading = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-heading' });
 const sans = Outfit({ subsets: ['latin'], variable: '--font-sans' });
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
           <ThemeProvider>
             <AuthProvider>
               <NotificationProvider>
+                <PrefetchRoutes />
                 <Header />
                 <main>{children}</main>
                 <Toaster position="top-right" />

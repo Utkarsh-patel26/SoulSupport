@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
+import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -18,11 +18,9 @@ export default function TherapistsPage() {
     const fetchTherapists = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/therapists`);
-        const data = response.data?.data?.therapists || [];
-        setTherapists(data);
+        const data = await api.get('/therapists');
+        setTherapists(data?.therapists || []);
       } catch (err) {
-        console.error('Failed to fetch therapists:', err);
         setError('Failed to load therapists');
         toast.error('Failed to load therapists');
       } finally {

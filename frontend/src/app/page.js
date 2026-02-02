@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 
@@ -21,12 +19,12 @@ export default function HomePage() {
                 Professional, secure, and personalized mental health support.
               </p>
               <div className="flex gap-4">
-                <Link href="/register">
+                <Link href="/register" prefetch={true}>
                   <Button className="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3">
                     Get Started
                   </Button>
                 </Link>
-                <Link href="/therapists">
+                <Link href="/therapists" prefetch={true}>
                   <Button variant="outline" className="px-8 py-3">
                     Find Therapists
                   </Button>
@@ -123,7 +121,7 @@ export default function HomePage() {
           <p className="text-xl text-teal-50 mb-8">
             Take the first step towards better mental health today.
           </p>
-          <Link href="/register">
+          <Link href="/register" prefetch={true}>
             <Button className="bg-white text-teal-600 hover:bg-gray-100 px-8 py-3 text-lg">
               Get Started Free
             </Button>

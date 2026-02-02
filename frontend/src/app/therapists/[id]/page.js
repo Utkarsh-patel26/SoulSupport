@@ -1,10 +1,10 @@
 "use client";
 
+import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import { useTherapist } from '@/hooks/useTherapists';
 import { useAuth } from '@/hooks/useAuth';
 import { ReviewCard } from '@/components/therapist/ReviewCard';
-import { BookingModal } from '@/components/therapist/BookingModal';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { useSessionMutations } from '@/hooks/useSessions';
@@ -13,6 +13,11 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import toast from 'react-hot-toast';
+
+const BookingModal = dynamic(
+  () => import('@/components/therapist/BookingModal').then(mod => ({ default: mod.BookingModal })),
+  { ssr: false, loading: () => null }
+);
 
 export default function TherapistPage() {
   const params = useParams();

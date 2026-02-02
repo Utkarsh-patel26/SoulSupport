@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 
 const SPECIALIZATIONS = [
@@ -32,12 +32,7 @@ function TherapistProfileContent() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/therapists/profile`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const data = response.data.data;
+        const data = await api.get('/therapists/profile');
         setProfile(data);
         setFormData({
           qualifications: data.qualifications || '',
@@ -64,12 +59,7 @@ function TherapistProfileContent() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem('token');
-      await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/therapists/${profile._id}`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await api.put(`/therapists/${profile._id}`, formData);
       toast.success('Profile updated successfully!');
       router.push('/therapist-dashboard');
     } catch (error) {
