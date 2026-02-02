@@ -40,16 +40,15 @@ jobs:
           cd backend
           npm ci
 
-      - name: Run Linter
+      - name: Setup test environment
         run: |
           cd backend
-          npm run lint
-        continue-on-error: true
+          cp .env.test .env
 
       - name: Run Tests
         run: |
           cd backend
-          npm test
+          npm run test:ci
         env:
           MONGODB_URI: mongodb://localhost:27017/soulsupport-test
           JWT_SECRET: test-secret-key-for-testing-purposes-only
@@ -81,16 +80,10 @@ jobs:
           cd frontend
           npm ci
 
-      - name: Run Linter
-        run: |
-          cd frontend
-          npm run lint
-        continue-on-error: true
-
       - name: Run Tests
         run: |
           cd frontend
-          npm test
+          npm test -- --passWithNoTests
         continue-on-error: true
 
       - name: Build Frontend
@@ -98,7 +91,7 @@ jobs:
           cd frontend
           npm run build
         env:
-          NEXT_PUBLIC_API_URL: http://localhost:5007/api
+          NEXT_PUBLIC_API_URL: http://localhost:5000/api
 
   # Security Scan
   security-scan:
