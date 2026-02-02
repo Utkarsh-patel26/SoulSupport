@@ -150,31 +150,3 @@ describe("Auth Routes", () => {
     });
   });
 });
-
-    test("Should not register with weak password", async () => {
-      const weakPasswordUser = {
-        ...validUser,
-        password: "weak",
-      };
-      // Implement password strength test
-      expect(true).toBe(true);
-    });
-  });
-
-  describe("POST /api/auth/login", () => {
-    test("Should login with valid credentials", async () => {
-      // Implement login test
-      expect(true).toBe(true);
-    });
-
-    test("Should not login with invalid email", async () => {
-      // Implement invalid email test
-      expect(true).toBe(true);
-    });
-
-    test("Should not login with wrong password", async () => {
-      // Implement wrong password test
-      expect(true).toBe(true);
-    });
-  });
-});

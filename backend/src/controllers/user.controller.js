@@ -58,6 +58,10 @@ exports.updateAvatar = asyncHandler(async (req, res) => {
 
 // User stats (sessions and reviews)
 exports.getUserStats = asyncHandler(async (req, res) => {
+  if (req.user.id.toString() !== req.params.id) {
+    throw new ApiError(403, 'You can only view your own stats');
+  }
+  
   const userId = req.params.id;
   const user = await User.findById(userId);
   if (!user) throw new ApiError(404, 'User not found');
@@ -65,5 +69,5 @@ exports.getUserStats = asyncHandler(async (req, res) => {
   const sessions = await Session.countDocuments({ userId });
   const reviews = await Review.countDocuments({ userId });
 
-  res.json(new ApiResponse(200, { sessions, reviews }, 'User stats retrieved successfully'));
+  res.json(new ApiResponse(200, { stats: { sessions, reviews } }, 'User stats retrieved successfully'));
 });
