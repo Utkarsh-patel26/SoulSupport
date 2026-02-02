@@ -35,7 +35,8 @@ export function PostForm({ onCreate }) {
       setIsAnonymous(true);
       toast.success('Posted to the community');
     } catch (err) {
-      toast.error(err || 'Unable to post');
+      const errorMessage = err instanceof Error ? err.message : String(err) || 'Unable to post';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

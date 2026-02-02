@@ -16,7 +16,8 @@ export function CommentForm({ onSubmit }) {
       setContent('');
       toast.success('Comment added');
     } catch (err) {
-      toast.error(err || 'Unable to add comment');
+      const errorMessage = err instanceof Error ? err.message : String(err) || 'Unable to add comment';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

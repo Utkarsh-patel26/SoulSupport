@@ -27,7 +27,8 @@ export function RegisterForm() {
       await register(form);
       toast.success('Account created');
     } catch (err) {
-      toast.error(err || 'Unable to register');
+      const errorMessage = err instanceof Error ? err.message : String(err) || 'Unable to register';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

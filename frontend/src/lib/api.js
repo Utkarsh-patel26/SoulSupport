@@ -26,7 +26,7 @@ api.interceptors.request.use(
 
 // Response interceptor - Handle errors globally
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   (error) => {
     if (error.response?.status === 401 && isClient) {
       localStorage.removeItem('token');

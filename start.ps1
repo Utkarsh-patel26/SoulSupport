@@ -10,12 +10,34 @@ Write-Host "   SoulSupport Quick Start" -ForegroundColor Cyan
 Write-Host "==================================" -ForegroundColor Cyan
 Write-Host ""
 
+# Helper function to remove directories with retries (handles locked files)
+function Remove-DirectoryWithRetry {
+    param([string]$Path, [int]$MaxRetries = 3)
+    if (-not (Test-Path $Path)) { return }
+    
+    for ($i = 0; $i -lt $MaxRetries; $i++) {
+        try {
+            if (Get-Item $Path -EA SilentlyContinue) {
+                robocopy "$Path" "$Path" /purge /s /q /r:0 /w:0 | Out-Null
+                Remove-Item -Recurse -Force $Path -EA Stop
+                return
+            }
+        }
+        catch {
+            if ($i -lt ($MaxRetries - 1)) {
+                Start-Sleep -Milliseconds 500
+            }
+        }
+    }
+}
+
 # Check Node.js installation
 Write-Host "Checking prerequisites..." -ForegroundColor Yellow
 try {
     $nodeVersion = node --version
     Write-Host "[OK] Node.js installed: $nodeVersion" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "[ERROR] Node.js is not installed!" -ForegroundColor Red
     Write-Host "Please install Node.js 18+ from https://nodejs.org" -ForegroundColor Yellow
     exit 1
@@ -26,7 +48,8 @@ Write-Host "Checking MongoDB..." -ForegroundColor Yellow
 $mongoRunning = Get-Process mongod -ErrorAction SilentlyContinue
 if ($mongoRunning) {
     Write-Host "[OK] MongoDB is running" -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "[WARNING] MongoDB is not running!" -ForegroundColor Red
     Write-Host "Please start MongoDB or see USER_CONFIGURATION_GUIDE.md" -ForegroundColor Yellow
     $response = Read-Host "Continue anyway? (y/n)"
@@ -53,26 +76,31 @@ if (-not (Test-Path .env)) {
         Write-Host "[IMPORTANT] Please edit backend/.env with your configuration!" -ForegroundColor Yellow
         Write-Host "See USER_CONFIGURATION_GUIDE.md for help" -ForegroundColor Yellow
         $response = Read-Host "Press Enter after configuring .env"
-    } else {
+    }
+    else {
         Write-Host "[ERROR] .env.example not found!" -ForegroundColor Red
         exit 1
     }
-} else {
+}
+else {
     Write-Host "[OK] Backend .env file exists" -ForegroundColor Green
 }
 
-# Install backend dependencies
-if (-not (Test-Path node_modules)) {
-    Write-Host "Installing backend dependencies..." -ForegroundColor Yellow
-    npm install
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[OK] Backend dependencies installed" -ForegroundColor Green
-    } else {
-        Write-Host "[ERROR] Failed to install backend dependencies" -ForegroundColor Red
-        exit 1
-    }
-} else {
-    Write-Host "[OK] Backend dependencies already installed" -ForegroundColor Green
+# Clean and install backend dependencies
+Write-Host "Cleaning backend node_modules..." -ForegroundColor Yellow
+Remove-DirectoryWithRetry "node_modules"
+if (Test-Path package-lock.json) {
+    Remove-Item -Force package-lock.json -EA SilentlyContinue
+}
+
+Write-Host "Installing backend dependencies..." -ForegroundColor Yellow
+npm install
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[OK] Backend dependencies installed" -ForegroundColor Green
+}
+else {
+    Write-Host "[ERROR] Failed to install backend dependencies" -ForegroundColor Red
+    exit 1
 }
 
 Set-Location ..
@@ -92,26 +120,32 @@ if (-not (Test-Path .env.local)) {
         Write-Host "Copying .env.local.example to .env.local..." -ForegroundColor Yellow
         Copy-Item .env.local.example .env.local
         Write-Host "[OK] Created .env.local file" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "[ERROR] .env.local.example not found!" -ForegroundColor Red
         exit 1
     }
-} else {
+}
+else {
     Write-Host "[OK] Frontend .env.local file exists" -ForegroundColor Green
 }
 
-# Install frontend dependencies
-if (-not (Test-Path node_modules)) {
-    Write-Host "Installing frontend dependencies..." -ForegroundColor Yellow
-    npm install
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[OK] Frontend dependencies installed" -ForegroundColor Green
-    } else {
-        Write-Host "[ERROR] Failed to install frontend dependencies" -ForegroundColor Red
-        exit 1
-    }
-} else {
-    Write-Host "[OK] Frontend dependencies already installed" -ForegroundColor Green
+# Clean and install frontend dependencies
+Write-Host "Cleaning frontend node_modules and .next cache..." -ForegroundColor Yellow
+Remove-DirectoryWithRetry "node_modules"
+Remove-DirectoryWithRetry ".next"
+if (Test-Path package-lock.json) {
+    Remove-Item -Force package-lock.json -EA SilentlyContinue
+}
+
+Write-Host "Installing frontend dependencies..." -ForegroundColor Yellow
+npm install
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "[OK] Frontend dependencies installed" -ForegroundColor Green
+}
+else {
+    Write-Host "[ERROR] Failed to install frontend dependencies" -ForegroundColor Red
+    exit 1
 }
 
 Set-Location ..

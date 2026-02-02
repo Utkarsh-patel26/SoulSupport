@@ -21,7 +21,8 @@ export default function LoginPage() {
       await login(email, password);
       toast.success('Login successful!');
     } catch (error) {
-      toast.error(error || 'Login failed');
+      const errorMessage = error instanceof Error ? error.message : String(error) || 'Login failed';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

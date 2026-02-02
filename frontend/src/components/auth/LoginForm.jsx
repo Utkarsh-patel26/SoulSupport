@@ -19,7 +19,8 @@ export function LoginForm() {
       await login(email, password);
       toast.success('Welcome back');
     } catch (err) {
-      toast.error(err || 'Unable to login');
+      const errorMessage = err instanceof Error ? err.message : String(err) || 'Unable to login';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

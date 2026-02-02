@@ -21,9 +21,9 @@ app.use(mongoSanitize());
 // Rate limiting
 app.use('/api/', apiLimiter);
 
-// Body parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parser with size limits
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Logging
 if (process.env.NODE_ENV === 'development') {
