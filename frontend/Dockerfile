@@ -30,7 +30,7 @@ RUN npm ci --only=production
 
 # Copy built application from builder
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# COPY --from=builder /app/public ./public
 COPY --from=builder /app/next.config.js ./
 COPY --from=builder /app/package.json ./
 
@@ -49,13 +49,6 @@ EXPOSE 3000
 
 # Set environment
 ENV NODE_ENV=production
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
-
-# Start application
-CMD ["npm", "start"]
 ENV PORT=3000
 
 # Health check
