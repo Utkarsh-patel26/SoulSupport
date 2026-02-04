@@ -1,9 +1,11 @@
 node_modules/
 .next/
-.env.local
 .DS_Store
 *.log
 dist/
 build/
 coverage/
 .vercel
+
+# Include all .env files for team development
+# Note: Make sure no sensitive production credentials are in these files!
