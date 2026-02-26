@@ -2,42 +2,52 @@ import api from '@/lib/api';
 
 export const forumService = {
   async getPosts(params = {}) {
-    return await api.get('/forum/posts', { params });
+    const response = await api.get('/forum/posts', { params });
+    return response.data;
   },
 
   async getPost(id) {
-    return await api.get(`/forum/posts/${id}`);
+    const response = await api.get(`/forum/posts/${id}`);
+    return response.data;
   },
 
   async getCategories() {
-    return await api.get('/forum/categories');
+    const response = await api.get('/forum/categories');
+    return response.data;
   },
 
   async createPost(data) {
-    return await api.post('/forum/posts', data);
+    const response = await api.post('/forum/posts', data);
+    return response.data;
   },
 
   async updatePost(id, data) {
-    return await api.put(`/forum/posts/${id}`, data);
+    const response = await api.put(`/forum/posts/${id}`, data);
+    return response.data;
   },
 
   async deletePost(id) {
-    return await api.delete(`/forum/posts/${id}`);
+    const response = await api.delete(`/forum/posts/${id}`);
+    return response.data;
   },
 
   async likePost(id) {
-    return await api.post(`/forum/posts/${id}/like`);
+    const response = await api.post(`/forum/posts/${id}/like`);
+    return response.data;
   },
 
   async unlikePost(id) {
-    return await api.delete(`/forum/posts/${id}/like`);
+    const response = await api.delete(`/forum/posts/${id}/like`);
+    return response.data;
   },
 
   async addComment(postId, data) {
-    return await api.post(`/forum/posts/${postId}/comments`, data);
+    const response = await api.post(`/forum/posts/${postId}/comments`, data);
+    return response.data;
   },
 
   async deleteComment(postId, commentId) {
-    return await api.delete(`/forum/posts/${postId}/comments/${commentId}`);
+    const response = await api.delete(`/forum/posts/${postId}/comments/${commentId}`);
+    return response.data;
   },
 };

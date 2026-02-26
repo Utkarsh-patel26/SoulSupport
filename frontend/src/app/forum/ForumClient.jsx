@@ -24,6 +24,7 @@ export default function ForumContent() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const {
     posts,
+    createPost,
     likePost,
     deletePost,
     addComment,
@@ -59,6 +60,16 @@ export default function ForumContent() {
     }
   };
 
+  const handleCreatePost = async (payload) => {
+    try {
+      await createPost.mutateAsync(payload);
+      setShowForm(false);
+    } catch (err) {
+      console.error('Create post failed:', err);
+      throw err;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Hero */}
@@ -86,7 +97,7 @@ export default function ForumContent() {
           {/* New Post Form */}
           {showForm && (
             <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6">
-              <PostForm onSubmit={() => setShowForm(false)} />
+              <PostForm onCreate={handleCreatePost} />
             </div>
           )}
 

@@ -1,3 +1,5 @@
+'use client';
+
 import { EmptyState } from '@/components/common/EmptyState';
 import { SessionCard } from './SessionCard';
 

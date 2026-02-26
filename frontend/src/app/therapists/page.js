@@ -18,8 +18,8 @@ export default function TherapistsPage() {
     const fetchTherapists = async () => {
       try {
         setLoading(true);
-        const data = await api.get('/therapists');
-        setTherapists(data?.therapists || []);
+        const response = await api.get('/therapists');
+        setTherapists(response?.data?.data?.therapists || []);
       } catch (err) {
         setError('Failed to load therapists');
         toast.error('Failed to load therapists');

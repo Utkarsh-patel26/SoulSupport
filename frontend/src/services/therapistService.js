@@ -2,32 +2,38 @@ import api from '@/lib/api';
 
 export const therapistService = {
   async getTherapists(params = {}) {
-    return await api.get('/therapists', { params });
+    const response = await api.get('/therapists', { params });
+    return response.data;
   },
 
   async getTherapist(id) {
-    return await api.get(`/therapists/${id}`);
+    const response = await api.get(`/therapists/${id}`);
+    return response.data;
   },
 
   async updateProfile(id, data) {
-    return await api.put(`/therapists/${id}`, data);
+    const response = await api.put(`/therapists/${id}`, data);
+    return response.data;
   },
 
   async uploadPhoto(id, file) {
     const formData = new FormData();
     formData.append('photo', file);
-    return await api.post(`/therapists/${id}/photo`, formData, {
+    const response = await api.post(`/therapists/${id}/photo`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    return response.data;
   },
 
   async getReviews(therapistId) {
-    return await api.get(`/therapists/${therapistId}/reviews`);
+    const response = await api.get(`/therapists/${therapistId}/reviews`);
+    return response.data;
   },
 
   async checkAvailability(therapistId, date, time) {
-    return await api.get(`/therapists/${therapistId}/availability`, {
+    const response = await api.get(`/therapists/${therapistId}/availability`, {
       params: { date, time },
     });
+    return response.data;
   },
 };
