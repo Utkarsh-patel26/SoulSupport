@@ -2,6 +2,8 @@
 
 import { useAuth } from '@/hooks/useAuth';
 import { useSessions } from '@/hooks/useSessions';
+import { useTherapists } from '@/hooks/useTherapists';
+import { useForum } from '@/hooks/useForum';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -10,10 +12,32 @@ import { Calendar, MessageSquare, User, TrendingUp } from 'lucide-react';
 
 export default function DashboardContent() {
   const { user } = useAuth();
-  const { list: sessions } = useSessions();
+  const liveQueryOptions = {
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  };
+
+  const { list: sessions } = useSessions({ limit: 200 }, liveQueryOptions);
+  const { list: therapists } = useTherapists({ page: 1, limit: 1 }, liveQueryOptions);
+  const { posts: forumPosts } = useForum({ page: 1, limit: 200 }, liveQueryOptions);
 
   const sessionList = sessions.data?.data?.sessions || [];
-  const upcomingSessions = sessionList.filter((s) => new Date(s.scheduledFor) > new Date()).length;
+  const therapistCount =
+    therapists.data?.data?.pagination?.total ||
+    therapists.data?.pagination?.total ||
+    therapists.data?.data?.therapists?.length ||
+    0;
+
+  const forumPostList = forumPosts.data?.data?.posts || forumPosts.data?.posts || [];
+  const forumCommentsCount = forumPostList.reduce(
+    (count, post) => count + (post.commentsCount ?? post.comments?.length ?? 0),
+    0
+  );
+
+  const upcomingSessionList = sessionList.filter(
+    (s) => ['pending', 'confirmed'].includes(s.status) && new Date(s.sessionDate) > new Date()
+  );
+  const upcomingSessions = upcomingSessionList.length;
   const completedSessions = sessionList.filter((s) => s.status === 'completed').length;
 
   return (
@@ -43,14 +67,14 @@ export default function DashboardContent() {
               color: 'from-sage-50 to-sage-100',
               iconColor: 'text-sage',
             }, {
-              label: 'Forum Posts',
-              value: 8,
+              label: 'Forum Comments',
+              value: forumCommentsCount,
               Icon: MessageSquare,
               color: 'from-soft-blue-50 to-lavender-50',
               iconColor: 'text-soft-blue',
             }, {
               label: 'Therapists',
-              value: 2,
+              value: therapistCount,
               Icon: User,
               color: 'from-coral-50 to-coral-100',
               iconColor: 'text-coral',
@@ -115,18 +139,17 @@ export default function DashboardContent() {
               </div>
             ) : (
               <div className="space-y-3">
-                {sessionList
-                  .filter((s) => new Date(s.scheduledFor) > new Date())
+                {upcomingSessionList
                   .slice(0, 3)
                   .map((session) => (
                     <div key={session._id} className="flex items-center justify-between border-t border-gray-100 py-3">
                       <div>
                         <p className="font-medium text-gray-900">
-                          Session with {session.therapistId?.user?.fullName}
+                          Session with {session.therapist?.name || 'Therapist'}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {new Date(session.scheduledFor).toLocaleDateString()} at{' '}
-                          {new Date(session.scheduledFor).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(session.sessionDate).toLocaleDateString()} at{' '}
+                          {new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                       <Button size="sm" variant="outline">

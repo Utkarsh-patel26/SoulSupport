@@ -1,10 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { forumService } from '@/services/forumService';
 
-export function useForum(params) {
+export function useForum(params, postsQueryOptions = {}) {
   const queryClient = useQueryClient();
 
-  const posts = useQuery({ queryKey: ['forum-posts', params], queryFn: () => forumService.getPosts(params) });
+  const posts = useQuery({
+    queryKey: ['forum-posts', params],
+    queryFn: () => forumService.getPosts(params),
+    ...postsQueryOptions,
+  });
   const categories = useQuery({ queryKey: ['forum-categories'], queryFn: forumService.getCategories });
 
   const createPost = useMutation({

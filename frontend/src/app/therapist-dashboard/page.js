@@ -44,7 +44,7 @@ function TherapistDashboardContent() {
     if (sessions.length > 0) {
       const now = new Date();
       const upcoming = sessions.filter(s => 
-        s.status === 'confirmed' && new Date(s.scheduledFor) > now
+        ['pending', 'confirmed'].includes(s.status) && new Date(s.sessionDate) > now
       ).length;
       const completed = sessions.filter(s => s.status === 'completed').length;
       const pending = sessions.filter(s => s.status === 'pending').length;
@@ -216,11 +216,11 @@ function TherapistDashboardContent() {
                   <div key={session._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">
-                        {session.userId?.fullName || 'Unknown Client'}
+                        {session.user?.name || 'Unknown Client'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {new Date(session.scheduledFor).toLocaleDateString()} at{' '}
-                        {new Date(session.scheduledFor).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(session.sessionDate).toLocaleDateString()} at{' '}
+                        {new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">

@@ -1,8 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { therapistService } from '@/services/therapistService';
 
-export function useTherapists(params) {
-  const list = useQuery({ queryKey: ['therapists', params], queryFn: () => therapistService.getTherapists(params) });
+export function useTherapists(params, queryOptions = {}) {
+  const list = useQuery({
+    queryKey: ['therapists', params],
+    queryFn: () => therapistService.getTherapists(params),
+    ...queryOptions,
+  });
   return { list };
 }
 

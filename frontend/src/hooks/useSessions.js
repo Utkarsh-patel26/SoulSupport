@@ -1,8 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { sessionService } from '@/services/sessionService';
 
-export function useSessions(params) {
-  const list = useQuery({ queryKey: ['sessions', params], queryFn: () => sessionService.getSessions(params) });
+export function useSessions(params, queryOptions = {}) {
+  const list = useQuery({
+    queryKey: ['sessions', params],
+    queryFn: () => sessionService.getSessions(params),
+    ...queryOptions,
+  });
   return { list };
 }
 
