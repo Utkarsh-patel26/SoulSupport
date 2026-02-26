@@ -8,11 +8,11 @@ export default function CTASection() {
   return (
     <section className="py-24 sm:py-32 relative overflow-hidden transition-colors duration-500">
       {/* Full Width Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 transition-colors duration-500">
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1F4E5F] via-[#2A6070] to-[#1F4E5F] transition-colors duration-500">
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 brightness-100 mix-blend-overlay"></div>
         {/* Soft Blobs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-sage/30 rounded-full mix-blend-soft-light filter blur-3xl opacity-40 animate-blob" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-soft-blue/20 rounded-full mix-blend-soft-light filter blur-3xl opacity-40 animate-blob animation-delay-2000" />
       </div>
 
       <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center">
@@ -29,10 +29,10 @@ export default function CTASection() {
 
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
             Your journey to <br />
-            <span className="text-purple-200">peace of mind</span> starts here
+            <span className="text-sage">peace of mind</span> starts here
           </h2>
           
-          <p className="text-xl text-indigo-100 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto leading-relaxed">
             Take the first step today. Connect with a licensed therapist who understands you. 
             Your future self will thank you.
           </p>
@@ -40,7 +40,7 @@ export default function CTASection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
             <Button 
                 size="xl"
-                className="w-full sm:w-auto bg-white text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 shadow-xl shadow-indigo-900/10 font-bold text-lg px-8 py-6 rounded-2xl transition-all duration-300 transform hover:scale-105"
+                className="w-full sm:w-auto bg-white text-primary hover:bg-gray-50 hover:text-primary-hover shadow-xl font-bold text-lg px-8 py-6 rounded-2xl transition-all duration-300 transform hover:scale-105"
             >
               Start Free Trial <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
@@ -54,15 +54,15 @@ export default function CTASection() {
             </Button>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-sm font-medium text-indigo-100">
+          <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-sm font-medium text-white/80">
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-emerald-400" /> HIPAA Compliant
+              <Shield className="w-5 h-5 text-sage" /> HIPAA Compliant
             </div>
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-emerald-400" /> 7-Day Free Trial
+              <CheckCircle className="w-5 h-5 text-sage" /> 7-Day Free Trial
             </div>
             <div className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-emerald-400" /> Cancel Anytime
+              <Lock className="w-5 h-5 text-sage" /> Cancel Anytime
             </div>
           </div>
         </motion.div>

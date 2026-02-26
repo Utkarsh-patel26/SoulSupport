@@ -9,36 +9,36 @@ const steps = [
     title: 'Talk',
     description: 'Share your thoughts and feelings in a safe, judgment-free space. Open up at your own pace.',
     icon: MessageCircle,
-    color: 'bg-indigo-100 text-indigo-600',
-    bg: 'bg-indigo-50/50',
-    borderColor: 'hover:border-indigo-200'
+    color: 'bg-soft-blue-100 text-soft-blue',
+    bg: 'bg-soft-blue-50/50',
+    borderColor: 'hover:border-soft-blue/30'
   },
   {
     id: 2,
     title: 'Match',
     description: 'We connect you with a therapist who truly understands your unique journey and needs.',
     icon: Users,
-    color: 'bg-teal-100 text-teal-600',
-    bg: 'bg-teal-50/50',
-    borderColor: 'hover:border-teal-200'
+    color: 'bg-primary-soft text-primary',
+    bg: 'bg-primary-50/50',
+    borderColor: 'hover:border-primary/30'
   },
   {
     id: 3,
     title: 'Heal',
     description: 'Work through challenges together with proven techniques tailored to your goals.',
     icon: Heart,
-    color: 'bg-purple-100 text-purple-600',
-    bg: 'bg-purple-50/50',
-    borderColor: 'hover:border-purple-200'
+    color: 'bg-lavender-100 text-lavender',
+    bg: 'bg-lavender-50/50',
+    borderColor: 'hover:border-lavender/30'
   },
   {
     id: 4,
     title: 'Grow',
     description: 'Build resilience and discover a stronger, more balanced version of yourself.',
     icon: TrendingUp,
-    color: 'bg-green-100 text-green-600',
-    bg: 'bg-green-50/50',
-    borderColor: 'hover:border-green-200'
+    color: 'bg-sage-100 text-sage',
+    bg: 'bg-sage-50/50',
+    borderColor: 'hover:border-sage/30'
   },
 ];
 
@@ -51,7 +51,7 @@ export default function PathToWellness() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 uppercase bg-primary-100 rounded-full"
+            className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary uppercase bg-primary-soft rounded-full"
           >
             How It Works
           </motion.div>
@@ -62,7 +62,7 @@ export default function PathToWellness() {
             viewport={{ once: true }}
             className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6"
           >
-            Your path to <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">wellness</span>
+            Your path to <span className="text-sage">wellness</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}

@@ -122,7 +122,7 @@ function TherapistProfileContent() {
                 rows={4}
                 value={formData.qualifications}
                 onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="List your degrees, certifications, and licenses..."
                 required
               />
@@ -137,7 +137,7 @@ function TherapistProfileContent() {
                 min="0"
                 value={formData.experienceYears}
                 onChange={(e) => setFormData({ ...formData, experienceYears: parseInt(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
 
@@ -150,7 +150,7 @@ function TherapistProfileContent() {
                 min="0"
                 value={formData.hourlyRate}
                 onChange={(e) => setFormData({ ...formData, hourlyRate: parseFloat(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               />
             </div>
@@ -167,8 +167,8 @@ function TherapistProfileContent() {
                     onClick={() => handleSpecializationToggle(spec)}
                     className={`px-4 py-2 rounded-md border transition-colors ${
                       formData.specializations.includes(spec)
-                        ? 'bg-teal-600 text-white border-teal-600'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-teal-500'
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
                     }`}
                   >
                     {spec}
@@ -189,8 +189,8 @@ function TherapistProfileContent() {
                     onClick={() => handleDayToggle(day)}
                     className={`px-4 py-2 rounded-md border transition-colors capitalize ${
                       formData.availability.days.includes(day)
-                        ? 'bg-teal-600 text-white border-teal-600'
-                        : 'bg-white text-gray-700 border-gray-300 hover:border-teal-500'
+                        ? 'bg-primary text-white border-primary'
+                        : 'bg-white text-gray-700 border-gray-300 hover:border-primary'
                     }`}
                   >
                     {day}
@@ -210,7 +210,7 @@ function TherapistProfileContent() {
                       ...formData,
                       availability: { ...formData.availability, timeStart: e.target.value }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
                 <div>
@@ -224,7 +224,7 @@ function TherapistProfileContent() {
                       ...formData,
                       availability: { ...formData.availability, timeEnd: e.target.value }
                     })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
                 </div>
               </div>
@@ -234,7 +234,7 @@ function TherapistProfileContent() {
               <button
                 type="submit"
                 disabled={saving}
-                className="flex-1 py-3 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 py-3 px-4 bg-primary hover:bg-primary-hover text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>

@@ -17,9 +17,9 @@ export default function DashboardContent() {
   const completedSessions = sessionList.filter((s) => s.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white text-charcoal">
       {/* Welcome Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-teal-600 to-cyan-600 pb-14 pt-16 text-white">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#1F4E5F] to-[#2A6070] pb-14 pt-16 text-white">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold sm:text-5xl">Welcome back, {user?.fullName}!</h1>
           <p className="mt-3 text-white/80">Track your progress and manage your therapy journey</p>
@@ -34,28 +34,28 @@ export default function DashboardContent() {
               label: 'Upcoming',
               value: upcomingSessions,
               Icon: Calendar,
-              color: 'from-teal-100 to-cyan-100',
-              iconColor: 'text-teal-600',
+              color: 'from-primary-soft to-soft-blue-50',
+              iconColor: 'text-primary',
             }, {
               label: 'Completed',
               value: completedSessions,
               Icon: TrendingUp,
-              color: 'from-emerald-100 to-teal-100',
-              iconColor: 'text-emerald-600',
+              color: 'from-sage-50 to-sage-100',
+              iconColor: 'text-sage',
             }, {
               label: 'Forum Posts',
               value: 8,
               Icon: MessageSquare,
-              color: 'from-indigo-100 to-blue-100',
-              iconColor: 'text-indigo-600',
+              color: 'from-soft-blue-50 to-lavender-50',
+              iconColor: 'text-soft-blue',
             }, {
               label: 'Therapists',
               value: 2,
               Icon: User,
-              color: 'from-amber-100 to-orange-100',
-              iconColor: 'text-amber-600',
+              color: 'from-coral-50 to-coral-100',
+              iconColor: 'text-coral',
             }].map((item) => (
-              <Card key={item.label} className="p-6 shadow-sm ring-1 ring-gray-100">
+              <Card key={item.label} className="p-6 shadow-sm ring-1 ring-border">
                 <div className="flex items-center gap-4">
                   <div className={`rounded-xl bg-gradient-to-br ${item.color} p-3`}>
                     <item.Icon className={`h-6 w-6 ${item.iconColor}`} />
@@ -70,8 +70,8 @@ export default function DashboardContent() {
           </div>
 
           {/* Quick Actions */}
-          <Card className="mb-8 p-8 shadow-sm ring-1 ring-gray-100">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900">Quick Actions</h2>
+          <Card className="mb-8 p-8 shadow-sm ring-1 ring-border">
+            <h2 className="mb-6 text-2xl font-bold text-charcoal">Quick Actions</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Link href="/therapists" prefetch={true}>
                 <Button variant="outline" className="w-full">
@@ -92,9 +92,9 @@ export default function DashboardContent() {
           </Card>
 
           {/* Upcoming Sessions */}
-          <Card className="p-8 shadow-sm ring-1 ring-gray-100">
+          <Card className="p-8 shadow-sm ring-1 ring-border">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">Upcoming Sessions</h2>
+              <h2 className="text-2xl font-bold text-charcoal">Upcoming Sessions</h2>
               <Link href="/dashboard/sessions">
                 <Button variant="ghost" size="sm">
                   View All

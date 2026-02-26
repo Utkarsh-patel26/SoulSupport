@@ -10,7 +10,7 @@ const testimonials = [
     role: "Anxiety & Stress",
     rating: 5,
     initial: "S",
-    color: "bg-blue-100 text-blue-600"
+    color: "bg-soft-blue-100 text-soft-blue"
   },
   {
     content: "The matching process found me the perfect therapist on the first try. Truly understood what I needed.",
@@ -18,7 +18,7 @@ const testimonials = [
     role: "Self Discovery",
     rating: 5,
     initial: "A",
-    color: "bg-purple-100 text-purple-600"
+    color: "bg-lavender-100 text-lavender"
   },
   {
     content: "Flexible scheduling is a game changer. I can fit sessions in during my lunch breaks or evenings.",
@@ -26,7 +26,7 @@ const testimonials = [
     role: "Career Counseling",
     rating: 4,
     initial: "J",
-    color: "bg-emerald-100 text-emerald-600"
+    color: "bg-sage-100 text-sage"
   },
   {
     content: "I've tried other platforms, but the quality of care here is unmatched. Practical tools I use everyday.",
@@ -34,7 +34,7 @@ const testimonials = [
     role: "Relationship Issues",
     rating: 5,
     initial: "E",
-    color: "bg-amber-100 text-amber-600"
+    color: "bg-coral-100 text-coral"
   },
   {
     content: "Finally, therapy that feels modern and accessible. The video quality is great and the app is simple.",
@@ -42,7 +42,7 @@ const testimonials = [
     role: "Depression",
     rating: 5,
     initial: "M",
-    color: "bg-rose-100 text-rose-600"
+    color: "bg-primary-soft text-primary"
   },
   {
     content: "Dr. Chen helped me navigate one of the hardest times in my life with compassion. Forever grateful.",
@@ -50,7 +50,7 @@ const testimonials = [
     role: "Life Transitions",
     rating: 5,
     initial: "E",
-    color: "bg-indigo-100 text-indigo-600"
+    color: "bg-soft-blue-100 text-soft-blue"
   },
   {
     content: "The video sessions feel so personal. I was worried it would feel distant, but it's great.",
@@ -58,7 +58,7 @@ const testimonials = [
     role: "Social Anxiety",
     rating: 5,
     initial: "D",
-    color: "bg-cyan-100 text-cyan-600"
+    color: "bg-lavender-100 text-lavender"
   },
   {
     content: "I love the journaling feature. It helps me prepare for my sessions effectively.",
@@ -66,13 +66,13 @@ const testimonials = [
     role: "Mindfulness",
     rating: 4,
     initial: "S",
-    color: "bg-teal-100 text-teal-600"
+    color: "bg-sage-100 text-sage"
   }
 ];
 
 const TestimonialCard = ({ testimonial }) => (
   <div className="w-[350px] flex-shrink-0 p-6 mx-4 rounded-3xl bg-surface border border-border shadow-soft hover:shadow-lg transition-all duration-300 group">
-    <Quote size={24} className="text-text-muted mb-4 group-hover:text-purple-400 transition-colors opacity-70" />
+    <Quote size={24} className="text-text-muted mb-4 group-hover:text-lavender transition-colors opacity-70" />
     
     <div className="flex gap-1 mb-3">
       {[...Array(5)].map((_, i) => (
@@ -129,18 +129,18 @@ export default function TestimonialsSection() {
     <section className="py-24 sm:py-32 bg-surface-alt relative overflow-hidden transition-colors duration-300">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-[20%] right-[10%] w-96 h-96 bg-purple-100/40 rounded-full blur-3xl opacity-60" />
-        <div className="absolute bottom-[10%] left-[5%] w-72 h-72 bg-blue-100/40 rounded-full blur-3xl opacity-60" />
+        <div className="absolute top-[20%] right-[10%] w-96 h-96 bg-lavender-50 rounded-full blur-3xl opacity-40" />
+        <div className="absolute bottom-[10%] left-[5%] w-72 h-72 bg-soft-blue-50 rounded-full blur-3xl opacity-40" />
       </div>
 
       <div className="relative z-10 w-full">
         <div className="container mx-auto px-4 max-w-7xl mb-12 sm:mb-16">
           <div className="text-center max-w-2xl mx-auto">
-            <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-orange-900 uppercase bg-orange-100 rounded-full">
+            <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-coral-600 uppercase bg-coral-50 rounded-full">
               Testimonials
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-              Stories of <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-orange-500">transformation</span>
+              Stories of <span className="text-coral">transformation</span>
             </h2>
             <p className="mt-6 text-lg text-text-muted">
               Real experiences from real people who found hope, healing, and happiness.

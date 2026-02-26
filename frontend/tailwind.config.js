@@ -12,27 +12,32 @@ module.exports = {
         surface: 'var(--surface)',
         'surface-alt': 'var(--surface-alt)',
         border: 'var(--border)',
-        
+
         primary: {
           DEFAULT: 'var(--primary)',
           hover: 'var(--primary-hover)',
           soft: 'var(--primary-soft)',
-          // Legacy support (mapping close approximations if needed, but primarily use semantic keys)
-          50: '#f0fdfa',
+          50: '#DEEEF3',
           100: 'var(--primary-soft)',
           500: 'var(--primary)',
-          600: 'var(--primary-hover)',
-          900: '#134e4a',
+          600: 'var(--primary)',
+          700: 'var(--primary-hover)',
+          900: '#0F2A34',
         },
-        
+
         // Text Colors
         foreground: 'var(--text-main)',
+        charcoal: '#1F2937',
         'text-secondary': 'var(--text-secondary)',
         'text-muted': 'var(--text-muted)',
         'text-inverse': 'var(--text-inverse)',
 
         // Brand Accent
         accent: 'var(--accent)',
+        sage: { DEFAULT: '#6FAF8F', 50: '#EDF6F1', 100: '#D5EBDF', 600: '#5A9A78' },
+        'soft-blue': { DEFAULT: '#4C6FFF', 50: '#EEF1FF', 100: '#D9DFFF', 600: '#3B5CE0' },
+        lavender: { DEFAULT: '#9C8CF1', 50: '#F1EFFE', 100: '#E2DCFD', 600: '#7E6DD4' },
+        coral: { DEFAULT: '#F08A7E', 50: '#FEF0EE', 100: '#FDDDD9', 600: '#D97064' },
       },
       borderRadius: {
         'xl': 'calc(var(--radius) - 4px)',

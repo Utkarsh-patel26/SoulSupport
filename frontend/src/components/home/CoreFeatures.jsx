@@ -12,9 +12,9 @@ const features = [
     cta: 'Learn more about sessions',
     icon: Video,
     imagePos: 'right',
-    gradient: 'from-purple-100 to-indigo-100',
-    iconColor: 'text-purple-600',
-    bgIcon: 'bg-purple-100',
+    gradient: 'from-lavender-50 to-soft-blue-50',
+    iconColor: 'text-lavender',
+    bgIcon: 'bg-lavender-100',
   },
   {
     title: '24/7 Messaging',
@@ -23,9 +23,9 @@ const features = [
     cta: 'See how messaging works',
     icon: MessageSquare,
     imagePos: 'left',
-    gradient: 'from-blue-100 to-cyan-100',
-    iconColor: 'text-blue-600',
-    bgIcon: 'bg-blue-100',
+    gradient: 'from-soft-blue-50 to-primary-50',
+    iconColor: 'text-soft-blue',
+    bgIcon: 'bg-soft-blue-100',
   },
   {
     title: 'Flexible Scheduling',
@@ -34,9 +34,9 @@ const features = [
     cta: 'Check availability',
     icon: Calendar,
     imagePos: 'right',
-    gradient: 'from-teal-100 to-emerald-100',
-    iconColor: 'text-teal-600',
-    bgIcon: 'bg-teal-100',
+    gradient: 'from-sage-50 to-primary-50',
+    iconColor: 'text-sage',
+    bgIcon: 'bg-sage-100',
   },
 ];
 
@@ -45,11 +45,11 @@ export default function CoreFeatures() {
     <section className="py-24 sm:py-32 bg-surface transition-colors duration-300 overflow-hidden">
       <div className="container mx-auto px-4 max-w-7xl space-y-32">
         <div className="text-center max-w-2xl mx-auto mb-16">
-           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 uppercase bg-primary-100 rounded-full">
+           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary uppercase bg-primary-soft rounded-full">
             Features
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-            Therapy that <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">fits you</span>
+            Therapy that <span className="text-soft-blue">fits you</span>
           </h2>
           <p className="mt-6 text-lg text-text-muted">
             Modern tools and flexible options designed to make your mental health journey as seamless and effective as possible.

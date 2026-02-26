@@ -128,7 +128,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
                 onClick={() => handleDateSelect(offset)}
                 className={`p-2 rounded-lg text-xs font-medium transition-colors ${
                   selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd')
-                    ? 'bg-teal-500 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                 }`}
               >
@@ -160,7 +160,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
                       slot.isBooked
                         ? 'bg-gray-100 text-gray-400 line-through cursor-not-allowed opacity-60'
                         : selectedTime?.hour === slot.hour
-                        ? 'bg-teal-500 text-white'
+                        ? 'bg-primary text-white'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
@@ -178,7 +178,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
 
         {/* Summary */}
         {selectedDate && selectedTime && (
-          <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
+          <div className="bg-primary-soft border border-primary/20 rounded-lg p-3">
             <p className="text-sm text-slate-700">
               <strong>Booking Summary:</strong>
               <br />

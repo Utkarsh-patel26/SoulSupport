@@ -107,20 +107,20 @@ const VIDEOS = [
 
 export default function ResourcesPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-white text-charcoal">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 to-cyan-50 pb-16 pt-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary-soft to-background pb-16 pt-20">
         <div className="absolute inset-0 pointer-events-none" />
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-teal-100 px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-semibold text-primary shadow-sm">
               <span className="text-base">📚</span>
               <span>Resource Hub</span>
             </div>
-            <h1 className="mt-6 text-4xl font-bold leading-tight text-gray-900 sm:text-5xl">
-              Mental Health <span className="text-teal-600">Resources &amp; Tools</span>
+            <h1 className="mt-6 text-4xl font-bold leading-tight text-charcoal sm:text-5xl">
+              Mental Health <span className="text-primary">Resources &amp; Tools</span>
             </h1>
-            <p className="mt-4 text-lg text-gray-600">
+            <p className="mt-4 text-lg text-text-muted">
               Trusted, curated content to support your mental wellbeing journey. From self-help tools to crisis support.
             </p>
           </div>
@@ -131,9 +131,9 @@ export default function ResourcesPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Explore Curated Collections</h2>
-            <p className="mt-3 text-base text-gray-600">Click any card to open the resource in a new tab</p>
-            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
+            <h2 className="text-3xl font-bold text-charcoal sm:text-4xl">Explore Curated Collections</h2>
+            <p className="mt-3 text-base text-text-muted">Click any card to open the resource in a new tab</p>
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-primary" />
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -142,11 +142,11 @@ export default function ResourcesPage() {
                 key={item.title}
                 className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-2xl text-teal-700">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-2xl text-primary">
                   {item.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
-                <p className="mt-2 flex-1 text-sm text-gray-600">{item.description}</p>
+                <h3 className="text-xl font-semibold text-charcoal">{item.title}</h3>
+                <p className="mt-2 flex-1 text-sm text-text-muted">{item.description}</p>
                 <div className="mt-4 space-y-2">
                   {item.links.map((link) => (
                     <a
@@ -154,7 +154,7 @@ export default function ResourcesPage() {
                       href={link.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700"
+                      className="inline-flex items-center text-sm font-semibold text-primary hover:text-primary-hover"
                     >
                       {link.label} <span className="ml-1">→</span>
                     </a>
@@ -167,14 +167,14 @@ export default function ResourcesPage() {
       </section>
 
       {/* Wellness Articles */}
-      <section className="bg-gray-50 py-16">
+      <section className="bg-background py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Wellness Articles</h2>
-            <p className="mt-3 text-base text-gray-600">
+            <h2 className="text-3xl font-bold text-charcoal sm:text-4xl">Wellness Articles</h2>
+            <p className="mt-3 text-base text-text-muted">
               Trusted reading to deepen your understanding and toolkit
             </p>
-            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-primary" />
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -183,16 +183,16 @@ export default function ResourcesPage() {
                 key={item.title}
                 className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-2xl text-teal-700">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary-soft text-2xl text-primary">
                   {item.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                <p className="mt-2 flex-1 text-sm text-gray-600">{item.description}</p>
+                <h3 className="text-lg font-semibold text-charcoal">{item.title}</h3>
+                <p className="mt-2 flex-1 text-sm text-text-muted">{item.description}</p>
                 <a
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700"
+                  className="mt-4 inline-flex items-center text-sm font-semibold text-primary hover:text-primary-hover"
                 >
                   Read Article <span className="ml-1">→</span>
                 </a>
@@ -206,11 +206,11 @@ export default function ResourcesPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Guided Meditation Audios</h2>
-            <p className="mt-3 text-base text-gray-600">
+            <h2 className="text-3xl font-bold text-charcoal sm:text-4xl">Guided Meditation Audios</h2>
+            <p className="mt-3 text-base text-text-muted">
               Press play to start a session. Curated playlists from Spotify.
             </p>
-            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-primary" />
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -219,8 +219,8 @@ export default function ResourcesPage() {
                 key={item.title}
                 className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                <p className="mt-2 text-sm text-gray-600">{item.description}</p>
+                <h3 className="text-lg font-semibold text-charcoal">{item.title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{item.description}</p>
                 <div className="mt-4 overflow-hidden rounded-xl">
                   <iframe
                     src={item.embed}
@@ -233,7 +233,7 @@ export default function ResourcesPage() {
                   />
                 </div>
                 <p className="mt-3 text-xs text-gray-500">
-                  If the player doesn't load, <a className="font-semibold text-teal-600 hover:text-teal-700" href={item.link} target="_blank" rel="noreferrer">open on Spotify</a>.
+                  If the player doesn't load, <a className="font-semibold text-primary hover:text-primary-hover" href={item.link} target="_blank" rel="noreferrer">open on Spotify</a>.
                 </p>
               </div>
             ))}
@@ -242,14 +242,14 @@ export default function ResourcesPage() {
       </section>
 
       {/* Stress Management Videos */}
-      <section className="bg-gray-50 py-16">
+      <section className="bg-background py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Stress Management Videos</h2>
-            <p className="mt-3 text-base text-gray-600">
+            <h2 className="text-3xl font-bold text-charcoal sm:text-4xl">Stress Management Videos</h2>
+            <p className="mt-3 text-base text-text-muted">
               Short, effective practices you can try right now
             </p>
-            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
+            <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-primary" />
           </div>
 
           <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -258,8 +258,8 @@ export default function ResourcesPage() {
                 key={item.title}
                 className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
-                <p className="mt-2 text-sm text-gray-600">{item.description}</p>
+                <h3 className="text-lg font-semibold text-charcoal">{item.title}</h3>
+                <p className="mt-2 text-sm text-text-muted">{item.description}</p>
                 <div className="mt-4 overflow-hidden rounded-xl">
                   <iframe
                     src={item.embed}
@@ -271,7 +271,7 @@ export default function ResourcesPage() {
                   />
                 </div>
                 <p className="mt-3 text-xs text-gray-500">
-                  If the video doesn't load, <a className="font-semibold text-teal-600 hover:text-teal-700" href={item.link} target="_blank" rel="noreferrer">watch on YouTube</a>.
+                  If the video doesn't load, <a className="font-semibold text-primary hover:text-primary-hover" href={item.link} target="_blank" rel="noreferrer">watch on YouTube</a>.
                 </p>
               </div>
             ))}

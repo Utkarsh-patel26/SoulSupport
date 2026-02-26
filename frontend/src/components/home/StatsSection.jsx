@@ -3,10 +3,10 @@
 import { motion } from 'framer-motion';
 
 const stats = [
-  { label: 'Users Transformed', value: '50K+', color: 'text-indigo-600' },
-  { label: 'Licensed Therapists', value: '500+', color: 'text-purple-600' },
-  { label: 'Sessions Completed', value: '1M+', color: 'text-teal-600' },
-  { label: 'Client Satisfaction', value: '98%', color: 'text-orange-600' },
+  { label: 'Users Transformed', value: '50K+', color: 'text-primary' },
+  { label: 'Licensed Therapists', value: '500+', color: 'text-sage' },
+  { label: 'Sessions Completed', value: '1M+', color: 'text-soft-blue' },
+  { label: 'Client Satisfaction', value: '98%', color: 'text-coral' },
 ];
 
 export default function StatsSection() {

@@ -33,10 +33,10 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-50 py-12 px-4 text-gray-900">
+    <div className="min-h-screen bg-background py-12 px-4 text-charcoal">
       <div className="mx-auto max-w-md">
-        <div className="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-gray-100">
-          <h1 className="text-2xl font-bold text-gray-900">Reset password</h1>
+        <div className="rounded-2xl bg-white p-8 shadow-xl ring-1 ring-border">
+          <h1 className="text-2xl font-bold text-charcoal">Reset password</h1>
           <form className="mt-4 space-y-3" onSubmit={handleSubmit}>
             <Input
               type="password"

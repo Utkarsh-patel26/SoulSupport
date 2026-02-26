@@ -53,11 +53,11 @@ export default function TherapistsSection() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 sm:mb-16 gap-4">
           <div className="max-w-2xl">
-            <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 uppercase bg-primary-100 rounded-full">
+            <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary uppercase bg-primary-soft rounded-full">
               Our Therapists
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-              Meet your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">guides</span>
+              Meet your <span className="text-sage">guides</span>
             </h2>
             <p className="mt-4 text-lg text-text-muted">
               Compassionate, licensed professionals ready to support your journey to wellness.
@@ -92,12 +92,12 @@ export default function TherapistsSection() {
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {therapist.available && (
-                   <div className="absolute top-3 left-3 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                   <div className="absolute top-3 left-3 bg-sage/90 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
                      <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Available Today
                    </div>
                 )}
                 {/* Checkmark badge mockup */}
-                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-blue-600">
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-soft-blue">
                    <Shield size={14} className="fill-current" />
                 </div>
               </div>

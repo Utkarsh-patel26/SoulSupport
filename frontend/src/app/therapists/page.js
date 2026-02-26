@@ -34,10 +34,10 @@ export default function TherapistsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-teal-600 text-white py-16">
+      <section className="bg-primary text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Find Your Therapist</h1>
-          <p className="text-xl text-teal-50">
+          <p className="text-xl text-white/80">
             Browse our network of licensed professionals
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function TherapistsPage() {
               </p>
               <Link
                 href="/register"
-                className="inline-block px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+                className="inline-block px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors"
               >
                 Register as Therapist
               </Link>
@@ -84,7 +84,7 @@ export default function TherapistsPage() {
                   className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-2xl">
+                    <div className="w-16 h-16 bg-primary-soft rounded-full flex items-center justify-center text-2xl">
                       {therapist.user?.avatarUrl ? (
                         <img
                           src={therapist.user.avatarUrl}
@@ -112,7 +112,7 @@ export default function TherapistsPage() {
                       {therapist.specializations.slice(0, 3).map((spec) => (
                         <span
                           key={spec}
-                          className="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded"
+                          className="px-2 py-1 bg-primary-soft text-primary text-xs rounded"
                         >
                           {spec}
                         </span>
@@ -134,7 +134,7 @@ export default function TherapistsPage() {
                   <div className="mt-4 flex gap-2">
                     <Link
                       href={`/therapists/${therapist._id}`}
-                      className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors text-center text-sm font-medium"
+                      className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors text-center text-sm font-medium"
                     >
                       View Profile
                     </Link>

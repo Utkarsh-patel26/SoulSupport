@@ -62,10 +62,10 @@ export default function ForumContent() {
   return (
     <div className="min-h-screen bg-white text-gray-900">
       {/* Hero */}
-      <section className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-16">
+      <section className="bg-gradient-to-r from-[#1F4E5F] to-[#2A6070] text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Community Forum</h1>
-          <p className="text-xl text-teal-50">Share experiences and support one another</p>
+          <p className="text-xl text-white/80">Share experiences and support one another</p>
         </div>
       </section>
 
@@ -97,7 +97,7 @@ export default function ForumContent() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-4 py-2 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
+                className="rounded-lg border border-border bg-white px-4 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>

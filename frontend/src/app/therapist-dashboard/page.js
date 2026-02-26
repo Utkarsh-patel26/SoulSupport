@@ -78,7 +78,7 @@ function TherapistDashboardContent() {
             </div>
             <Link 
               href="/therapist-dashboard/profile"
-              className="px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition-colors"
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors"
             >
               Edit Profile
             </Link>
@@ -97,8 +97,8 @@ function TherapistDashboardContent() {
                   {stats.upcoming}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-soft-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-soft-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -113,8 +113,8 @@ function TherapistDashboardContent() {
                   {stats.pending}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-coral-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -129,8 +129,8 @@ function TherapistDashboardContent() {
                   {stats.completed}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-sage-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-sage" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -145,8 +145,8 @@ function TherapistDashboardContent() {
                   ${stats.revenue}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-lavender-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-lavender" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -166,7 +166,7 @@ function TherapistDashboardContent() {
                 <div className="flex flex-wrap gap-2 mt-2">
                   {profile.specializations?.length > 0 ? (
                     profile.specializations.map((spec) => (
-                      <span key={spec} className="px-2 py-1 bg-teal-100 text-teal-700 text-xs rounded">
+                      <span key={spec} className="px-2 py-1 bg-primary-soft text-primary text-xs rounded">
                         {spec}
                       </span>
                     ))
@@ -225,16 +225,16 @@ function TherapistDashboardContent() {
                     </div>
                     <div className="flex items-center gap-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        session.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                        session.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                        session.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                        session.status === 'confirmed' ? 'bg-sage-100 text-sage-600' :
+                        session.status === 'pending' ? 'bg-coral-50 text-coral-600' :
+                        session.status === 'completed' ? 'bg-soft-blue-100 text-soft-blue-600' :
                         'bg-gray-100 text-gray-700'
                       }`}>
                         {session.status}
                       </span>
                       <Link 
                         href={`/therapist-dashboard/sessions/${session._id}`}
-                        className="text-teal-600 hover:text-teal-700 text-sm font-medium"
+                        className="text-primary hover:text-primary-hover text-sm font-medium"
                       >
                         View
                       </Link>

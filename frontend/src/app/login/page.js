@@ -29,10 +29,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-charcoal">
             Welcome Back
           </h1>
           <p className="mt-2 text-sm text-gray-600">
@@ -40,10 +40,10 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+        <div className="bg-white rounded-lg shadow-sm border border-border p-8">
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-charcoal mb-1">
                 Email
               </label>
               <input
@@ -54,13 +54,13 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-md bg-white text-charcoal focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-charcoal mb-1">
                 Password
               </label>
               <input
@@ -71,13 +71,13 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-border rounded-md bg-white text-charcoal focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="••••••••"
               />
             </div>
 
             <div className="flex items-center justify-end">
-              <Link href="/forgot-password" prefetch={true} className="text-sm font-medium text-teal-600 hover:text-teal-500">
+              <Link href="/forgot-password" prefetch={true} className="text-sm font-medium text-primary hover:text-primary-hover">
                 Forgot password?
               </Link>
             </div>
@@ -85,15 +85,15 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2 px-4 bg-primary hover:bg-primary-hover text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p className="mt-6 text-center text-sm text-text-muted">
             Don't have an account?{' '}
-            <Link href="/register" prefetch={true} className="font-medium text-teal-600 hover:text-teal-500">
+            <Link href="/register" prefetch={true} className="font-medium text-primary hover:text-primary-hover">
               Create Account
             </Link>
           </p>

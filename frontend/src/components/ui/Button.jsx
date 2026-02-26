@@ -6,11 +6,11 @@ import { cn } from '@/lib/utils';
 const buttonVariants = {
   variants: {
     variant: {
-      primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-md hover:shadow-lg transition-all',
-      secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500 shadow-sm transition-all',
-      outline: 'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500',
+      primary: 'bg-primary text-white hover:bg-primary-hover focus:ring-primary shadow-md hover:shadow-lg transition-all',
+      secondary: 'bg-gray-200 text-charcoal hover:bg-gray-300 focus:ring-gray-400 shadow-sm transition-all',
+      outline: 'border-2 border-primary text-primary hover:bg-primary-soft focus:ring-primary',
       ghost: 'text-charcoal hover:bg-gray-100 transition-colors',
-      danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-md hover:shadow-lg transition-all',
+      danger: 'bg-coral text-white hover:bg-coral-600 focus:ring-coral shadow-md hover:shadow-lg transition-all',
     },
     size: {
       sm: 'px-3 py-1.5 text-sm',

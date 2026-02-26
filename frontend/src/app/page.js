@@ -18,7 +18,7 @@ export default function HomePage() {
         {/* Floating Lines Animation */}
         <div className="absolute inset-0 z-0">
           <FloatingLines
-            linesGradient={['#14b8a6', '#0d9488', '#0f766e', '#164e63']}
+            linesGradient={['#1F4E5F', '#6FAF8F', '#4C6FFF', '#9C8CF1']}
             enabledWaves={['middle', 'bottom']}
             lineCount={[5, 4]}
             lineDistance={[5, 3]}
@@ -32,8 +32,8 @@ export default function HomePage() {
           />
         </div>
 
-        {/* Dark Gradient Overlay for Better Text Contrast */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+        {/* Gradient Overlay for Better Text Contrast */}
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#1F2937]/50 via-transparent to-[#1F2937]/60" />
         
         {/* Hero Content - Centered */}
         <div className="container mx-auto max-w-7xl px-4 relative z-10">
@@ -41,7 +41,7 @@ export default function HomePage() {
             {/* Main Headline */}
             <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold text-white mb-8 leading-tight">
               Welcome to <br />
-              <span className="text-teal-400 inline-block mt-2">Soul Support</span>
+              <span className="text-sage inline-block mt-2">Soul Support</span>
             </h1>
             
             {/* Subheadline */}
@@ -53,7 +53,7 @@ export default function HomePage() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
               <Link href="/register" prefetch={true}>
-                <Button className="bg-teal-600 hover:bg-teal-700 text-white px-10 py-4 text-lg font-semibold shadow-2xl hover:shadow-teal-500/50 transition-all duration-300 transform hover:scale-105">
+                <Button className="bg-primary hover:bg-primary-hover text-white px-10 py-4 text-lg font-semibold shadow-xl transition-all duration-300 transform hover:scale-105">
                   Begin Your Journey
                 </Button>
               </Link>
@@ -67,19 +67,19 @@ export default function HomePage() {
             {/* Stats Grid - Cinematic Style */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <p className="text-5xl font-bold text-teal-400 mb-2">100+</p>
+                <p className="text-5xl font-bold text-sage mb-2">100+</p>
                 <p className="text-gray-200 text-sm font-medium">Licensed Therapists</p>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <p className="text-5xl font-bold text-teal-400 mb-2">3K+</p>
+                <p className="text-5xl font-bold text-soft-blue mb-2">3K+</p>
                 <p className="text-gray-200 text-sm font-medium">Sessions Completed</p>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <p className="text-5xl font-bold text-teal-400 mb-2">4.9★</p>
+                <p className="text-5xl font-bold text-lavender mb-2">4.9★</p>
                 <p className="text-gray-200 text-sm font-medium">Average Rating</p>
               </div>
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
-                <p className="text-5xl font-bold text-teal-400 mb-2">24/7</p>
+                <p className="text-5xl font-bold text-coral mb-2">24/7</p>
                 <p className="text-gray-200 text-sm font-medium">Support Available</p>
               </div>
             </div>
