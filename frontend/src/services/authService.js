@@ -3,18 +3,20 @@ import api from '@/lib/api';
 export const authService = {
   async register(data) {
     const response = await api.post('/auth/register', data);
-    if (response.data?.token) {
-      localStorage.setItem('token', response.data.token);
+    const payload = response.data?.data ?? response.data ?? {};
+    if (payload?.token) {
+      localStorage.setItem('token', payload.token);
     }
-    return response;
+    return payload;
   },
 
   async login(email, password) {
     const response = await api.post('/auth/login', { email, password });
-    if (response.data?.token) {
-      localStorage.setItem('token', response.data.token);
+    const payload = response.data?.data ?? response.data ?? {};
+    if (payload?.token) {
+      localStorage.setItem('token', payload.token);
     }
-    return response;
+    return payload;
   },
 
   logout() {
@@ -25,7 +27,8 @@ export const authService = {
   },
 
   async getCurrentUser() {
-    return await api.get('/auth/me');
+    const response = await api.get('/auth/me');
+    return response.data?.data ?? response.data ?? {};
   },
 
   async forgotPassword(email) {

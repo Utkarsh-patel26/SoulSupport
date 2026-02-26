@@ -228,7 +228,7 @@ export default function ResourcesPage() {
                     height="320"
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     loading="lazy"
-                    className="w-full border-0"
+                    className="h-96 w-full border-0"
                     title={item.title}
                   />
                 </div>

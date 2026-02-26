@@ -15,8 +15,8 @@ export const AuthProvider = ({ children }) => {
     const loadUser = async () => {
       try {
         if (authService.isAuthenticated()) {
-          const response = await authService.getCurrentUser();
-          setUser(response.data.user);
+          const payload = await authService.getCurrentUser();
+          setUser(payload.user);
         }
       } catch (error) {
         console.error('Failed to load user:', error);
@@ -30,11 +30,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const response = await authService.login(email, password);
-    setUser(response.data.user);
+    const payload = await authService.login(email, password);
+    setUser(payload.user);
     
     // Redirect based on user type
-    if (response.data.user.userType === 'therapist') {
+    if (payload.user?.userType === 'therapist') {
       router.push('/therapist-dashboard');
     } else {
       router.push('/dashboard');
@@ -42,8 +42,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (data) => {
-    const response = await authService.register(data);
-    setUser(response.data.user);
+    const payload = await authService.register(data);
+    setUser(payload.user);
     router.push('/dashboard');
   };
 
