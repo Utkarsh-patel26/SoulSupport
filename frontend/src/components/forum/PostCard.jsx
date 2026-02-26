@@ -72,7 +72,7 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
       </div>
 
       {/* Post Actions */}
-      <div className="flex items-center gap-4 pt-4 border-t border-gray-100 dark:border-gray-700">
+      <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
         <Button
           variant="ghost"
           size="sm"
@@ -100,7 +100,7 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
 
       {/* Comments Section */}
       {showComments && (
-        <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+        <div className="mt-4 pt-4 border-t border-gray-100 space-y-4">
           {/* Comment Form */}
           {onComment && (
             <form onSubmit={handleAddComment} className="space-y-3">
@@ -110,13 +110,13 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
                   value={commentText}
                   onChange={(e) => setCommentText(e.target.value)}
                   placeholder="Write a supportive comment..."
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
+                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
                 <Button type="submit" size="sm" disabled={!commentText.trim()}>
                   Send
                 </Button>
               </div>
-              <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-gray-400">
+              <label className="flex items-center gap-2 text-sm text-slate-600">
                 <input
                   type="checkbox"
                   checked={isAnonymous}
@@ -131,7 +131,7 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
           {/* Comments List */}
           <div className="space-y-3">
             {post.comments?.map((comment) => (
-              <div key={comment._id} className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={comment._id} className="flex gap-3 p-3 bg-gray-50 rounded-lg">
                 <Avatar
                   src={comment.isAnonymous ? null : comment.author?.avatarUrl}
                   name={comment.author?.name || 'Anonymous'}
@@ -146,7 +146,7 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
                       {formatDistanceToNow(new Date(comment.createdAt))} ago
                     </span>
                   </div>
-                  <p className="text-sm text-slate-700 dark:text-gray-300">{comment.content}</p>
+                  <p className="text-sm text-slate-700">{comment.content}</p>
                 </div>
               </div>
             ))}

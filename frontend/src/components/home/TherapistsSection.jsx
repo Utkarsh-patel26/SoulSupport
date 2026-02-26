@@ -53,11 +53,11 @@ export default function TherapistsSection() {
       <div className="container mx-auto px-4 max-w-7xl">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 sm:mb-16 gap-4">
           <div className="max-w-2xl">
-            <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 dark:text-primary-100 uppercase bg-primary-100 dark:bg-primary-900/30 rounded-full">
+            <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 uppercase bg-primary-100 rounded-full">
               Our Therapists
             </span>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-              Meet your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">guides</span>
+              Meet your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">guides</span>
             </h2>
             <p className="mt-4 text-lg text-text-muted">
               Compassionate, licensed professionals ready to support your journey to wellness.
@@ -97,7 +97,7 @@ export default function TherapistsSection() {
                    </div>
                 )}
                 {/* Checkmark badge mockup */}
-                <div className="absolute top-3 right-3 bg-white/90 dark:bg-black/60 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-blue-600 dark:text-blue-400">
+                <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-blue-600">
                    <Shield size={14} className="fill-current" />
                 </div>
               </div>
@@ -109,7 +109,7 @@ export default function TherapistsSection() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                   <div className="flex items-center gap-1 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded-md text-amber-700 dark:text-amber-400 text-sm font-medium">
+                   <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-md text-amber-700 text-sm font-medium">
                      <Star size={14} className="fill-current" /> {therapist.rating}
                    </div>
                    <span className="text-xs text-text-muted">({therapist.reviews} reviews)</span>

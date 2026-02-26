@@ -61,7 +61,7 @@ export default function TherapistPage() {
               </div>
             </div>
             {isTherapist ? (
-              <div className="ml-auto px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-md text-sm">
+              <div className="ml-auto px-4 py-2 bg-gray-100 text-gray-600 rounded-md text-sm">
                 Therapists cannot book sessions
               </div>
             ) : (

@@ -41,12 +41,12 @@ export function AnimatedSection({
       {(title || subtitle) && (
         <motion.div variants={itemVariants} className="space-y-2">
           {title && (
-            <h2 className="font-heading text-3xl font-bold text-charcoal dark:text-slate-50">
+            <h2 className="font-heading text-3xl font-bold text-charcoal">
               {title}
             </h2>
           )}
           {subtitle && (
-            <p className="text-lg text-slate-600 dark:text-slate-300">
+            <p className="text-lg text-slate-600">
               {subtitle}
             </p>
           )}

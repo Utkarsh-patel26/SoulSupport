@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
-import Plasma from "@/components/Plasma";
 import FloatingLines from "@/components/FloatingLines";
 import StatsSection from "@/components/home/StatsSection";
 import PathToWellness from "@/components/home/PathToWellness";
@@ -16,18 +15,6 @@ export default function HomePage() {
     <div className="bg-background transition-colors duration-300">
       {/* Full-Screen Cinematic Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Plasma Background */}
-        <div className="absolute inset-0 z-0">
-          <Plasma 
-            color="#14b8a6"
-            speed={0.6}
-            direction="forward"
-            scale={1.1}
-            opacity={0.3}
-            mouseInteractive={true}
-          />
-        </div>
-
         {/* Floating Lines Animation */}
         <div className="absolute inset-0 z-0">
           <FloatingLines
@@ -46,7 +33,7 @@ export default function HomePage() {
         </div>
 
         {/* Dark Gradient Overlay for Better Text Contrast */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 dark:from-black/60 dark:via-transparent dark:to-black/70" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
         
         {/* Hero Content - Centered */}
         <div className="container mx-auto max-w-7xl px-4 relative z-10">

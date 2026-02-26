@@ -60,9 +60,9 @@ export default function ForumContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50">
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Hero */}
-      <section className="bg-gradient-to-r from-teal-600 to-cyan-600 dark:from-teal-900 dark:to-cyan-900 text-white py-16">
+      <section className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Community Forum</h1>
           <p className="text-xl text-teal-50">Share experiences and support one another</p>
@@ -85,7 +85,7 @@ export default function ForumContent() {
 
           {/* New Post Form */}
           {showForm && (
-            <div className="mb-8 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6">
+            <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6">
               <PostForm onSubmit={() => setShowForm(false)} />
             </div>
           )}
@@ -97,7 +97,7 @@ export default function ForumContent() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="rounded-lg border border-gray-200 bg-white px-4 py-2 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200 dark:bg-gray-900 dark:border-gray-800"
+                className="rounded-lg border border-gray-200 bg-white px-4 py-2 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-200"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -117,7 +117,7 @@ export default function ForumContent() {
             <ErrorMessage message={String(posts.error)} />
           ) : postList.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-gray-600 mb-6">
                 No posts yet. Be the first to share!
               </p>
               <Button onClick={() => setShowForm(true)}>Create First Post</Button>

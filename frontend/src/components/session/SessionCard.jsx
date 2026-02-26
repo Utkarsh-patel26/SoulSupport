@@ -17,11 +17,11 @@ export function SessionCard({ session, onUpdate, onCancel }) {
   return (
     <Card className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
       <div>
-        <p className="font-heading text-lg font-semibold text-charcoal dark:text-gray-200">{displayName}</p>
-        <p className="text-sm text-slate-600 dark:text-gray-400">
+        <p className="font-heading text-lg font-semibold text-charcoal">{displayName}</p>
+        <p className="text-sm text-slate-600">
           {date} at {time} · {session.durationMinutes || 60} mins
         </p>
-        <p className="text-xs text-slate-500 dark:text-gray-500">{session.meetingLink || 'Meeting link to be shared'}</p>
+        <p className="text-xs text-slate-500">{session.meetingLink || 'Meeting link to be shared'}</p>
       </div>
       <div className="flex items-center gap-2">
         <SessionStatusBadge status={session.status} />

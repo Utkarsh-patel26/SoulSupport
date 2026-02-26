@@ -63,16 +63,16 @@ function TherapistDashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h1 className="text-3xl font-bold text-gray-900">
                 Therapist Dashboard
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <p className="text-sm text-gray-600 mt-1">
                 Welcome back, {user?.fullName}
               </p>
             </div>
@@ -89,64 +89,64 @@ function TherapistDashboardContent() {
       <div className="container mx-auto px-4 py-8">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Upcoming Sessions</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600">Upcoming Sessions</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
                   {stats.upcoming}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Pending Requests</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600">Pending Requests</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
                   {stats.pending}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Completed</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600">Completed</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
                   {stats.completed}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+          <div className="bg-white rounded-lg p-6 border border-gray-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Revenue</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600">Total Revenue</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">
                   ${stats.revenue}
                 </p>
               </div>
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
@@ -156,39 +156,39 @@ function TherapistDashboardContent() {
 
         {/* Profile Summary */}
         {profile && (
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border border-gray-200 dark:border-gray-800 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white rounded-lg p-6 border border-gray-200 mb-8">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
               Profile Summary
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Specializations</p>
+                <p className="text-sm text-gray-600">Specializations</p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {profile.specializations?.length > 0 ? (
                     profile.specializations.map((spec) => (
-                      <span key={spec} className="px-2 py-1 bg-teal-100 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 text-xs rounded">
+                      <span key={spec} className="px-2 py-1 bg-teal-100 text-teal-700 text-xs rounded">
                         {spec}
                       </span>
                     ))
                   ) : (
-                    <span className="text-sm text-gray-500 dark:text-gray-500">Not set</span>
+                    <span className="text-sm text-gray-500">Not set</span>
                   )}
                 </div>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Hourly Rate</p>
-                <p className="text-lg font-semibold text-gray-900 dark:text-white mt-1">
+                <p className="text-sm text-gray-600">Hourly Rate</p>
+                <p className="text-lg font-semibold text-gray-900 mt-1">
                   ${profile.hourlyRate || 0}/hour
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Rating</p>
+                <p className="text-sm text-gray-600">Rating</p>
                 <div className="flex items-center mt-1">
-                  <span className="text-lg font-semibold text-gray-900 dark:text-white mr-2">
+                  <span className="text-lg font-semibold text-gray-900 mr-2">
                     {profile.rating?.toFixed(1) || '0.0'}
                   </span>
                   <span className="text-yellow-500">★</span>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
+                  <span className="text-sm text-gray-600 ml-2">
                     ({profile.totalReviews || 0} reviews)
                   </span>
                 </div>
@@ -198,9 +198,9 @@ function TherapistDashboardContent() {
         )}
 
         {/* Sessions List */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-800">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-bold text-gray-900">
               Recent Sessions
             </h2>
           </div>
@@ -208,33 +208,33 @@ function TherapistDashboardContent() {
             {list.error && <ErrorMessage message={String(list.error)} />}
             {sessions.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600 dark:text-gray-400">No sessions yet</p>
+                <p className="text-gray-600">No sessions yet</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {sessions.slice(0, 10).map((session) => (
-                  <div key={session._id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div key={session._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className="font-medium text-gray-900">
                         {session.userId?.fullName || 'Unknown Client'}
                       </p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <p className="text-sm text-gray-600">
                         {new Date(session.scheduledFor).toLocaleDateString()} at{' '}
                         {new Date(session.scheduledFor).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        session.status === 'confirmed' ? 'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
-                        session.status === 'pending' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                        session.status === 'completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' :
-                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400'
+                        session.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                        session.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                        session.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-700'
                       }`}>
                         {session.status}
                       </span>
                       <Link 
                         href={`/therapist-dashboard/sessions/${session._id}`}
-                        className="text-teal-600 hover:text-teal-700 dark:text-teal-400 text-sm font-medium"
+                        className="text-teal-600 hover:text-teal-700 text-sm font-medium"
                       >
                         View
                       </Link>

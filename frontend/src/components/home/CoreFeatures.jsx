@@ -12,9 +12,9 @@ const features = [
     cta: 'Learn more about sessions',
     icon: Video,
     imagePos: 'right',
-    gradient: 'from-purple-100 to-indigo-100 dark:from-purple-900/40 dark:to-indigo-900/40',
-    iconColor: 'text-purple-600 dark:text-purple-400',
-    bgIcon: 'bg-purple-100 dark:bg-purple-900/30',
+    gradient: 'from-purple-100 to-indigo-100',
+    iconColor: 'text-purple-600',
+    bgIcon: 'bg-purple-100',
   },
   {
     title: '24/7 Messaging',
@@ -23,9 +23,9 @@ const features = [
     cta: 'See how messaging works',
     icon: MessageSquare,
     imagePos: 'left',
-    gradient: 'from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40',
-    iconColor: 'text-blue-600 dark:text-blue-400',
-    bgIcon: 'bg-blue-100 dark:bg-blue-900/30',
+    gradient: 'from-blue-100 to-cyan-100',
+    iconColor: 'text-blue-600',
+    bgIcon: 'bg-blue-100',
   },
   {
     title: 'Flexible Scheduling',
@@ -34,9 +34,9 @@ const features = [
     cta: 'Check availability',
     icon: Calendar,
     imagePos: 'right',
-    gradient: 'from-teal-100 to-emerald-100 dark:from-teal-900/40 dark:to-emerald-900/40',
-    iconColor: 'text-teal-600 dark:text-teal-400',
-    bgIcon: 'bg-teal-100 dark:bg-teal-900/30',
+    gradient: 'from-teal-100 to-emerald-100',
+    iconColor: 'text-teal-600',
+    bgIcon: 'bg-teal-100',
   },
 ];
 
@@ -45,11 +45,11 @@ export default function CoreFeatures() {
     <section className="py-24 sm:py-32 bg-surface transition-colors duration-300 overflow-hidden">
       <div className="container mx-auto px-4 max-w-7xl space-y-32">
         <div className="text-center max-w-2xl mx-auto mb-16">
-           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 dark:text-primary-100 uppercase bg-primary-100 dark:bg-primary-900/30 rounded-full">
+           <span className="inline-block px-4 py-1.5 mb-4 text-xs font-semibold tracking-wider text-primary-900 uppercase bg-primary-100 rounded-full">
             Features
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground">
-            Therapy that <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400">fits you</span>
+            Therapy that <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">fits you</span>
           </h2>
           <p className="mt-6 text-lg text-text-muted">
             Modern tools and flexible options designed to make your mental health journey as seamless and effective as possible.
@@ -105,7 +105,7 @@ export default function CoreFeatures() {
               className="flex-1 w-full"
             >
               <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br ${feature.gradient} p-8 flex items-center justify-center group shadow-soft border border-border`}>
-                <div className="absolute inset-0 bg-white/30 dark:bg-black/10 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 {/* Abstract UI Representation */}
                 <div className="relative w-full max-w-sm bg-surface rounded-2xl shadow-xl p-6 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-1 border border-border/50">

@@ -50,8 +50,8 @@ export function TherapistCard({ therapist, onBook }) {
 
       {/* Info */}
       <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{data.name}</h3>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{data.qualifications}</p>
+        <h3 className="text-xl font-bold text-gray-900 mb-1">{data.name}</h3>
+        <p className="text-sm text-gray-600 mb-3">{data.qualifications}</p>
 
         {/* Rating */}
         {data.rating > 0 && (
@@ -65,17 +65,17 @@ export function TherapistCard({ therapist, onBook }) {
                 />
               ))}
             </div>
-            <span className="font-semibold text-gray-900 dark:text-white">
+            <span className="font-semibold text-gray-900">
               {data.rating.toFixed(1)}
             </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-gray-500">
               ({data.totalReviews} reviews)
             </span>
           </div>
         )}
 
         {/* Bio */}
-        <p className="text-sm text-gray-700 dark:text-gray-300 mb-4 line-clamp-3">
+        <p className="text-sm text-gray-700 mb-4 line-clamp-3">
           {data.bio || 'Experienced therapist ready to help you.'}
         </p>
 
@@ -92,10 +92,10 @@ export function TherapistCard({ therapist, onBook }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           <div>
             <span className="text-2xl font-bold text-primary-600">${data.hourlyRate}</span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">/hour</span>
+            <span className="text-sm text-gray-500">/hour</span>
           </div>
           <div className="flex gap-2">
             <Link href={`/therapists/${data.id}`}>

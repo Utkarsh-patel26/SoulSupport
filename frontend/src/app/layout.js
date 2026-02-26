@@ -1,7 +1,6 @@
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
-import { ThemeProvider } from '@/context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import { Providers } from './providers';
@@ -19,18 +18,16 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${heading.variable} ${sans.variable} bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-50 transition-colors`}>
+      <body className={`${heading.variable} ${sans.variable} bg-white text-gray-900 transition-colors`}>
         <Providers>
-          <ThemeProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <PrefetchRoutes />
-                <Header />
-                <main>{children}</main>
-                <Toaster position="top-right" />
-              </NotificationProvider>
-            </AuthProvider>
-          </ThemeProvider>
+          <AuthProvider>
+            <NotificationProvider>
+              <PrefetchRoutes />
+              <Header />
+              <main>{children}</main>
+              <Toaster position="top-right" />
+            </NotificationProvider>
+          </AuthProvider>
         </Providers>
       </body>
     </html>

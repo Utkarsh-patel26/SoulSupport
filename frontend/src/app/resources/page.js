@@ -107,20 +107,20 @@ const VIDEOS = [
 
 export default function ResourcesPage() {
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50">
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 to-cyan-50 pb-16 pt-20 dark:from-gray-900 dark:to-gray-800">
+      <section className="relative overflow-hidden bg-gradient-to-br from-teal-50 to-cyan-50 pb-16 pt-20">
         <div className="absolute inset-0 pointer-events-none" />
         <div className="container mx-auto px-4">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-teal-100 px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm dark:bg-teal-900 dark:text-teal-100">
+            <div className="inline-flex items-center gap-2 rounded-full bg-teal-100 px-4 py-2 text-sm font-semibold text-teal-700 shadow-sm">
               <span className="text-base">📚</span>
               <span>Resource Hub</span>
             </div>
-            <h1 className="mt-6 text-4xl font-bold leading-tight text-gray-900 sm:text-5xl dark:text-white">
-              Mental Health <span className="text-teal-600 dark:text-teal-400">Resources &amp; Tools</span>
+            <h1 className="mt-6 text-4xl font-bold leading-tight text-gray-900 sm:text-5xl">
+              Mental Health <span className="text-teal-600">Resources &amp; Tools</span>
             </h1>
-            <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            <p className="mt-4 text-lg text-gray-600">
               Trusted, curated content to support your mental wellbeing journey. From self-help tools to crisis support.
             </p>
           </div>
@@ -131,8 +131,8 @@ export default function ResourcesPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Explore Curated Collections</h2>
-            <p className="mt-3 text-base text-gray-600 dark:text-gray-400">Click any card to open the resource in a new tab</p>
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Explore Curated Collections</h2>
+            <p className="mt-3 text-base text-gray-600">Click any card to open the resource in a new tab</p>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
           </div>
 
@@ -140,13 +140,13 @@ export default function ResourcesPage() {
             {FEATURED_RESOURCES.map((item) => (
               <div
                 key={item.title}
-                className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-gray-900"
+                className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-2xl text-teal-700 dark:bg-teal-900 dark:text-teal-200">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-2xl text-teal-700">
                   {item.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                <p className="mt-2 flex-1 text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+                <h3 className="text-xl font-semibold text-gray-900">{item.title}</h3>
+                <p className="mt-2 flex-1 text-sm text-gray-600">{item.description}</p>
                 <div className="mt-4 space-y-2">
                   {item.links.map((link) => (
                     <a
@@ -154,7 +154,7 @@ export default function ResourcesPage() {
                       href={link.href}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-300 dark:hover:text-teal-200"
+                      className="inline-flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700"
                     >
                       {link.label} <span className="ml-1">→</span>
                     </a>
@@ -167,11 +167,11 @@ export default function ResourcesPage() {
       </section>
 
       {/* Wellness Articles */}
-      <section className="bg-gray-50 py-16 dark:bg-gray-900">
+      <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Wellness Articles</h2>
-            <p className="mt-3 text-base text-gray-600 dark:text-gray-400">
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Wellness Articles</h2>
+            <p className="mt-3 text-base text-gray-600">
               Trusted reading to deepen your understanding and toolkit
             </p>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
@@ -181,18 +181,18 @@ export default function ResourcesPage() {
             {WELLNESS_ARTICLES.map((item) => (
               <div
                 key={item.title}
-                className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-gray-800"
+                className="flex h-full flex-col rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-2xl text-teal-700 dark:bg-teal-900 dark:text-teal-200">
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-2xl text-teal-700">
                   {item.icon}
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                <p className="mt-2 flex-1 text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                <p className="mt-2 flex-1 text-sm text-gray-600">{item.description}</p>
                 <a
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-300 dark:hover:text-teal-200"
+                  className="mt-4 inline-flex items-center text-sm font-semibold text-teal-600 hover:text-teal-700"
                 >
                   Read Article <span className="ml-1">→</span>
                 </a>
@@ -206,8 +206,8 @@ export default function ResourcesPage() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Guided Meditation Audios</h2>
-            <p className="mt-3 text-base text-gray-600 dark:text-gray-400">
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Guided Meditation Audios</h2>
+            <p className="mt-3 text-base text-gray-600">
               Press play to start a session. Curated playlists from Spotify.
             </p>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
@@ -217,10 +217,10 @@ export default function ResourcesPage() {
             {MEDITATIONS.map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-gray-900"
+                className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                <p className="mt-2 text-sm text-gray-600">{item.description}</p>
                 <div className="mt-4 overflow-hidden rounded-xl">
                   <iframe
                     src={item.embed}
@@ -232,8 +232,8 @@ export default function ResourcesPage() {
                     title={item.title}
                   />
                 </div>
-                <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                  If the player doesn't load, <a className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-300" href={item.link} target="_blank" rel="noreferrer">open on Spotify</a>.
+                <p className="mt-3 text-xs text-gray-500">
+                  If the player doesn't load, <a className="font-semibold text-teal-600 hover:text-teal-700" href={item.link} target="_blank" rel="noreferrer">open on Spotify</a>.
                 </p>
               </div>
             ))}
@@ -242,11 +242,11 @@ export default function ResourcesPage() {
       </section>
 
       {/* Stress Management Videos */}
-      <section className="bg-gray-50 py-16 dark:bg-gray-900">
+      <section className="bg-gray-50 py-16">
         <div className="container mx-auto px-4">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl">Stress Management Videos</h2>
-            <p className="mt-3 text-base text-gray-600 dark:text-gray-400">
+            <h2 className="text-3xl font-bold text-gray-900 sm:text-4xl">Stress Management Videos</h2>
+            <p className="mt-3 text-base text-gray-600">
               Short, effective practices you can try right now
             </p>
             <div className="mx-auto mt-4 h-1 w-16 rounded-full bg-teal-500" />
@@ -256,10 +256,10 @@ export default function ResourcesPage() {
             {VIDEOS.map((item) => (
               <div
                 key={item.title}
-                className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-gray-800"
+                className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{item.title}</h3>
-                <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{item.description}</p>
+                <h3 className="text-lg font-semibold text-gray-900">{item.title}</h3>
+                <p className="mt-2 text-sm text-gray-600">{item.description}</p>
                 <div className="mt-4 overflow-hidden rounded-xl">
                   <iframe
                     src={item.embed}
@@ -270,8 +270,8 @@ export default function ResourcesPage() {
                     className="aspect-video w-full border-0"
                   />
                 </div>
-                <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-                  If the video doesn't load, <a className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-300" href={item.link} target="_blank" rel="noreferrer">watch on YouTube</a>.
+                <p className="mt-3 text-xs text-gray-500">
+                  If the video doesn't load, <a className="font-semibold text-teal-600 hover:text-teal-700" href={item.link} target="_blank" rel="noreferrer">watch on YouTube</a>.
                 </p>
               </div>
             ))}

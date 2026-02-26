@@ -17,7 +17,7 @@ export default function DashboardContent() {
   const completedSessions = sessionList.filter((s) => s.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-50">
+    <div className="min-h-screen bg-white text-gray-900">
       {/* Welcome Banner */}
       <section className="relative overflow-hidden bg-gradient-to-br from-teal-600 to-cyan-600 pb-14 pt-16 text-white">
         <div className="container mx-auto px-4">
@@ -55,14 +55,14 @@ export default function DashboardContent() {
               color: 'from-amber-100 to-orange-100',
               iconColor: 'text-amber-600',
             }].map((item) => (
-              <Card key={item.label} className="p-6 shadow-sm ring-1 ring-gray-100 dark:ring-gray-800">
+              <Card key={item.label} className="p-6 shadow-sm ring-1 ring-gray-100">
                 <div className="flex items-center gap-4">
-                  <div className={`rounded-xl bg-gradient-to-br ${item.color} p-3 dark:bg-white/5`}>
-                    <item.Icon className={`h-6 w-6 ${item.iconColor} dark:text-white`} />
+                  <div className={`rounded-xl bg-gradient-to-br ${item.color} p-3`}>
+                    <item.Icon className={`h-6 w-6 ${item.iconColor}`} />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{item.label}</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{item.value}</p>
+                    <p className="text-sm text-gray-600">{item.label}</p>
+                    <p className="text-2xl font-bold text-gray-900">{item.value}</p>
                   </div>
                 </div>
               </Card>
@@ -70,8 +70,8 @@ export default function DashboardContent() {
           </div>
 
           {/* Quick Actions */}
-          <Card className="mb-8 p-8 shadow-sm ring-1 ring-gray-100 dark:ring-gray-800">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Quick Actions</h2>
+          <Card className="mb-8 p-8 shadow-sm ring-1 ring-gray-100">
+            <h2 className="mb-6 text-2xl font-bold text-gray-900">Quick Actions</h2>
             <div className="grid gap-4 md:grid-cols-3">
               <Link href="/therapists" prefetch={true}>
                 <Button variant="outline" className="w-full">
@@ -92,9 +92,9 @@ export default function DashboardContent() {
           </Card>
 
           {/* Upcoming Sessions */}
-          <Card className="p-8 shadow-sm ring-1 ring-gray-100 dark:ring-gray-800">
+          <Card className="p-8 shadow-sm ring-1 ring-gray-100">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Upcoming Sessions</h2>
+              <h2 className="text-2xl font-bold text-gray-900">Upcoming Sessions</h2>
               <Link href="/dashboard/sessions">
                 <Button variant="ghost" size="sm">
                   View All
@@ -108,7 +108,7 @@ export default function DashboardContent() {
               </div>
             ) : upcomingSessions === 0 ? (
               <div className="py-8 text-center">
-                <p className="mb-4 text-gray-600 dark:text-gray-400">No upcoming sessions</p>
+                <p className="mb-4 text-gray-600">No upcoming sessions</p>
                 <Link href="/therapists">
                   <Button>Schedule a session</Button>
                 </Link>
@@ -119,12 +119,12 @@ export default function DashboardContent() {
                   .filter((s) => new Date(s.scheduledFor) > new Date())
                   .slice(0, 3)
                   .map((session) => (
-                    <div key={session._id} className="flex items-center justify-between border-t border-gray-100 py-3 dark:border-gray-800">
+                    <div key={session._id} className="flex items-center justify-between border-t border-gray-100 py-3">
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">
+                        <p className="font-medium text-gray-900">
                           Session with {session.therapistId?.user?.fullName}
                         </p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm text-gray-600">
                           {new Date(session.scheduledFor).toLocaleDateString()} at{' '}
                           {new Date(session.scheduledFor).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </p>

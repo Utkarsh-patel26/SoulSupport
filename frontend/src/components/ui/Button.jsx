@@ -7,9 +7,9 @@ const buttonVariants = {
   variants: {
     variant: {
       primary: 'bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-md hover:shadow-lg transition-all',
-      secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500 shadow-sm transition-all dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600',
-      outline: 'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500 dark:border-primary-400 dark:text-primary-400 dark:hover:bg-gray-700',
-      ghost: 'text-charcoal hover:bg-gray-100 transition-colors dark:text-gray-300 dark:hover:bg-gray-700',
+      secondary: 'bg-gray-200 text-gray-900 hover:bg-gray-300 focus:ring-gray-500 shadow-sm transition-all',
+      outline: 'border-2 border-primary-600 text-primary-600 hover:bg-primary-50 focus:ring-primary-500',
+      ghost: 'text-charcoal hover:bg-gray-100 transition-colors',
       danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-md hover:shadow-lg transition-all',
     },
     size: {

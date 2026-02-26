@@ -32,9 +32,9 @@ export default function TherapistsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero */}
-      <section className="bg-teal-600 dark:bg-teal-900 text-white py-16">
+      <section className="bg-teal-600 text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl font-bold mb-4">Find Your Therapist</h1>
           <p className="text-xl text-teal-50">
@@ -53,18 +53,18 @@ export default function TherapistsPage() {
           )}
 
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 text-center">
-              <p className="text-red-800 dark:text-red-200">{error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+              <p className="text-red-800">{error}</p>
             </div>
           )}
 
           {!loading && !error && therapists.length === 0 && (
-            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-12 text-center">
+            <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
               <div className="text-6xl mb-4">👨‍⚕️</div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
                 No Therapists Available Yet
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
+              <p className="text-gray-600 mb-6">
                 Be the first to join our network as a therapist!
               </p>
               <Link
@@ -81,10 +81,10 @@ export default function TherapistsPage() {
               {therapists.map((therapist) => (
                 <div
                   key={therapist._id}
-                  className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 hover:shadow-lg transition-shadow"
+                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/20 rounded-full flex items-center justify-center text-2xl">
+                    <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center text-2xl">
                       {therapist.user?.avatarUrl ? (
                         <img
                           src={therapist.user.avatarUrl}
@@ -96,10 +96,10 @@ export default function TherapistsPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-1">
                         {therapist.user?.fullName || 'Therapist'}
                       </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                         <span>{therapist.rating?.toFixed(1) || '0.0'} ★</span>
                         <span>•</span>
                         <span>${therapist.hourlyRate || 0}/hr</span>
@@ -112,13 +112,13 @@ export default function TherapistsPage() {
                       {therapist.specializations.slice(0, 3).map((spec) => (
                         <span
                           key={spec}
-                          className="px-2 py-1 bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300 text-xs rounded"
+                          className="px-2 py-1 bg-teal-50 text-teal-700 text-xs rounded"
                         >
                           {spec}
                         </span>
                       ))}
                       {therapist.specializations.length > 3 && (
-                        <span className="px-2 py-1 text-gray-600 dark:text-gray-400 text-xs">
+                        <span className="px-2 py-1 text-gray-600 text-xs">
                           +{therapist.specializations.length - 3} more
                         </span>
                       )}
@@ -126,7 +126,7 @@ export default function TherapistsPage() {
                   )}
 
                   {therapist.user?.bio && (
-                    <p className="mt-3 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                    <p className="mt-3 text-sm text-gray-600 line-clamp-2">
                       {therapist.user.bio}
                     </p>
                   )}
@@ -146,7 +146,7 @@ export default function TherapistsPage() {
 
           {!loading && !error && therapists.length > 0 && (
             <div className="mt-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-600">
                 Showing {therapists.length} therapist{therapists.length !== 1 ? 's' : ''}
               </p>
             </div>
