@@ -1,13 +1,10 @@
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { getDefaultAvatarPath } from '@/lib/avatar';
 
 export function Avatar({ src, name = '', className, size = 40 }) {
-  const initials = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
+  const fallbackSrc = getDefaultAvatarPath(name);
+  const resolvedSrc = src || fallbackSrc;
 
   return (
     <div
@@ -17,11 +14,7 @@ export function Avatar({ src, name = '', className, size = 40 }) {
       )}
       style={{ width: size, height: size }}
     >
-      {src ? (
-        <Image src={src} alt={name || 'avatar'} width={size} height={size} className="object-cover" />
-      ) : (
-        <span className="text-sm font-semibold">{initials || 'SS'}</span>
-      )}
+      <Image src={resolvedSrc} alt={name || 'avatar'} width={size} height={size} className="object-cover" />
     </div>
   );
 }

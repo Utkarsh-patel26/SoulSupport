@@ -5,6 +5,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { Avatar } from '@/components/ui/Avatar';
 import toast from 'react-hot-toast';
 
 export default function TherapistsPage() {
@@ -84,17 +85,11 @@ export default function TherapistsPage() {
                   className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 bg-primary-soft rounded-full flex items-center justify-center text-2xl">
-                      {therapist.user?.avatarUrl ? (
-                        <img
-                          src={therapist.user.avatarUrl}
-                          alt={therapist.user?.fullName}
-                          className="w-full h-full rounded-full object-cover"
-                        />
-                      ) : (
-                        '👤'
-                      )}
-                    </div>
+                    <Avatar
+                      src={therapist.user?.avatarUrl}
+                      name={therapist.user?.fullName || 'Therapist'}
+                      size={64}
+                    />
                     <div className="flex-1">
                       <h3 className="text-lg font-bold text-gray-900 mb-1">
                         {therapist.user?.fullName || 'Therapist'}

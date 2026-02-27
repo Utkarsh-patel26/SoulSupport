@@ -64,6 +64,18 @@ export default function HomePage() {
               </Link>
             </div>
 
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-12">
+              <span className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/90 text-sm font-medium backdrop-blur-sm">
+                HIPAA-Compliant Care
+              </span>
+              <span className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/90 text-sm font-medium backdrop-blur-sm">
+                Verified Therapists
+              </span>
+              <span className="px-4 py-2 rounded-full bg-white/10 border border-white/20 text-white/90 text-sm font-medium backdrop-blur-sm">
+                Personalized Matching
+              </span>
+            </div>
+
             {/* Stats Grid - Cinematic Style */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
               <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
@@ -83,13 +95,6 @@ export default function HomePage() {
                 <p className="text-gray-200 text-sm font-medium">Support Available</p>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Scroll Down Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 animate-bounce">
-          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex items-start justify-center p-2">
-            <div className="w-1.5 h-3 bg-white/70 rounded-full animate-pulse" />
           </div>
         </div>
       </section>

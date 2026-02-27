@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const emailService = require('../services/email.service');
 const crypto = require('crypto');
+const { getDefaultAvatarPath } = require('../utils/defaultAvatar');
 
 /**
  * @desc    Register a new user
@@ -13,6 +14,7 @@ const crypto = require('crypto');
  */
 exports.register = asyncHandler(async (req, res) => {
   const { email, password, fullName, userType, bio } = req.body;
+  const avatarUrl = getDefaultAvatarPath(email);
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
@@ -25,6 +27,7 @@ exports.register = asyncHandler(async (req, res) => {
     fullName,
     userType,
     bio,
+    avatarUrl,
   });
 
   if (userType === 'therapist') {
@@ -33,6 +36,7 @@ exports.register = asyncHandler(async (req, res) => {
       qualifications: 'To be completed',
       hourlyRate: 0,
       specializations: [],
+      photoUrl: avatarUrl,
     });
   }
 

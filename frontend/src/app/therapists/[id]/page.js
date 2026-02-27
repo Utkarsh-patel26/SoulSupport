@@ -48,7 +48,7 @@ export default function TherapistPage() {
       {therapist && (
         <div className="space-y-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-soft">
           <div className="flex items-center gap-4">
-            <Avatar src={therapist.photoUrl} name={therapist.fullName} size={72} />
+            <Avatar src={therapist.photoUrl || therapist.user?.avatarUrl} name={therapist.fullName || therapist.user?.fullName} size={72} />
             <div className="space-y-1">
               <p className="font-heading text-2xl font-bold text-charcoal">{therapist.fullName}</p>
               <p className="text-sm text-slate-600">{therapist.specialization || 'Therapist'}</p>

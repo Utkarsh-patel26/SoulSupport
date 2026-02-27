@@ -4,13 +4,15 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Star, CheckCircle } from 'lucide-react';
+import { getDefaultAvatarPath } from '@/lib/avatar';
 
 function normalize(therapist) {
   const user = therapist?.user || {};
+  const name = therapist?.fullName || user.fullName || 'Therapist';
   return {
     id: therapist?._id || therapist?.id,
-    name: therapist?.fullName || user.fullName || 'Therapist',
-    photo: therapist?.photoUrl || user.avatarUrl,
+    name,
+    photo: therapist?.photoUrl || user.avatarUrl || getDefaultAvatarPath(name),
     specializations: therapist?.specializations || therapist?.tags || [],
     bio: therapist?.bio || user.bio,
     rating: therapist?.rating || 0,
@@ -28,18 +30,12 @@ export function TherapistCard({ therapist, onBook }) {
     <Card className="overflow-hidden hover:shadow-xl transition-shadow">
       {/* Photo */}
       <div className="relative h-48 bg-gradient-to-br from-primary-100 to-primary-200">
-        {data.photo ? (
-          <Image
-            src={data.photo}
-            alt={data.name}
-            fill
-            className="object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <span className="text-6xl text-primary-600">{data.name[0]}</span>
-          </div>
-        )}
+        <Image
+          src={data.photo}
+          alt={data.name}
+          fill
+          className="object-cover"
+        />
         {data.isVerified && (
           <Badge className="absolute top-3 right-3 bg-primary-600 text-white">
             <CheckCircle className="w-3 h-3 mr-1" />

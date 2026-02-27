@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Video, MessageSquare, Calendar, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -15,6 +16,7 @@ const features = [
     gradient: 'from-lavender-50 to-soft-blue-50',
     iconColor: 'text-lavender',
     bgIcon: 'bg-lavender-100',
+    image: '/images/home/feature-video.svg',
   },
   {
     title: '24/7 Messaging',
@@ -26,6 +28,7 @@ const features = [
     gradient: 'from-soft-blue-50 to-primary-50',
     iconColor: 'text-soft-blue',
     bgIcon: 'bg-soft-blue-100',
+    image: '/images/home/feature-messaging.svg',
   },
   {
     title: 'Flexible Scheduling',
@@ -37,6 +40,7 @@ const features = [
     gradient: 'from-sage-50 to-primary-50',
     iconColor: 'text-sage',
     bgIcon: 'bg-sage-100',
+    image: '/images/home/feature-scheduling.svg',
   },
 ];
 
@@ -104,27 +108,17 @@ export default function CoreFeatures() {
               transition={{ duration: 0.6 }}
               className="flex-1 w-full"
             >
-              <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br ${feature.gradient} p-8 flex items-center justify-center group shadow-soft border border-border`}>
-                <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Abstract UI Representation */}
-                <div className="relative w-full max-w-sm bg-surface rounded-2xl shadow-xl p-6 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-1 border border-border/50">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-10 h-10 rounded-full bg-surface-alt animate-pulse" />
-                    <div className="space-y-2 flex-1">
-                      <div className="h-2 w-1/3 bg-surface-alt rounded-full" />
-                      <div className="h-2 w-1/2 bg-surface-alt rounded-full" />
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="h-16 w-full bg-surface-alt rounded-xl" />
-                    <div className="h-16 w-full bg-surface-alt rounded-xl opacity-75" />
-                    <div className="h-16 w-full bg-surface-alt rounded-xl opacity-50" />
-                  </div>
-                  
-                  <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-surface rounded-xl shadow-lg border border-border flex items-center justify-center">
-                    <feature.icon size={24} className={feature.iconColor} />
-                  </div>
+              <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br ${feature.gradient} group shadow-soft border border-border`}>
+                <Image
+                  src={feature.image}
+                  alt={`${feature.title} illustration`}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
+                <div className="absolute bottom-4 right-4 w-14 h-14 bg-white/90 rounded-2xl shadow-lg border border-border flex items-center justify-center backdrop-blur-sm">
+                  <feature.icon size={24} className={feature.iconColor} />
                 </div>
               </div>
             </motion.div>

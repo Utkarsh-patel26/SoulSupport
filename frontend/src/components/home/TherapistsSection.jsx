@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 import { Star, Shield, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -12,7 +13,7 @@ const therapists = [
     focus: ['Anxiety', 'Depression', 'Trauma'],
     rating: '4.9',
     reviews: 120,
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=400',
+    image: '/images/home/therapist-1.svg',
     available: true,
   },
   {
@@ -22,7 +23,7 @@ const therapists = [
     focus: ['Relationships', 'Stress', 'Life Transitions'],
     rating: '5.0',
     reviews: 85,
-    image: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=400&h=400',
+    image: '/images/home/therapist-2.svg',
     available: true,
   },
   {
@@ -32,7 +33,7 @@ const therapists = [
     focus: ['Couples', 'Family', 'Communication'],
     rating: '4.8',
     reviews: 95,
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400&h=400',
+    image: '/images/home/therapist-3.svg',
     available: false,
   },
   {
@@ -42,7 +43,7 @@ const therapists = [
     focus: ['Career', 'Burnout', 'Mindfulness'],
     rating: '4.9',
     reviews: 72,
-    image: 'https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?auto=format&fit=crop&q=80&w=400&h=400',
+    image: '/images/home/therapist-4.svg',
     available: true,
   },
 ];
@@ -86,10 +87,12 @@ export default function TherapistsSection() {
               className="flex-shrink-0 w-80 sm:w-auto snap-center mr-4 sm:mr-0 group relative bg-surface rounded-3xl p-4 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border border-border"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4 bg-surface-alt">
-                <img 
-                  src={therapist.image} 
+                <Image
+                  src={therapist.image}
                   alt={therapist.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  fill
+                  sizes="(max-width: 640px) 320px, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {therapist.available && (
                    <div className="absolute top-3 left-3 bg-sage/90 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
