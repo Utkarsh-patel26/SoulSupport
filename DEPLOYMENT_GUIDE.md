@@ -368,29 +368,23 @@ sudo systemctl start mongod
 ## Performance Optimization
 
 1. **Enable Gzip Compression:**
-
    - Already configured in nginx.conf
 
 2. **Database Indexing:**
-
    - Indexes created automatically on startup
    - Monitor query performance in MongoDB Atlas
 
 3. **Caching:**
-
    - Redis configured in docker-compose.yml
    - React Query handles client-side caching
 
 4. **Image Optimization:**
-
    - Using Cloudinary for image delivery
    - Next.js Image component for automatic optimization
 
 5. **Code Splitting:**
    - Next.js automatically code-splits pages
    - Configure `next/dynamic` for large components
-
-## CI/CD Pipeline
 
 GitHub Actions workflow configured in `.github/workflows/ci-cd.yml`
 

@@ -86,21 +86,20 @@ else {
     Write-Host "[OK] Backend .env file exists" -ForegroundColor Green
 }
 
-# Clean and install backend dependencies
-Write-Host "Cleaning backend node_modules..." -ForegroundColor Yellow
-Remove-DirectoryWithRetry "node_modules"
-if (Test-Path package-lock.json) {
-    Remove-Item -Force package-lock.json -EA SilentlyContinue
-}
-
-Write-Host "Installing backend dependencies..." -ForegroundColor Yellow
-npm install
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "[OK] Backend dependencies installed" -ForegroundColor Green
+# Install backend dependencies only if missing
+if (-not (Test-Path node_modules)) {
+    Write-Host "Installing backend dependencies (first run)..." -ForegroundColor Yellow
+    npm install
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[OK] Backend dependencies installed" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[ERROR] Failed to install backend dependencies" -ForegroundColor Red
+        exit 1
+    }
 }
 else {
-    Write-Host "[ERROR] Failed to install backend dependencies" -ForegroundColor Red
-    exit 1
+    Write-Host "[OK] Backend dependencies already installed (skipping install)" -ForegroundColor Green
 }
 
 Set-Location ..
@@ -130,22 +129,20 @@ else {
     Write-Host "[OK] Frontend .env.local file exists" -ForegroundColor Green
 }
 
-# Clean and install frontend dependencies
-Write-Host "Cleaning frontend node_modules and .next cache..." -ForegroundColor Yellow
-Remove-DirectoryWithRetry "node_modules"
-Remove-DirectoryWithRetry ".next"
-if (Test-Path package-lock.json) {
-    Remove-Item -Force package-lock.json -EA SilentlyContinue
-}
-
-Write-Host "Installing frontend dependencies..." -ForegroundColor Yellow
-npm install
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "[OK] Frontend dependencies installed" -ForegroundColor Green
+# Install frontend dependencies only if missing
+if (-not (Test-Path node_modules)) {
+    Write-Host "Installing frontend dependencies (first run)..." -ForegroundColor Yellow
+    npm install
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[OK] Frontend dependencies installed" -ForegroundColor Green
+    }
+    else {
+        Write-Host "[ERROR] Failed to install frontend dependencies" -ForegroundColor Red
+        exit 1
+    }
 }
 else {
-    Write-Host "[ERROR] Failed to install frontend dependencies" -ForegroundColor Red
-    exit 1
+    Write-Host "[OK] Frontend dependencies already installed (skipping install)" -ForegroundColor Green
 }
 
 Set-Location ..
