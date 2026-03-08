@@ -197,11 +197,11 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
 
       onClose?.();
     } catch (error) {
-      setAvailableSlots((prev) =>
-        prev.map((slot) =>
-          slot.hour === selectedTime.hour ? { ...slot, status: 'available', isBooked: false } : slot
-        )
-      );
+      // Always reconcile with server state on failure so conflicting slots remain disabled.
+      if (selectedDate) {
+        await fetchAvailableSlots(selectedDate);
+      }
+      setSelectedTime(null);
       toast.error(String(error || 'Failed to reserve slot'));
     } finally {
       setLoading(false);

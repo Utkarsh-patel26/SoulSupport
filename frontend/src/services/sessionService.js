@@ -1,5 +1,12 @@
 import api from '@/lib/api';
 
+function toLocalDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export const sessionService = {
   async getSessions(params = {}) {
     const response = await api.get('/sessions', { params });
@@ -17,7 +24,8 @@ export const sessionService = {
   },
 
   async getAvailableSlots(therapistId, date) {
-    const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
+    const dateStr =
+      typeof date === 'string' ? date : toLocalDateString(date instanceof Date ? date : new Date(date));
     const response = await api.get(`/sessions/available-slots/${therapistId}`, {
       params: { date: dateStr },
     });

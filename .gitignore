@@ -30,3 +30,14 @@ coverage/
 
 # Include all .env files for team development
 # Note: Ensure no sensitive production credentials are in these files!
+
+# Local environment secrets (keep examples committed)
+.env
+.env.local
+.env.*.local
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+backend/.env
+backend/.env.local
+backend/.env.*.local

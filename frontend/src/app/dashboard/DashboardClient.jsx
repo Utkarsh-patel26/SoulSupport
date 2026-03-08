@@ -89,6 +89,9 @@ export default function DashboardContent() {
                 <Link href="/forum" className="flex-1">
                   <Button size="sm" variant="outline" className="w-full justify-center">Community</Button>
                 </Link>
+                <Link href="/dashboard/assistant" className="flex-1">
+                  <Button size="sm" variant="outline" className="w-full justify-center">AI Assistant</Button>
+                </Link>
               </div>
             </div>
           </CardContent>

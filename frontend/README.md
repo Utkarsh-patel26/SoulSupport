@@ -74,7 +74,58 @@ See `.env.local.example` for required environment variables:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 NEXT_PUBLIC_APP_NAME=SoulSupport
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+MONGODB_URI=mongodb://127.0.0.1:27017/soulsupport
+JWT_SECRET=replace-with-backend-jwt-secret
+OPENROUTER_API_KEY=sk-or-v1-xxxxxxxx
 ```
+
+## AI Dashboard Assistant
+
+The project includes a user-only AI assistant available at `/dashboard/assistant`.
+
+### What it does
+
+- Provides supportive mental wellness guidance (non-diagnostic)
+- Answers platform usage questions (booking, cancelling, session flow)
+- Uses user-specific context (upcoming/cancelled/completed sessions + recent forum activity)
+- Supports smart intents like:
+  - `Show my upcoming appointments`
+  - `Who is my therapist tomorrow?`
+  - `How do I cancel my session?`
+  - `Give me stress relief tips`
+
+### Backend route
+
+- Path: `src/app/api/chat/route.js`
+- Methods:
+  - `GET /api/chat` - returns last 15 messages for authenticated user
+  - `POST /api/chat` - sends message, injects context, streams assistant response
+- Model: `stepfun/step-3.5-flash:free` via OpenRouter
+
+### Security guarantees
+
+- Chat route validates `Authorization: Bearer <token>` server-side
+- JWT is verified with `JWT_SECRET`
+- Access is restricted to users with `userType === 'user'`
+- Chat history is isolated by `userId`
+- OpenRouter API key is server-only and never exposed to the client bundle
+
+### Chat storage
+
+- Collection: `chat_messages`
+- Schema fields:
+  - `userId`
+  - `role` (`user` or `assistant`)
+  - `message`
+  - `timestamp`
+
+### Error handling
+
+- Returns `401` for missing/invalid auth
+- Returns `403` for therapist/admin access attempts
+- Returns `400` for invalid message input
+- Returns `502` for upstream provider errors
 
 ## Key Features Implementation
 
