@@ -23,6 +23,16 @@ const commentSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  likesCount: {
+    type: Number,
+    default: 0,
+  },
+  likedBy: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  ],
 });
 
 const forumPostSchema = new mongoose.Schema(

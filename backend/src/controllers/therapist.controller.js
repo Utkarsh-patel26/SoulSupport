@@ -129,7 +129,8 @@ exports.getMyProfile = asyncHandler(async (req, res) => {
  * @access  Private (Therapist only)
  */
 exports.updateProfile = asyncHandler(async (req, res) => {
-  const therapist = await findTherapistByIdOrUser(req.params.id);
+  const targetId = req.params.id || req.user.id;
+  const therapist = await findTherapistByIdOrUser(targetId);
 
   if (!therapist) {
     throw new ApiError(404, 'Therapist profile not found');

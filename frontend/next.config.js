@@ -5,7 +5,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const nextConfig = {
   images: {
-    domains: ['res.cloudinary.com', 'localhost'],
+    domains: ['res.cloudinary.com', 'localhost', 'picsum.photos', 'api.dicebear.com'],
     formats: ['image/avif', 'image/webp'],
   },
   reactStrictMode: true,

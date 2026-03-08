@@ -232,6 +232,64 @@ exports.deleteComment = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Like a comment
+ * @route   POST /api/forum/posts/:postId/comments/:commentId/like
+ * @access  Private
+ */
+exports.likeComment = asyncHandler(async (req, res) => {
+  const { postId, commentId } = req.params;
+  const userId = req.user.id.toString();
+
+  const post = await ForumPost.findById(postId);
+  if (!post) throw new ApiError(404, 'Post not found');
+
+  const comment = post.comments.id(commentId);
+  if (!comment) throw new ApiError(404, 'Comment not found');
+
+  const alreadyLiked = comment.likedBy.some(
+    (id) => id.toString() === userId
+  );
+  if (alreadyLiked) {
+    throw new ApiError(400, 'Comment already liked');
+  }
+
+  comment.likedBy.push(req.user.id);
+  comment.likesCount = (comment.likesCount || 0) + 1;
+  await post.save();
+
+  res.json(new ApiResponse(200, { comment }, 'Comment liked successfully'));
+});
+
+/**
+ * @desc    Unlike a comment
+ * @route   DELETE /api/forum/posts/:postId/comments/:commentId/like
+ * @access  Private
+ */
+exports.unlikeComment = asyncHandler(async (req, res) => {
+  const { postId, commentId } = req.params;
+  const userId = req.user.id.toString();
+
+  const post = await ForumPost.findById(postId);
+  if (!post) throw new ApiError(404, 'Post not found');
+
+  const comment = post.comments.id(commentId);
+  if (!comment) throw new ApiError(404, 'Comment not found');
+
+  const alreadyLiked = comment.likedBy.some(
+    (id) => id.toString() === userId
+  );
+  if (!alreadyLiked) {
+    throw new ApiError(400, 'Comment not liked yet');
+  }
+
+  comment.likedBy = comment.likedBy.filter((id) => id.toString() !== userId);
+  comment.likesCount = Math.max(0, (comment.likesCount || 0) - 1);
+  await post.save();
+
+  res.json(new ApiResponse(200, { comment }, 'Comment unliked successfully'));
+});
+
+/**
  * @desc    Delete own post
  * @route   DELETE /api/forum/posts/:id
  * @access  Private

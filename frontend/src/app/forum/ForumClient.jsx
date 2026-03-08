@@ -9,6 +9,7 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/ui/Button';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { Modal } from '@/components/ui/Modal';
+import { useAuth } from '@/hooks/useAuth';
 
 const CATEGORIES = [
   { value: 'all', label: 'All Posts' },
@@ -21,6 +22,7 @@ const CATEGORIES = [
 ];
 
 export default function ForumContent() {
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const {
@@ -29,6 +31,8 @@ export default function ForumContent() {
     likePost,
     deletePost,
     addComment,
+    deleteComment,
+    likeComment,
   } = useForum({
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
   });
@@ -37,7 +41,12 @@ export default function ForumContent() {
 
   const handleLike = async (postId) => {
     try {
-      await likePost.mutateAsync(postId);
+      const currentPost = postList.find((post) => post._id === postId);
+      const hasLiked = Array.isArray(currentPost?.likedBy)
+        ? currentPost.likedBy.some((id) => String(id) === String(user?._id))
+        : !!currentPost?.likedByCurrentUser;
+
+      await likePost.mutateAsync({ postId, liked: hasLiked, userId: user?._id });
     } catch (err) {
       console.error('Like failed:', err);
     }
@@ -58,6 +67,27 @@ export default function ForumContent() {
       await addComment.mutateAsync({ postId, data: commentData });
     } catch (err) {
       console.error('Comment failed:', err);
+    }
+  };
+
+  const handleCommentLike = async (postId, commentId, hasLiked) => {
+    try {
+      await likeComment.mutateAsync({
+        postId,
+        commentId,
+        liked: hasLiked,
+        userId: user?._id,
+      });
+    } catch (err) {
+      console.error('Comment like failed:', err);
+    }
+  };
+
+  const handleDeleteComment = async (postId, commentId) => {
+    try {
+      await deleteComment.mutateAsync({ postId, commentId });
+    } catch (err) {
+      console.error('Comment delete failed:', err);
     }
   };
 
@@ -144,9 +174,12 @@ export default function ForumContent() {
                   <PostCard
                     key={post._id}
                     post={post}
+                    currentUserId={user?._id}
                     onLike={handleLike}
                     onDelete={handleDelete}
                     onComment={handleAddComment}
+                    onCommentLike={handleCommentLike}
+                    onDeleteComment={handleDeleteComment}
                   />
                 ))}
               </div>

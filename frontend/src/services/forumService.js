@@ -50,4 +50,14 @@ export const forumService = {
     const response = await api.delete(`/forum/posts/${postId}/comments/${commentId}`);
     return response.data;
   },
+
+  async likeComment(postId, commentId) {
+    const response = await api.post(`/forum/posts/${postId}/comments/${commentId}/like`);
+    return response.data;
+  },
+
+  async unlikeComment(postId, commentId) {
+    const response = await api.delete(`/forum/posts/${postId}/comments/${commentId}/like`);
+    return response.data;
+  },
 };

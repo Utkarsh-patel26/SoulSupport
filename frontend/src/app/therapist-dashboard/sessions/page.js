@@ -8,7 +8,13 @@ import { AnimatedSection } from '@/components/common/AnimatedSection';
 import toast from 'react-hot-toast';
 
 export default function TherapistSessionsPage() {
-  const { list } = useSessions({ role: 'therapist' });
+  const { list } = useSessions(
+    { role: 'therapist' },
+    {
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    }
+  );
   const { updateStatus } = useSessionMutations();
   const sessions = list.data?.data?.sessions || list.data?.sessions || [];
 

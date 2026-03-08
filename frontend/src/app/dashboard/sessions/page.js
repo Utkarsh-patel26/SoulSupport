@@ -7,7 +7,13 @@ import { ErrorMessage } from '@/components/common/ErrorMessage';
 import toast from 'react-hot-toast';
 
 export default function DashboardSessionsPage() {
-  const { list } = useSessions({});
+  const { list } = useSessions(
+    {},
+    {
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    }
+  );
   const { cancelSession } = useSessionMutations();
   const sessions = list.data?.data?.sessions || list.data?.sessions || [];
 

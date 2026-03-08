@@ -9,7 +9,16 @@ import { Badge } from '@/components/ui/Badge';
 import Link from 'next/link';
 import { Heart, MessageCircle, Trash2 } from 'lucide-react';
 
-export function PostCard({ post, onLike, onDelete, onComment }) {
+export function PostCard({
+  post,
+  onLike,
+  onDelete,
+  onComment,
+  onCommentLike,
+  onDeleteComment,
+  currentUserId,
+  showActions = true,
+}) {
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [isAnonymous, setIsAnonymous] = useState(true);
@@ -21,6 +30,11 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
       console.error('Like failed:', err);
     }
   };
+
+  const hasLiked = Array.isArray(post.likedBy)
+    ? post.likedBy.some((id) => String(id) === String(currentUserId))
+    : !!post.likedByCurrentUser;
+  const canDeletePost = showActions && onDelete && currentUserId && String(post.userId) === String(currentUserId);
 
   const handleAddComment = async (e) => {
     e.preventDefault();
@@ -59,7 +73,7 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
             </div>
           </div>
         </div>
-        {onDelete && (
+        {canDeletePost && (
           <Button variant="ghost" size="sm" onClick={() => onDelete(post._id)}>
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -77,11 +91,11 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
           variant="ghost"
           size="sm"
           onClick={handleLike}
-          className={post.likedByCurrentUser ? 'text-red-500' : ''}
+          className={hasLiked ? 'text-red-500' : ''}
         >
           <Heart
             className="w-4 h-4 mr-2"
-            fill={post.likedByCurrentUser ? 'currentColor' : 'none'}
+            fill={hasLiked ? 'currentColor' : 'none'}
           />
           <span>{post.likesCount || 'Like'}</span>
         </Button>
@@ -147,6 +161,45 @@ export function PostCard({ post, onLike, onDelete, onComment }) {
                     </span>
                   </div>
                   <p className="text-sm text-slate-700">{comment.content}</p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={
+                        Array.isArray(comment.likedBy) &&
+                        comment.likedBy.some((id) => String(id) === String(currentUserId))
+                          ? 'text-red-500'
+                          : ''
+                      }
+                      onClick={() => {
+                        const hasLiked = Array.isArray(comment.likedBy)
+                          ? comment.likedBy.some((id) => String(id) === String(currentUserId))
+                          : !!comment.likedByCurrentUser;
+                        onCommentLike?.(post._id, comment._id, hasLiked);
+                      }}
+                    >
+                      <Heart
+                        className="w-4 h-4 mr-2"
+                        fill={
+                          Array.isArray(comment.likedBy) &&
+                          comment.likedBy.some((id) => String(id) === String(currentUserId))
+                            ? 'currentColor'
+                            : 'none'
+                        }
+                      />
+                      {comment.likesCount || 0}
+                    </Button>
+                    {onDeleteComment && String(comment.userId) === String(currentUserId) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDeleteComment(post._id, comment._id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

@@ -13,6 +13,13 @@ router.get('/search', therapistController.getTherapists);
 
 // Protected route - must come before :id route
 router.get('/profile', protect, restrictTo('therapist'), therapistController.getMyProfile);
+router.put(
+  '/profile',
+  protect,
+  restrictTo('therapist'),
+  validate(updateTherapistProfileSchema),
+  therapistController.updateProfile
+);
 
 router.get('/:id', therapistController.getTherapist);
 

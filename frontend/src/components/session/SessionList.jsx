@@ -5,7 +5,7 @@ import { SessionCard } from './SessionCard';
 
 export function SessionList({ sessions = [], onUpdate, onCancel }) {
   if (!sessions.length) {
-    return <EmptyState title="No sessions yet" description="Book your first session to see it here." />;
+    return <EmptyState title="No sessions scheduled yet." description="Book your first session to see it here." />;
   }
 
   return (

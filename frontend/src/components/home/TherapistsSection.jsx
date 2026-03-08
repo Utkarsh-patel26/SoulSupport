@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { Star, Shield, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { SeededImage } from '@/components/ui/SeededImage';
 
 const therapists = [
   {
@@ -13,7 +13,6 @@ const therapists = [
     focus: ['Anxiety', 'Depression', 'Trauma'],
     rating: '4.9',
     reviews: 120,
-    image: '/images/home/therapist-1.svg',
     available: true,
   },
   {
@@ -23,7 +22,6 @@ const therapists = [
     focus: ['Relationships', 'Stress', 'Life Transitions'],
     rating: '5.0',
     reviews: 85,
-    image: '/images/home/therapist-2.svg',
     available: true,
   },
   {
@@ -33,7 +31,6 @@ const therapists = [
     focus: ['Couples', 'Family', 'Communication'],
     rating: '4.8',
     reviews: 95,
-    image: '/images/home/therapist-3.svg',
     available: false,
   },
   {
@@ -43,7 +40,6 @@ const therapists = [
     focus: ['Career', 'Burnout', 'Mindfulness'],
     rating: '4.9',
     reviews: 72,
-    image: '/images/home/therapist-4.svg',
     available: true,
   },
 ];
@@ -87,8 +83,9 @@ export default function TherapistsSection() {
               className="flex-shrink-0 w-80 sm:w-auto snap-center mr-4 sm:mr-0 group relative bg-surface rounded-3xl p-4 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 border border-border"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-2xl mb-4 bg-surface-alt">
-                <Image
-                  src={therapist.image}
+                <SeededImage
+                  seed={therapist.name}
+                  category="therapist"
                   alt={therapist.name}
                   fill
                   sizes="(max-width: 640px) 320px, (max-width: 1024px) 50vw, 25vw"

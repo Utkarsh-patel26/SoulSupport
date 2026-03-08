@@ -8,19 +8,13 @@ const notificationService = require('../services/notification.service');
 const emailService = require('../services/email.service');
 const ratingService = require('../services/rating.service');
 
+const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
 /**
- * @desc    Get available time slots (9am-5pm)
+ * @desc    Parse "HH:MM" to hour number
  */
-function getAvailableSlots(bookedHours) {
-  const slots = [];
-  for (let hour = 9; hour < 17; hour++) {
-    slots.push({
-      hour,
-      time: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
-      available: !bookedHours.includes(hour),
-    });
-  }
-  return slots;
+function parseHour(timeStr) {
+  return parseInt(timeStr.split(':')[0], 10);
 }
 
 /**
@@ -33,8 +27,8 @@ exports.getSessions = asyncHandler(async (req, res) => {
 
   const filter =
     req.user.userType === 'therapist'
-      ? { therapistId: req.user.id }
-      : { userId: req.user.id };
+      ? { therapistId: req.user._id }
+      : { userId: req.user._id };
 
   if (status) {
     filter.status = status;
@@ -105,8 +99,8 @@ exports.updateSession = asyncHandler(async (req, res) => {
 exports.getUpcoming = asyncHandler(async (req, res) => {
   const filter =
     req.user.userType === 'therapist'
-      ? { therapistId: req.user.id }
-      : { userId: req.user.id };
+      ? { therapistId: req.user._id }
+      : { userId: req.user._id };
 
   const sessions = await Session.find({
     ...filter,
@@ -148,8 +142,30 @@ exports.getAvailableSlots = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Therapist not found');
   }
 
+  // Get therapist profile for availability
+  const therapistProfile = await TherapistProfile.findOne({ userId: therapistUser._id });
+
   // Parse date string (YYYY-MM-DD)
   const [year, month, day] = date.split('-').map(Number);
+  const requestedDate = new Date(year, month - 1, day);
+  const requestedDay = DAY_NAMES[requestedDate.getDay()];
+
+  // Check if therapist is available on this day
+  const availableDays = therapistProfile?.availability?.days || [];
+  if (availableDays.length > 0 && !availableDays.includes(requestedDay)) {
+    return res.json(
+      new ApiResponse(
+        200,
+        { bookedHours: [], availableDays, isAvailableDay: false },
+        `Therapist is not available on ${requestedDay}`
+      )
+    );
+  }
+
+  // Determine working hours from therapist profile
+  const startHour = parseHour(therapistProfile?.availability?.timeStart || '09:00');
+  const endHour = parseHour(therapistProfile?.availability?.timeEnd || '17:00');
+
   const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
   const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
 
@@ -172,7 +188,7 @@ exports.getAvailableSlots = asyncHandler(async (req, res) => {
   res.json(
     new ApiResponse(
       200,
-      { bookedHours },
+      { bookedHours, startHour, endHour, availableDays, isAvailableDay: true },
       'Available slots retrieved successfully'
     )
   );
@@ -203,29 +219,40 @@ exports.createSession = asyncHandler(async (req, res) => {
   const sessionDateTime = new Date(sessionDate);
   const sessionHour = sessionDateTime.getHours();
 
-  // Validate time is within 9am-5pm
-  if (sessionHour < 9 || sessionHour >= 17) {
-    throw new ApiError(400, 'Sessions must be booked between 9 AM and 5 PM');
+  // Normalize to start of hour to prevent duplicate bookings within the same slot
+  sessionDateTime.setMinutes(0, 0, 0);
+
+  // Validate booking day against therapist's availability
+  const bookingDay = DAY_NAMES[sessionDateTime.getDay()];
+  const availableDays = therapistProfile.availability?.days || [];
+
+  if (availableDays.length > 0 && !availableDays.includes(bookingDay)) {
+    throw new ApiError(
+      400,
+      `Therapist is not available on ${bookingDay}. Available days: ${availableDays.join(', ')}`
+    );
   }
 
-  // Check for conflicts - exact hour booking
-  const startOfHour = new Date(sessionDateTime);
-  startOfHour.setMinutes(0, 0, 0);
-  
-  const endOfHour = new Date(startOfHour);
-  endOfHour.setHours(endOfHour.getHours() + 1);
+  // Validate time is within therapist's working hours
+  const startHour = parseHour(therapistProfile.availability?.timeStart || '09:00');
+  const endHour = parseHour(therapistProfile.availability?.timeEnd || '17:00');
 
+  if (sessionHour < startHour || sessionHour >= endHour) {
+    throw new ApiError(
+      400,
+      `Sessions must be booked between ${therapistProfile.availability?.timeStart || '09:00'} and ${therapistProfile.availability?.timeEnd || '17:00'}`
+    );
+  }
+
+  // Check for double-booking - same therapist, same hour slot
   const existingSession = await Session.findOne({
     therapistId: therapistProfile.userId._id,
-    sessionDate: {
-      $gte: startOfHour,
-      $lt: endOfHour,
-    },
+    sessionDate: sessionDateTime,
     status: { $in: ['pending', 'confirmed'] },
   });
 
   if (existingSession) {
-    throw new ApiError(400, 'This time slot is not available. Please select another time.');
+    throw new ApiError(409, 'This time slot is already reserved. Please select another time.');
   }
 
   // Get user info
@@ -234,7 +261,7 @@ exports.createSession = asyncHandler(async (req, res) => {
   // Create session (use the actual therapist User ID, not the passed parameter)
   const session = await Session.create({
     therapistId: therapistProfile.userId._id,
-    userId: req.user.id,
+    userId: req.user._id,
     therapist: {
       name: therapistProfile.userId.fullName,
       photoUrl: therapistProfile.photoUrl,
@@ -254,7 +281,7 @@ exports.createSession = asyncHandler(async (req, res) => {
   // Send notification and email (non-blocking)
   notificationService.notifySessionBooked(
     therapistId,
-    req.user.id,
+    req.user._id,
     session._id,
     user.fullName
   ).catch(err => console.error('Failed to send notification:', err));

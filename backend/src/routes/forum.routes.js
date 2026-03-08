@@ -48,4 +48,16 @@ router.delete(
   forumController.deleteComment
 );
 
+router.post(
+  '/posts/:postId/comments/:commentId/like',
+  protect,
+  forumController.likeComment
+);
+
+router.delete(
+  '/posts/:postId/comments/:commentId/like',
+  protect,
+  forumController.unlikeComment
+);
+
 module.exports = router;

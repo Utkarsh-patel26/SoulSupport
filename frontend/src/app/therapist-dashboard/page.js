@@ -11,7 +11,13 @@ import api from '@/lib/api';
 
 function TherapistDashboardContent() {
   const { user } = useAuth();
-  const { list } = useSessions({ role: 'therapist' });
+  const { list } = useSessions(
+    { role: 'therapist' },
+    {
+      refetchInterval: 10000,
+      refetchOnWindowFocus: true,
+    }
+  );
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({

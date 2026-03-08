@@ -29,16 +29,23 @@ function TherapistProfileContent() {
     availability: { days: [], timeStart: '09:00', timeEnd: '17:00' },
   });
 
+  const toSafeNumber = (value, fallback = 0) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await api.get('/therapists/profile');
+        const response = await api.get('/therapists/profile');
+        const data = response?.data?.data || {};
+
         setProfile(data);
         setFormData({
           qualifications: data.qualifications || '',
-          experienceYears: data.experienceYears || 0,
-          hourlyRate: data.hourlyRate || 0,
-          specializations: data.specializations || [],
+          experienceYears: toSafeNumber(data.experienceYears, 0),
+          hourlyRate: toSafeNumber(data.hourlyRate, 0),
+          specializations: Array.isArray(data.specializations) ? data.specializations : [],
           availability: data.availability || { days: [], timeStart: '09:00', timeEnd: '17:00' },
         });
       } catch (error) {
@@ -59,12 +66,18 @@ function TherapistProfileContent() {
     setSaving(true);
 
     try {
-      await api.put(`/therapists/${profile._id}`, formData);
+      const payload = {
+        ...formData,
+        experienceYears: toSafeNumber(formData.experienceYears, 0),
+        hourlyRate: toSafeNumber(formData.hourlyRate, 0),
+      };
+
+      await api.put('/therapists/profile', payload);
       toast.success('Profile updated successfully!');
       router.push('/therapist-dashboard');
     } catch (error) {
       console.error('Failed to update profile:', error);
-      toast.error(error.response?.data?.message || 'Failed to update profile');
+      toast.error(typeof error === 'string' ? error : 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -136,7 +149,10 @@ function TherapistProfileContent() {
                 type="number"
                 min="0"
                 value={formData.experienceYears}
-                onChange={(e) => setFormData({ ...formData, experienceYears: parseInt(e.target.value) })}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  experienceYears: toSafeNumber(e.target.value, 0),
+                })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
               />
             </div>
@@ -149,7 +165,10 @@ function TherapistProfileContent() {
                 type="number"
                 min="0"
                 value={formData.hourlyRate}
-                onChange={(e) => setFormData({ ...formData, hourlyRate: parseFloat(e.target.value) })}
+                onChange={(e) => setFormData({
+                  ...formData,
+                  hourlyRate: toSafeNumber(e.target.value, 0),
+                })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
                 required
               />

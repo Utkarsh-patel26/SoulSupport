@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Star, CheckCircle } from 'lucide-react';
 import { getDefaultAvatarPath } from '@/lib/avatar';
+import { SeededImage } from '@/components/ui/SeededImage';
 
 function normalize(therapist) {
   const user = therapist?.user || {};
@@ -30,8 +30,10 @@ export function TherapistCard({ therapist, onBook }) {
     <Card className="overflow-hidden hover:shadow-xl transition-shadow">
       {/* Photo */}
       <div className="relative h-48 bg-gradient-to-br from-primary-100 to-primary-200">
-        <Image
+        <SeededImage
           src={data.photo}
+          seed={data.name}
+          category="therapist"
           alt={data.name}
           fill
           className="object-cover"

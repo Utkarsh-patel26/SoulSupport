@@ -8,11 +8,29 @@ const { apiLimiter } = require('./middlewares/rateLimiter.middleware');
 
 const app = express();
 
+const configuredOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 // Security middleware
 app.use(helmet());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin(origin, callback) {
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      const isConfiguredOrigin = configuredOrigins.includes(origin);
+      const isLocalhostDevPort = /^http:\/\/localhost:\d+$/.test(origin);
+
+      if (isConfiguredOrigin || isLocalhostDevPort) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
   })
 );

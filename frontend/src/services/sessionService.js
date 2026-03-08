@@ -2,37 +2,45 @@ import api from '@/lib/api';
 
 export const sessionService = {
   async getSessions(params = {}) {
-    return await api.get('/sessions', { params });
+    const response = await api.get('/sessions', { params });
+    return response.data;
   },
 
   async getSession(id) {
-    return await api.get(`/sessions/${id}`);
+    const response = await api.get(`/sessions/${id}`);
+    return response.data;
   },
 
   async getUpcoming() {
-    return await api.get('/sessions/upcoming');
+    const response = await api.get('/sessions/upcoming');
+    return response.data;
   },
 
   async getAvailableSlots(therapistId, date) {
     const dateStr = typeof date === 'string' ? date : date.toISOString().split('T')[0];
-    return await api.get(`/sessions/available-slots/${therapistId}`, {
+    const response = await api.get(`/sessions/available-slots/${therapistId}`, {
       params: { date: dateStr },
     });
+    return response.data;
   },
 
   async createSession(data) {
-    return await api.post('/sessions', data);
+    const response = await api.post('/sessions', data);
+    return response.data;
   },
 
   async updateSession(id, data) {
-    return await api.put(`/sessions/${id}`, data);
+    const response = await api.put(`/sessions/${id}`, data);
+    return response.data;
   },
 
   async updateSessionStatus(id, data) {
-    return await api.put(`/sessions/${id}/status`, data);
+    const response = await api.put(`/sessions/${id}/status`, data);
+    return response.data;
   },
 
   async cancelSession(id, cancelReason) {
-    return await api.delete(`/sessions/${id}`, { data: { cancelReason } });
+    const response = await api.delete(`/sessions/${id}`, { data: { cancelReason } });
+    return response.data;
   },
 };

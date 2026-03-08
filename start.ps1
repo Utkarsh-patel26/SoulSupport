@@ -156,8 +156,14 @@ Write-Host "Starting backend and frontend servers..." -ForegroundColor Yellow
 Write-Host "This will open two new terminal windows." -ForegroundColor Yellow
 Write-Host ""
 
-# Start backend in new terminal
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\backend'; Write-Host 'Starting Backend Server...' -ForegroundColor Cyan; npm run dev"
+# Start backend in new terminal only if port 5000 is not already occupied
+$backendListener = Get-NetTCPConnection -LocalPort 5000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($backendListener) {
+    Write-Host "[INFO] Backend already running on port 5000 (PID: $($backendListener.OwningProcess)). Skipping backend start." -ForegroundColor Yellow
+}
+else {
+    Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '$PWD\backend'; Write-Host 'Starting Backend Server...' -ForegroundColor Cyan; npm run dev"
+}
 
 # Wait a moment before starting frontend
 Start-Sleep -Seconds 2

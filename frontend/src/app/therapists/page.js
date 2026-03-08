@@ -2,51 +2,192 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
-import { useAuth } from '@/hooks/useAuth';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Avatar } from '@/components/ui/Avatar';
 import toast from 'react-hot-toast';
+import { ArrowRight, Search, Star, BadgeCheck } from 'lucide-react';
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0 },
+};
+
+function formatPrice(value) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return '$0/hr';
+  }
+
+  return `$${value}/hr`;
+}
+
+function TherapistCard({ therapist, index }) {
+  const name = therapist?.user?.fullName || 'Therapist';
+  const rating = typeof therapist?.rating === 'number' ? therapist.rating.toFixed(1) : '0.0';
+  const price = formatPrice(therapist?.hourlyRate);
+  const reviewCount = therapist?.totalReviews || 0;
+  const specializations = Array.isArray(therapist?.specializations)
+    ? therapist.specializations
+    : [];
+
+  return (
+    <motion.article
+      initial="hidden"
+      animate="visible"
+      variants={cardVariants}
+      transition={{ duration: 0.35, delay: index * 0.04 }}
+      className="group rounded-card border border-border-light bg-white p-6 shadow-card-soft transition-all hover:-translate-y-1 hover:shadow-lg"
+    >
+      <div className="flex items-start gap-4">
+        <Avatar
+          src={therapist?.user?.avatarUrl}
+          name={name}
+          size={64}
+          className="ring-2 ring-brand/10"
+        />
+
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-xl font-bold text-text-dark">{name}</h3>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-text-secondary">
+            <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 font-medium text-brand">
+              <Star className="h-3.5 w-3.5 fill-current" />
+              {rating}
+            </span>
+            <span>{reviewCount} review{reviewCount !== 1 ? 's' : ''}</span>
+            <span className="text-border-light">|</span>
+            <span className="font-semibold text-text-dark">{price}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {specializations.length > 0 ? (
+          <>
+            {specializations.slice(0, 3).map((spec) => (
+              <span
+                key={`${therapist?._id}-${spec}`}
+                className="rounded-full border border-brand/20 bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand"
+              >
+                {spec}
+              </span>
+            ))}
+            {specializations.length > 3 && (
+              <span className="rounded-full border border-border-light bg-surface-alt px-2.5 py-1 text-xs font-medium text-text-secondary">
+                +{specializations.length - 3} more
+              </span>
+            )}
+          </>
+        ) : (
+          <span className="rounded-full border border-border-light bg-surface-alt px-2.5 py-1 text-xs font-medium text-text-secondary">
+            General counseling
+          </span>
+        )}
+      </div>
+
+      <p className="mt-4 min-h-[48px] text-sm leading-relaxed text-text-secondary">
+        {therapist?.user?.bio || 'Experienced and compassionate therapist focused on practical, client-centered support.'}
+      </p>
+
+      <div className="mt-6 flex items-center justify-between">
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-brand">
+          <BadgeCheck className="h-4 w-4" />
+          Verified profile
+        </span>
+
+        <Link
+          href={`/therapists/${therapist?._id}`}
+          className="inline-flex items-center gap-2 rounded-brand bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+        >
+          View Profile
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </div>
+    </motion.article>
+  );
+}
 
 export default function TherapistsPage() {
-  const { user } = useAuth();
   const [therapists, setTherapists] = useState([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const isTherapist = user?.userType === 'therapist';
+
+  const fetchTherapists = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get('/therapists');
+      setTherapists(response?.data?.data?.therapists || []);
+    } catch (err) {
+      setError('Failed to load therapists. Please try again.');
+      toast.error('Failed to load therapists');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTherapists = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get('/therapists');
-        setTherapists(response?.data?.data?.therapists || []);
-      } catch (err) {
-        setError('Failed to load therapists');
-        toast.error('Failed to load therapists');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTherapists();
   }, []);
 
+  const filteredTherapists = therapists.filter((therapist) => {
+    const name = therapist?.user?.fullName?.toLowerCase() || '';
+    const bio = therapist?.user?.bio?.toLowerCase() || '';
+    const specs = Array.isArray(therapist?.specializations)
+      ? therapist.specializations.join(' ').toLowerCase()
+      : '';
+    const q = search.trim().toLowerCase();
+
+    if (!q) {
+      return true;
+    }
+
+    return name.includes(q) || bio.includes(q) || specs.includes(q);
+  });
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero */}
-      <section className="bg-primary text-white py-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Find Your Therapist</h1>
-          <p className="text-xl text-white/80">
-            Browse our network of licensed professionals
-          </p>
+    <div className="min-h-screen bg-brand-soft/40">
+      <section className="bg-brand-gradient px-4 py-16 text-white sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+            className="text-4xl font-bold tracking-tight sm:text-5xl"
+          >
+            Find Your Therapist
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.08 }}
+            className="mt-4 max-w-2xl text-lg text-white/90"
+          >
+            Browse licensed professionals, compare experience and pricing, and choose the support that fits you best.
+          </motion.p>
         </div>
       </section>
 
-      {/* Therapists Grid */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
+      <section className="px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8 rounded-card border border-border-light bg-white p-4 shadow-card-soft">
+            <label htmlFor="therapist-search" className="mb-2 block text-sm font-semibold text-text-dark">
+              Search therapists by name, bio, or specialization
+            </label>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-secondary" />
+              <input
+                id="therapist-search"
+                type="text"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Try: anxiety, relationships, trauma..."
+                className="w-full rounded-brand border border-border-light py-2.5 pl-10 pr-3 text-sm text-text-dark placeholder:text-text-secondary/80 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20"
+              />
+            </div>
+          </div>
+
           {loading && (
             <div className="flex justify-center py-20">
               <LoadingSpinner label="Loading therapists..." />
@@ -54,95 +195,62 @@ export default function TherapistsPage() {
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-              <p className="text-red-800">{error}</p>
+            <div className="rounded-card border border-red-200 bg-red-50 p-8 text-center shadow-sm">
+              <p className="font-medium text-red-800">{error}</p>
+              <button
+                type="button"
+                onClick={fetchTherapists}
+                className="mt-4 inline-flex items-center rounded-brand bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+              >
+                Try Again
+              </button>
             </div>
           )}
 
           {!loading && !error && therapists.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
-              <div className="text-6xl mb-4">👨‍⚕️</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="rounded-card border border-border-light bg-white p-12 text-center shadow-card-soft">
+              <div className="mb-4 text-5xl">👩‍⚕️</div>
+              <h2 className="mb-2 text-2xl font-bold text-text-dark">
                 No Therapists Available Yet
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="mb-6 text-text-secondary">
                 Be the first to join our network as a therapist!
               </p>
               <Link
                 href="/register"
-                className="inline-block px-6 py-3 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors"
+                className="inline-flex items-center rounded-brand bg-brand px-6 py-3 font-semibold text-white transition-colors hover:bg-brand-hover"
               >
                 Register as Therapist
               </Link>
             </div>
           )}
 
-          {!loading && !error && therapists.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {therapists.map((therapist) => (
-                <div
-                  key={therapist._id}
-                  className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-start gap-4">
-                    <Avatar
-                      src={therapist.user?.avatarUrl}
-                      name={therapist.user?.fullName || 'Therapist'}
-                      size={64}
-                    />
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-1">
-                        {therapist.user?.fullName || 'Therapist'}
-                      </h3>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                        <span>{therapist.rating?.toFixed(1) || '0.0'} ★</span>
-                        <span>•</span>
-                        <span>${therapist.hourlyRate || 0}/hr</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {therapist.specializations && therapist.specializations.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {therapist.specializations.slice(0, 3).map((spec) => (
-                        <span
-                          key={spec}
-                          className="px-2 py-1 bg-primary-soft text-primary text-xs rounded"
-                        >
-                          {spec}
-                        </span>
-                      ))}
-                      {therapist.specializations.length > 3 && (
-                        <span className="px-2 py-1 text-gray-600 text-xs">
-                          +{therapist.specializations.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  )}
-
-                  {therapist.user?.bio && (
-                    <p className="mt-3 text-sm text-gray-600 line-clamp-2">
-                      {therapist.user.bio}
-                    </p>
-                  )}
-
-                  <div className="mt-4 flex gap-2">
-                    <Link
-                      href={`/therapists/${therapist._id}`}
-                      className="flex-1 px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-hover transition-colors text-center text-sm font-medium"
-                    >
-                      View Profile
-                    </Link>
-                  </div>
-                </div>
+          {!loading && !error && therapists.length > 0 && filteredTherapists.length > 0 && (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filteredTherapists.map((therapist, index) => (
+                <TherapistCard key={therapist._id} therapist={therapist} index={index} />
               ))}
             </div>
           )}
 
+          {!loading && !error && therapists.length > 0 && filteredTherapists.length === 0 && (
+            <div className="rounded-card border border-border-light bg-white p-10 text-center shadow-card-soft">
+              <h2 className="text-xl font-bold text-text-dark">No therapists match your search</h2>
+              <p className="mt-2 text-text-secondary">Try a different keyword or remove filters.</p>
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="mt-4 inline-flex items-center rounded-brand bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+              >
+                Clear Search
+              </button>
+            </div>
+          )}
+
           {!loading && !error && therapists.length > 0 && (
-            <div className="mt-8 text-center">
-              <p className="text-gray-600">
-                Showing {therapists.length} therapist{therapists.length !== 1 ? 's' : ''}
+            <div className="mt-8 text-center text-sm text-text-secondary">
+              <p>
+                Showing {filteredTherapists.length} of {therapists.length} therapist{therapists.length !== 1 ? 's' : ''}
               </p>
             </div>
           )}

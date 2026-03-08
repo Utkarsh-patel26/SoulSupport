@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, ShieldCheck, CalendarClock, Activity, BookOpen, HeartHandshake, MessageCircle, Users, Zap, Search, Play, Phone, Mail } from 'lucide-react';
 import Link from 'next/link';
+import { SeededImage } from '@/components/ui/SeededImage';
 
 // Animation configs
 const fadeInUp = {
@@ -84,8 +85,16 @@ const HeroSection = () => (
         className="relative mx-auto mt-10 lg:mt-0"
       >
         <div className="relative w-full max-w-lg aspect-square bg-white rounded-[2rem] shadow-card-soft overflow-hidden border border-white flex items-center justify-center">
-          <div className="absolute inset-0 bg-gradient-to-tr from-brand-soft to-white"></div>
-          {/* Relaxing Illustration Placeholder */}
+          <SeededImage
+            seed="soulsupport-hero"
+            category="hero"
+            alt="Calming therapy illustration"
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-tr from-brand-soft/30 to-white/20"></div>
           <motion.div 
             animate={{ y: [0, -10, 0] }} 
             transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}

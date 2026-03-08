@@ -1,11 +1,9 @@
-import Image from 'next/image';
+"use client";
+
 import { cn } from '@/lib/utils';
-import { getDefaultAvatarPath } from '@/lib/avatar';
+import { SeededImage } from '@/components/ui/SeededImage';
 
 export function Avatar({ src, name = '', className, size = 40 }) {
-  const fallbackSrc = getDefaultAvatarPath(name);
-  const resolvedSrc = src || fallbackSrc;
-
   return (
     <div
       className={cn(
@@ -14,7 +12,15 @@ export function Avatar({ src, name = '', className, size = 40 }) {
       )}
       style={{ width: size, height: size }}
     >
-      <Image src={resolvedSrc} alt={name || 'avatar'} width={size} height={size} className="object-cover h-full w-full" />
+      <SeededImage
+        src={src}
+        seed={name || 'user-avatar'}
+        category="avatar"
+        alt={name || 'avatar'}
+        width={size}
+        height={size}
+        className="object-cover h-full w-full"
+      />
     </div>
   );
 }

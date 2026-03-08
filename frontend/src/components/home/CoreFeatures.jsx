@@ -1,9 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import Image from 'next/image';
 import { Video, MessageSquare, Calendar, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { SeededImage } from '@/components/ui/SeededImage';
 
 const features = [
   {
@@ -16,7 +16,7 @@ const features = [
     gradient: 'from-lavender-50 to-soft-blue-50',
     iconColor: 'text-lavender',
     bgIcon: 'bg-lavender-100',
-    image: '/images/home/feature-video.svg',
+    imageSeed: 'video-sessions',
   },
   {
     title: '24/7 Messaging',
@@ -28,7 +28,7 @@ const features = [
     gradient: 'from-soft-blue-50 to-primary-50',
     iconColor: 'text-soft-blue',
     bgIcon: 'bg-soft-blue-100',
-    image: '/images/home/feature-messaging.svg',
+    imageSeed: 'messaging-support',
   },
   {
     title: 'Flexible Scheduling',
@@ -40,7 +40,7 @@ const features = [
     gradient: 'from-sage-50 to-primary-50',
     iconColor: 'text-sage',
     bgIcon: 'bg-sage-100',
-    image: '/images/home/feature-scheduling.svg',
+    imageSeed: 'flexible-scheduling',
   },
 ];
 
@@ -109,8 +109,9 @@ export default function CoreFeatures() {
               className="flex-1 w-full"
             >
               <div className={`relative aspect-[4/3] rounded-3xl overflow-hidden bg-gradient-to-br ${feature.gradient} group shadow-soft border border-border`}>
-                <Image
-                  src={feature.image}
+                <SeededImage
+                  seed={feature.imageSeed}
+                  category="feature"
                   alt={`${feature.title} illustration`}
                   fill
                   sizes="(max-width: 1024px) 100vw, 50vw"
