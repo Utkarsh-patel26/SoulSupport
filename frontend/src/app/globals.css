@@ -2,44 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Palette: Trust & Calm */
-  --bg: #F7F9F8;
-  --surface: #FFFFFF;
-  --surface-alt: #F0F4F3;
-  --border: #E2E8F0;
-
-  --primary: #1F4E5F;
-  --primary-hover: #173E4D;
-  --primary-soft: #DEEEF3;
-
-  --text-main: #1F2937;
-  --text-secondary: #374151;
-  --text-muted: #6B7280;
-  --text-inverse: #FFFFFF;
-
-  --accent: #F08A7E;
-  --sage: #6FAF8F;
-  --soft-blue: #4C6FFF;
-  --lavender: #9C8CF1;
-  --coral: #F08A7E;
-
-  --radius: 18px;
-  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.06);
-}
-
 @layer base {
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --surface-alt: #f1f5f9;
+    --border: #e2e8f0;
+    --text-main: #0f172a;
+  }
+
   html {
     scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-300 antialiased;
   }
 
   /* Typography defaults */
   h1, h2, h3, h4, h5, h6 {
     @apply tracking-tight font-heading;
+  }
+
+  /* Accessibility skip link */
+  .skip-to-content {
+    @apply absolute left-4 -top-20 z-50 rounded-md bg-primary px-4 py-2 text-white transition-all focus:top-4 focus:outline-none focus:ring-2 focus:ring-offset-2;
   }
 }
 

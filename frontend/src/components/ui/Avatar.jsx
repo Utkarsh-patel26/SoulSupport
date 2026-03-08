@@ -9,12 +9,12 @@ export function Avatar({ src, name = '', className, size = 40 }) {
   return (
     <div
       className={cn(
-        'flex items-center justify-center overflow-hidden rounded-full bg-primary-100 text-primary-700 ring-2 ring-white shadow-soft',
+        'flex items-center justify-center overflow-hidden rounded-full bg-primary-soft text-primary ring-2 ring-surface shadow-sm transition-transform hover:scale-105',
         className
       )}
       style={{ width: size, height: size }}
     >
-      <Image src={resolvedSrc} alt={name || 'avatar'} width={size} height={size} className="object-cover" />
+      <Image src={resolvedSrc} alt={name || 'avatar'} width={size} height={size} className="object-cover h-full w-full" />
     </div>
   );
 }

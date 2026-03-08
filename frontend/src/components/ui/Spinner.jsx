@@ -1,10 +1,10 @@
 export function Spinner({ size = 'md' }) {
   const sizes = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8',
+    sm: 'h-4 w-4 border-2',
+    md: 'h-6 w-6 border-2',
+    lg: 'h-10 w-10 border-4',
   };
   return (
-    <div className={`inline-block ${sizes[size]} animate-spin rounded-full border-2 border-primary-500 border-t-transparent`}></div>
+    <div className={`inline-block ${sizes[size]} animate-spin rounded-full border-primary/20 border-t-primary`}></div>
   );
 }

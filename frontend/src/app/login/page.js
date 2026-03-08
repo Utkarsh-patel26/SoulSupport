@@ -5,6 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -29,41 +31,43 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-charcoal">
-            Welcome Back
-          </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to your SoulSupport account
-          </p>
-        </div>
+    <div className="min-h-[calc(100vh-80px)] flex flex-col md:flex-row bg-background">
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 z-10">
+        <div className="w-full max-w-md bg-surface border border-border/50 rounded-3xl p-8 sm:p-12 shadow-card relative overflow-hidden backdrop-blur-sm">
+          <div className="absolute top-0 right-0 -mt-16 -mr-16 w-32 h-32 bg-primary-soft rounded-full opacity-50 blur-2xl"></div>
+          
+          <div className="text-center mb-8 relative z-10">
+            <h1 className="font-heading text-h3 font-bold text-charcoal tracking-tight sm:text-h2">
+              Welcome back
+            </h1>
+            <p className="mt-3 text-base text-text-secondary">
+              Sign in to continue your secure session.
+            </p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-border p-8">
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-charcoal mb-1">
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-md bg-white text-charcoal focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="you@example.com"
-              />
-            </div>
+          <form className="space-y-6 relative z-10" onSubmit={handleSubmit}>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              label="Email Address"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@organization.org"
+            />
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-charcoal mb-1">
-                Password
-              </label>
-              <input
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="block text-sm font-semibold text-charcoal">
+                  Password
+                </label>
+                <Link href="/forgot-password" prefetch={true} className="text-sm font-medium text-primary hover:text-primary-hover transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
                 id="password"
                 name="password"
                 type="password"
@@ -71,32 +75,45 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-border rounded-md bg-white text-charcoal focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="••••••••"
+                placeholder="At least 8 characters"
               />
             </div>
 
-            <div className="flex items-center justify-end">
-              <Link href="/forgot-password" prefetch={true} className="text-sm font-medium text-primary hover:text-primary-hover">
-                Forgot password?
-              </Link>
-            </div>
-
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-primary hover:bg-primary-hover text-white font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              isLoading={loading}
+              className="w-full py-3.5 text-base rounded-xl mt-4"
             >
-              {loading ? 'Signing In...' : 'Sign In'}
-            </button>
+              Sign In
+            </Button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-text-muted">
-            Don't have an account?{' '}
-            <Link href="/register" prefetch={true} className="font-medium text-primary hover:text-primary-hover">
-              Create Account
+          <p className="mt-8 text-center text-sm text-text-muted relative z-10">
+            New here?{' '}
+            <Link href="/register" prefetch={true} className="font-semibold text-primary hover:text-primary-hover underline decoration-primary/30 underline-offset-4 transition-colors">
+              Create an account
             </Link>
           </p>
+        </div>
+      </div>
+      
+      <div className="hidden md:flex flex-1 relative items-center justify-center bg-primary-soft/30 p-12 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-sage-100/50 to-primary-100/50"></div>
+        <div className="relative z-10 w-full max-w-lg bg-white/60 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/60 shadow-xl">
+           <h2 className="font-heading text-h3 font-bold text-charcoal mb-4">Connecting communities to compassionate care</h2>
+           <p className="text-text-secondary text-base leading-relaxed mix-blend-multiply">Join thousands of students, verified therapists, and NGOs working together to build accessible emotional support for everyone.</p>
+           
+           <div className="mt-8 flex items-center space-x-4">
+              <div className="flex -space-x-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-sm ${i===1?'bg-primary':i===2?'bg-soft-blue-600':'bg-accent-hover'}`}>
+                    U{i}
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm font-medium text-text-muted">Trusted by 10k+ members</p>
+           </div>
         </div>
       </div>
     </div>

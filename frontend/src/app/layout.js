@@ -18,14 +18,40 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${heading.variable} ${sans.variable} bg-white text-gray-900 transition-colors`}>
+      <body className={`${heading.variable} ${sans.variable} bg-background text-charcoal transition-colors`}>
+        <a href="#main-content" className="skip-to-content">Skip to content</a>
         <Providers>
           <AuthProvider>
             <NotificationProvider>
               <PrefetchRoutes />
               <Header />
-              <main>{children}</main>
-              <Toaster position="top-right" />
+              <main id="main-content" className="min-h-screen outline-none" tabIndex={-1}>{children}</main>
+              <Toaster 
+                position="bottom-right" 
+                toastOptions={{
+                  style: {
+                    background: 'var(--color-surface)',
+                    color: 'var(--color-charcoal)',
+                    border: '1px solid var(--color-border)',
+                    boxShadow: 'var(--shadow-card)',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                  },
+                  success: {
+                    iconTheme: {
+                      primary: 'var(--color-primary)',
+                      secondary: '#fff',
+                    },
+                  },
+                  error: {
+                    iconTheme: {
+                      primary: '#ef4444',
+                      secondary: '#fff',
+                    },
+                  },
+                }}
+              />
             </NotificationProvider>
           </AuthProvider>
         </Providers>

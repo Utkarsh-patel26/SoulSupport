@@ -7,7 +7,8 @@ import { PostCard } from '@/components/forum/PostCard';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Button } from '@/components/ui/Button';
-import { Plus } from 'lucide-react';
+import { Dropdown } from '@/components/ui/Dropdown';
+import { Modal } from '@/components/ui/Modal';
 
 const CATEGORIES = [
   { value: 'all', label: 'All Posts' },
@@ -71,81 +72,86 @@ export default function ForumContent() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="min-h-screen bg-background text-charcoal pb-24">
       {/* Hero */}
-      <section className="bg-gradient-to-r from-[#1F4E5F] to-[#2A6070] text-white py-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Community Forum</h1>
-          <p className="text-xl text-white/80">Share experiences and support one another</p>
+      <section className="bg-surface border-b border-border/50 pb-16 pt-20 px-4 sm:px-6">
+        <div className="container mx-auto max-w-4xl">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary-soft px-4 py-2 text-sm font-semibold text-primary shadow-sm border border-primary/20 mb-6">
+            <span className="text-base" aria-hidden="true">💬</span>
+            <span>Community Forum</span>
+          </div>
+          <h1 className="font-heading text-h2 font-bold leading-tight text-charcoal sm:text-h1">
+            Share experiences and support <span className="text-primary">one another</span>
+          </h1>
+          <p className="mt-4 text-base sm:text-lg text-text-secondary leading-relaxed max-w-2xl">
+            A safe, moderated space to connect with peers, ask questions, and share your journey in a supportive environment.
+          </p>
         </div>
       </section>
 
-      <section className="py-12">
-        <div className="container mx-auto px-4 max-w-4xl">
-          {/* Header with button */}
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold">Posts</h2>
+      <section className="py-12 px-4 sm:px-6">
+        <div className="container mx-auto max-w-4xl">
+          {/* Header Controls */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="w-full sm:w-64">
+              <Dropdown
+                options={CATEGORIES}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="bg-white"
+              />
+            </div>
             <Button
-              onClick={() => setShowForm(!showForm)}
-              className="flex items-center gap-2"
+              onClick={() => setShowForm(true)}
+              className="flex items-center gap-2 w-full sm:w-auto justify-center shadow-soft"
             >
-              <Plus size={20} />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/></svg>
               New Post
             </Button>
           </div>
 
-          {/* New Post Form */}
-          {showForm && (
-            <div className="mb-8 bg-white border border-gray-200 rounded-lg p-6">
+          <Modal 
+            open={showForm} 
+            onClose={() => setShowForm(false)} 
+            title="Create a New Post"
+            description="Share your thoughts with the community."
+          >
+            <div className="-mx-6 -my-6 sm:mx-0 sm:my-0">
               <PostForm onCreate={handleCreatePost} />
             </div>
-          )}
-
-          {/* Category Filter */}
-          <div className="mb-6">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium">Filter by Category</span>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="rounded-lg border border-border bg-white px-4 py-2 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          </Modal>
 
           {/* Posts List */}
-          {posts.isLoading ? (
-            <div className="py-16 text-center">
-              <LoadingSpinner label="Loading posts..." />
-            </div>
-          ) : posts.error ? (
-            <ErrorMessage message={String(posts.error)} />
-          ) : postList.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-gray-600 mb-6">
-                No posts yet. Be the first to share!
-              </p>
-              <Button onClick={() => setShowForm(true)}>Create First Post</Button>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {postList.map((post) => (
-                <PostCard
-                  key={post._id}
-                  post={post}
-                  onLike={handleLike}
-                  onDelete={handleDelete}
-                  onComment={handleAddComment}
-                />
-              ))}
-            </div>
-          )}
+          <div className="space-y-6">
+            {posts.isLoading ? (
+              <div className="py-16 flex justify-center">
+                <LoadingSpinner size="md" />
+              </div>
+            ) : posts.error ? (
+              <div className="p-6 bg-red-50 text-red-600 rounded-xl border border-red-200">
+                <ErrorMessage message={String(posts.error)} />
+              </div>
+            ) : postList.length === 0 ? (
+              <div className="text-center py-20 bg-surface rounded-2xl border border-dashed border-border/60">
+                <div className="w-16 h-16 bg-surface-alt rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">📝</div>
+                <p className="font-semibold text-charcoal text-lg">No posts in this category yet</p>
+                <p className="text-text-muted mt-2 mb-6">Be the first to share your thoughts and start a conversation.</p>
+                <Button onClick={() => setShowForm(true)}>Create First Post</Button>
+              </div>
+            ) : (
+              <div className="space-y-5 animate-in fade-in duration-500 slides-in-from-bottom-4">
+                {postList.map((post) => (
+                  <PostCard
+                    key={post._id}
+                    post={post}
+                    onLike={handleLike}
+                    onDelete={handleDelete}
+                    onComment={handleAddComment}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>

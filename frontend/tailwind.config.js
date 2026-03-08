@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+﻿/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -11,48 +11,45 @@ module.exports = {
         background: 'var(--bg)',
         surface: 'var(--surface)',
         'surface-alt': 'var(--surface-alt)',
-        border: 'var(--border)',
-
-        primary: {
-          DEFAULT: 'var(--primary)',
-          hover: 'var(--primary-hover)',
-          soft: 'var(--primary-soft)',
-          50: '#DEEEF3',
-          100: 'var(--primary-soft)',
-          500: 'var(--primary)',
-          600: 'var(--primary)',
-          700: 'var(--primary-hover)',
-          900: '#0F2A34',
-        },
-
-        // Text Colors
         foreground: 'var(--text-main)',
+        border: {
+          DEFAULT: 'var(--border)',
+          light: '#E5E7EB',
+        },
+        primary: {
+          DEFAULT: '#1FB6A6',
+          hover: '#159A8C',
+          soft: '#F3FAF9',
+        },
+        brand: {
+          DEFAULT: '#1FB6A6',
+          hover: '#159A8C',
+          soft: '#F3FAF9',
+          section: '#E8F5F3',
+          accent: '#3FD3C2',
+        },
+        text: {
+          dark: '#1F2937',
+          secondary: '#6B7280',
+        },
         charcoal: '#1F2937',
-        'text-secondary': 'var(--text-secondary)',
-        'text-muted': 'var(--text-muted)',
-        'text-inverse': 'var(--text-inverse)',
-
-        // Brand Accent
-        accent: 'var(--accent)',
-        sage: { DEFAULT: '#6FAF8F', 50: '#EDF6F1', 100: '#D5EBDF', 600: '#5A9A78' },
-        'soft-blue': { DEFAULT: '#4C6FFF', 50: '#EEF1FF', 100: '#D9DFFF', 600: '#3B5CE0' },
-        lavender: { DEFAULT: '#9C8CF1', 50: '#F1EFFE', 100: '#E2DCFD', 600: '#7E6DD4' },
-        coral: { DEFAULT: '#F08A7E', 50: '#FEF0EE', 100: '#FDDDD9', 600: '#D97064' },
+      },
+      backgroundImage: {
+        'brand-gradient': 'linear-gradient(135deg, #1FB6A6, #3FD3C2)',
       },
       borderRadius: {
-        'xl': 'calc(var(--radius) - 4px)',
-        '2xl': 'var(--radius)',
-        '3xl': 'calc(var(--radius) + 6px)',
+        brand: '12px',
+        card: '16px',
       },
       boxShadow: {
-        soft: 'var(--shadow-soft)',
+        'card-soft': '0 8px 30px rgba(0, 0, 0, 0.05)',
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'Inter', 'sans-serif'],
-        heading: ['var(--font-heading)', 'Plus Jakarta Sans', 'sans-serif'],
+        heading: ['var(--font-heading)', 'Inter', 'sans-serif'],
       },
       animation: {
-        'blob': 'blob 7s infinite',
+        blob: 'blob 7s infinite',
         'fade-in': 'fadeIn 0.3s ease-in',
         'slide-up': 'slideUp 0.3s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',

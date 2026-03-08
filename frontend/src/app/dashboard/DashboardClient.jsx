@@ -4,11 +4,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSessions } from '@/hooks/useSessions';
 import { useTherapists } from '@/hooks/useTherapists';
 import { useForum } from '@/hooks/useForum';
-import { Card } from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import Link from 'next/link';
-import { Calendar, MessageSquare, User, TrendingUp } from 'lucide-react';
 
 export default function DashboardContent() {
   const { user } = useAuth();
@@ -18,21 +18,9 @@ export default function DashboardContent() {
   };
 
   const { list: sessions } = useSessions({ limit: 200 }, liveQueryOptions);
-  const { list: therapists } = useTherapists({ page: 1, limit: 1 }, liveQueryOptions);
-  const { posts: forumPosts } = useForum({ page: 1, limit: 200 }, liveQueryOptions);
-
-  const sessionList = sessions.data?.data?.sessions || [];
-  const therapistCount =
-    therapists.data?.data?.pagination?.total ||
-    therapists.data?.pagination?.total ||
-    therapists.data?.data?.therapists?.length ||
-    0;
-
-  const forumPostList = forumPosts.data?.data?.posts || forumPosts.data?.posts || [];
-  const forumCommentsCount = forumPostList.reduce(
-    (count, post) => count + (post.commentsCount ?? post.comments?.length ?? 0),
-    0
-  );
+  let sessionList = [];
+  if (sessions?.data?.data?.sessions) sessionList = sessions.data.data.sessions;
+  else if (sessions?.data?.sessions) sessionList = sessions.data.sessions;
 
   const upcomingSessionList = sessionList.filter(
     (s) => ['pending', 'confirmed'].includes(s.status) && new Date(s.sessionDate) > new Date()
@@ -41,127 +29,150 @@ export default function DashboardContent() {
   const completedSessions = sessionList.filter((s) => s.status === 'completed').length;
 
   return (
-    <div className="min-h-screen bg-white text-charcoal">
-      {/* Welcome Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#1F4E5F] to-[#2A6070] pb-14 pt-16 text-white">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold sm:text-5xl">Welcome back, {user?.fullName}!</h1>
-          <p className="mt-3 text-white/80">Track your progress and manage your therapy journey</p>
-        </div>
-      </section>
+    <div className="flex flex-col gap-8 animate-in fade-in duration-500">
+      {/* Header */}
+      <div>
+        <h1 className="font-heading text-h3 sm:text-h2 font-bold text-charcoal">
+          Welcome back, {user?.fullName?.split(' ')[0] || 'User'}!
+        </h1>
+        <p className="mt-2 text-base text-text-secondary">
+          Track your progress and manage your therapy journey.
+        </p>
+      </div>
 
-      <section className="pb-16 pt-6">
-        <div className="container mx-auto px-4">
-          {/* Quick Stats */}
-          <div className="mb-8 grid gap-6 md:grid-cols-4">
-            {[{
-              label: 'Upcoming',
-              value: upcomingSessions,
-              Icon: Calendar,
-              color: 'from-primary-soft to-soft-blue-50',
-              iconColor: 'text-primary',
-            }, {
-              label: 'Completed',
-              value: completedSessions,
-              Icon: TrendingUp,
-              color: 'from-sage-50 to-sage-100',
-              iconColor: 'text-sage',
-            }, {
-              label: 'Forum Comments',
-              value: forumCommentsCount,
-              Icon: MessageSquare,
-              color: 'from-soft-blue-50 to-lavender-50',
-              iconColor: 'text-soft-blue',
-            }, {
-              label: 'Therapists',
-              value: therapistCount,
-              Icon: User,
-              color: 'from-coral-50 to-coral-100',
-              iconColor: 'text-coral',
-            }].map((item) => (
-              <Card key={item.label} className="p-6 shadow-sm ring-1 ring-border">
-                <div className="flex items-center gap-4">
-                  <div className={`rounded-xl bg-gradient-to-br ${item.color} p-3`}>
-                    <item.Icon className={`h-6 w-6 ${item.iconColor}`} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600">{item.label}</p>
-                    <p className="text-2xl font-bold text-gray-900">{item.value}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-
-          {/* Quick Actions */}
-          <Card className="mb-8 p-8 shadow-sm ring-1 ring-border">
-            <h2 className="mb-6 text-2xl font-bold text-charcoal">Quick Actions</h2>
-            <div className="grid gap-4 md:grid-cols-3">
-              <Link href="/therapists" prefetch={true}>
-                <Button variant="outline" className="w-full">
-                  Find a Therapist
-                </Button>
-              </Link>
-              <Link href="/forum" prefetch={true}>
-                <Button variant="outline" className="w-full">
-                  Visit Forum
-                </Button>
-              </Link>
-              <Link href="/resources" prefetch={true}>
-                <Button variant="outline" className="w-full">
-                  Browse Resources
-                </Button>
-              </Link>
-            </div>
-          </Card>
-
-          {/* Upcoming Sessions */}
-          <Card className="p-8 shadow-sm ring-1 ring-border">
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-charcoal">Upcoming Sessions</h2>
-              <Link href="/dashboard/sessions">
-                <Button variant="ghost" size="sm">
-                  View All
-                </Button>
-              </Link>
-            </div>
-
-            {sessions.isLoading ? (
-              <div className="flex justify-center py-8">
-                <LoadingSpinner size="sm" />
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Card className="hover:border-primary/40 transition-colors">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary-soft text-primary">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
               </div>
-            ) : upcomingSessions === 0 ? (
-              <div className="py-8 text-center">
-                <p className="mb-4 text-gray-600">No upcoming sessions</p>
-                <Link href="/therapists">
-                  <Button>Schedule a session</Button>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-text-muted uppercase tracking-wider">Upcoming Sessions</p>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <p className="text-3xl font-heading font-bold text-charcoal">{upcomingSessions}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/40 transition-colors">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sage-50 text-sage">
+                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-text-muted uppercase tracking-wider">Completed Sessions</p>
+                <div className="mt-1 flex items-baseline gap-2">
+                  <p className="text-3xl font-heading font-bold text-charcoal">{completedSessions}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:border-primary/40 transition-colors sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-6">
+            <div className="flex flex-col h-full justify-center">
+              <p className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">Quick Actions</p>
+              <div className="flex gap-2">
+                <Link href="/therapists" className="flex-1">
+                  <Button size="sm" className="w-full justify-center">Find Therapist</Button>
+                </Link>
+                <Link href="/forum" className="flex-1">
+                  <Button size="sm" variant="outline" className="w-full justify-center">Community</Button>
                 </Link>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {upcomingSessionList
-                  .slice(0, 3)
-                  .map((session) => (
-                    <div key={session._id} className="flex items-center justify-between border-t border-gray-100 py-3">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          Session with {session.therapist?.name || 'Therapist'}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {new Date(session.sessionDate).toLocaleDateString()} at{' '}
-                          {new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 space-y-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
+              <div>
+                <CardTitle>Upcoming Sessions</CardTitle>
+                <CardDescription>Your next scheduled appointments.</CardDescription>
+              </div>
+              <Link href="/dashboard/sessions">
+                <Button variant="ghost" size="sm" className="text-primary hover:bg-primary-soft">View All</Button>
+              </Link>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {sessions.isLoading ? (
+                <div className="flex justify-center py-12">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : upcomingSessions === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center bg-surface-alt/30 rounded-xl border border-dashed border-border">
+                  <div className="w-12 h-12 rounded-full bg-surface mb-3 flex items-center justify-center shadow-sm">
+                    <svg className="w-6 h-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  </div>
+                  <p className="text-sm font-semibold text-charcoal">No upcoming sessions</p>
+                  <p className="text-sm text-text-muted max-w-[250px] mb-4 mt-1">Get the support you need by scheduling time with a therapist.</p>
+                  <Link href="/therapists">
+                    <Button>Book a Session</Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {upcomingSessionList.slice(0, 3).map((session) => (
+                    <div key={session._id} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl border border-border/60 hover:border-primary/30 hover:bg-surface-alt/30 transition-colors">
+                      <div className="flex items-start gap-4">
+                        <div className="h-10 w-10 shrink-0 rounded-full bg-primary-soft flex items-center justify-center text-primary font-bold">
+                          {session.therapist?.user?.fullName?.charAt(0) || 'T'}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-charcoal group-hover:text-primary transition-colors">
+                            {session.therapist?.user?.fullName || 'Therapist'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge tone={session.status === 'confirmed' ? 'success' : 'warning'}>{session.status}</Badge>
+                            <span className="text-sm text-text-secondary flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                              {new Date(session.sessionDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric'})}
+                            </span>
+                            <span className="text-sm text-text-secondary flex items-center gap-1">
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                              {new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <Button size="sm" variant="outline">
-                        Manage
-                      </Button>
+                      <Link href="/dashboard/sessions">
+                        <Button size="sm" variant="outline" className="w-full sm:w-auto">Manage</Button>
+                      </Link>
                     </div>
                   ))}
-              </div>
-            )}
+                </div>
+              )}
+            </CardContent>
           </Card>
         </div>
-      </section>
+
+        {/* Sidebar Space (Resources/Tips) */}
+        <div className="space-y-6">
+          <Card className="bg-gradient-to-br from-primary to-[#0f4637] text-white border-0 shadow-md">
+            <CardContent className="p-6">
+              <h3 className="font-heading text-lg font-bold mb-2">Need immediate help?</h3>
+              <p className="text-white/80 text-sm mb-6 leading-relaxed">
+                If you are in crisis, please connect with a hot line or emergency service right away.
+              </p>
+              <Link href="/resources">
+                <Button className="w-full bg-white text-primary hover:bg-white/90">
+                  Crisis Resources
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
