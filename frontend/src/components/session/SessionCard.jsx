@@ -5,11 +5,13 @@ import { Button } from '@/components/ui/Button';
 import { SessionStatusBadge } from './SessionStatusBadge';
 import { formatDate, formatTime } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import Link from 'next/link';
 
 export function SessionCard({ session, onUpdate, onCancel }) {
   const { user } = useAuth();
   const date = formatDate(session.sessionDate);
   const time = formatTime(session.sessionDate);
+  const isTherapist = user?.userType === 'therapist';
   
   // Show therapist name for users, user name for therapists
   const displayName = user?.userType === 'therapist' 
@@ -23,16 +25,23 @@ export function SessionCard({ session, onUpdate, onCancel }) {
         <p className="text-sm text-slate-600">
           {date} at {time} · {session.durationMinutes || 60} mins
         </p>
-        <p className="text-xs text-slate-500">{session.meetingLink || 'Meeting link to be shared'}</p>
+        <p className="text-xs text-slate-500">
+          {session.meetingLink ? 'Meeting link available' : 'Meeting link to be shared'}
+        </p>
       </div>
       <div className="flex items-center gap-2">
         <SessionStatusBadge status={session.status} />
-        {onUpdate && (
+        {session.status === 'confirmed' && (
+          <Link href={`/session/${session._id}`}>
+            <Button size="sm">Join Meeting</Button>
+          </Link>
+        )}
+        {onUpdate && session.status === 'pending' && isTherapist && (
           <Button variant="secondary" size="sm" onClick={() => onUpdate(session._id)}>
-            Update
+            Confirm
           </Button>
         )}
-        {onCancel && (
+        {onCancel && ['pending', 'confirmed'].includes(session.status) && (
           <Button variant="ghost" size="sm" onClick={() => onCancel(session._id)}>
             Cancel
           </Button>

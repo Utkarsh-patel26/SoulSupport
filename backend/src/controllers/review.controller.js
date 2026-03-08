@@ -13,7 +13,7 @@ const ratingService = require('../services/rating.service');
  * @access  Private (User only)
  */
 exports.createReview = asyncHandler(async (req, res) => {
-  const { sessionId, rating, reviewText } = req.body;
+  const { sessionId, rating, reviewTitle, comment, reviewText } = req.body;
 
   // Check if session exists and is completed
   const session = await Session.findById(sessionId);
@@ -28,6 +28,13 @@ exports.createReview = asyncHandler(async (req, res) => {
 
   if (session.status !== 'completed') {
     throw new ApiError(400, 'Can only review completed sessions');
+  }
+
+  if (
+    session.sessionStatusUser !== 'completed' ||
+    session.sessionStatusTherapist !== 'completed'
+  ) {
+    throw new ApiError(400, 'Review allowed only if session is fully completed');
   }
 
   // Check if review already exists
@@ -49,7 +56,9 @@ exports.createReview = asyncHandler(async (req, res) => {
       avatarUrl: user.avatarUrl,
     },
     rating,
-    reviewText,
+    reviewTitle,
+    comment: comment || reviewText,
+    reviewText: reviewText || comment,
   });
 
   // Update therapist rating

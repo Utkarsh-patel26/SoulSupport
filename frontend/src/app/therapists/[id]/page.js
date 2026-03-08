@@ -12,7 +12,6 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorMessage } from '@/components/common/ErrorMessage';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
-import toast from 'react-hot-toast';
 import { CalendarClock, CircleDollarSign, GraduationCap, Star, Timer } from 'lucide-react';
 
 const BookingModal = dynamic(
@@ -26,7 +25,7 @@ export default function TherapistPage() {
   const { user } = useAuth();
   const { data, isLoading, error } = useTherapist(therapistId);
   const { data: reviewsData } = useTherapistReviews(therapistId);
-  const { createSession } = useSessionMutations();
+  const { createSlotHold, confirmSlotHold } = useSessionMutations();
   const [open, setOpen] = useState(false);
 
   const therapist = data?.data?.therapist || data?.therapist;
@@ -40,17 +39,28 @@ export default function TherapistPage() {
     ? therapist.availability.days
     : [];
   const displayRating = typeof therapist?.rating === 'number' ? therapist.rating.toFixed(1) : '0.0';
+  const roundedRating = Math.round(Number(displayRating));
   const reviews = reviewsData?.data?.reviews || reviewsData?.reviews || [];
   const isTherapist = user?.userType === 'therapist';
 
   const handleBook = async (payload) => {
-    // Extract the userId from the therapist object
     const therapistUserId = therapist?.user?._id || therapist?.userId;
-    await createSession.mutateAsync({
+    const holdResponse = await createSlotHold.mutateAsync({
       ...payload,
       therapistId: therapistUserId,
     });
-    toast.success('Session requested');
+
+    const hold = holdResponse?.data?.hold || holdResponse?.hold;
+    if (!hold?._id) {
+      throw new Error('Unable to lock slot. Please try again.');
+    }
+
+    await confirmSlotHold.mutateAsync({
+      holdId: hold._id,
+      data: {
+        notes: payload?.notes || '',
+      },
+    });
   };
 
   return (
@@ -69,7 +79,8 @@ export default function TherapistPage() {
                   <Star className="h-4 w-4 fill-current" />
                   {displayRating}
                 </span>
-                <span>{therapist?.totalReviews || 0} reviews</span>
+                <span>{'★'.repeat(Math.max(roundedRating, 0))}{'☆'.repeat(Math.max(5 - roundedRating, 0))}</span>
+                <span>Based on {therapist?.totalReviews || 0} reviews</span>
                 <span>{therapist?.totalSessions || 0} sessions</span>
               </div>
             </div>

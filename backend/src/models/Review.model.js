@@ -28,6 +28,14 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
+    reviewTitle: {
+      type: String,
+      maxlength: 120,
+    },
+    comment: {
+      type: String,
+      maxlength: 1000,
+    },
     reviewText: {
       type: String,
       maxlength: 1000,

@@ -18,6 +18,15 @@ export function useSessionMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
   });
 
+  const createSlotHold = useMutation({
+    mutationFn: sessionService.createSlotHold,
+  });
+
+  const confirmSlotHold = useMutation({
+    mutationFn: ({ holdId, data }) => sessionService.confirmSlotHold(holdId, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+  });
+
   const updateStatus = useMutation({
     mutationFn: ({ id, data }) => sessionService.updateSessionStatus(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
@@ -28,5 +37,17 @@ export function useSessionMutations() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
   });
 
-  return { createSession, updateStatus, cancelSession };
+  const updateCompletionStatus = useMutation({
+    mutationFn: ({ id, data }) => sessionService.updateCompletionStatus(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+  });
+
+  return {
+    createSession,
+    createSlotHold,
+    confirmSlotHold,
+    updateStatus,
+    cancelSession,
+    updateCompletionStatus,
+  };
 }

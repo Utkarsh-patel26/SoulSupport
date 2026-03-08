@@ -3,7 +3,7 @@
 import { EmptyState } from '@/components/common/EmptyState';
 import { SessionCard } from './SessionCard';
 
-export function SessionList({ sessions = [], onUpdate, onCancel }) {
+export function SessionList({ sessions = [], onConfirm, onCancel }) {
   if (!sessions.length) {
     return <EmptyState title="No sessions scheduled yet." description="Book your first session to see it here." />;
   }
@@ -11,7 +11,7 @@ export function SessionList({ sessions = [], onUpdate, onCancel }) {
   return (
     <div className="space-y-3">
       {sessions.map((session) => (
-        <SessionCard key={session._id} session={session} onUpdate={onUpdate} onCancel={onCancel} />
+        <SessionCard key={session._id} session={session} onUpdate={onConfirm} onCancel={onCancel} />
       ))}
     </div>
   );

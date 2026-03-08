@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
 import { sessionService } from '@/services/sessionService';
+import { useSessionRealtime } from '@/hooks/useSessionRealtime';
 import toast from 'react-hot-toast';
 
 const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
@@ -18,6 +19,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
   const [loading, setLoading] = useState(false);
   const [fetchingSlots, setFetchingSlots] = useState(false);
   const therapistName = therapist?.fullName || therapist?.user?.fullName || 'therapist';
+  const therapistUserId = String(therapist?.user?._id || therapist?.userId || therapist?._id || '');
 
   // Generate time slots within the therapist's working hours
   const generateTimeSlots = (startHour = 9, endHour = 17) => {
@@ -32,12 +34,78 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     return slots;
   };
 
+  const fetchAvailableSlots = async (dateValue) => {
+    if (!dateValue || !therapistUserId) {
+      return;
+    }
+
+    setFetchingSlots(true);
+    setUnavailableDay(false);
+    try {
+      const response = await sessionService.getAvailableSlots(therapistUserId, dateValue);
+      const data = response.data?.data || response.data || {};
+      const bookedHours = data.bookedHours || [];
+      const pendingHours = data.pendingHours || [];
+      const availableHours = Array.isArray(data.availableHours) ? data.availableHours : [];
+      const allowedHours = Array.isArray(data.allowedHours) ? data.allowedHours : [];
+      const startHour = data.startHour ?? 9;
+      const endHour = data.endHour ?? 17;
+
+      if (data.availableDays) {
+        setTherapistAvailDays(data.availableDays);
+      }
+
+      if (data.isAvailableDay === false) {
+        setUnavailableDay(true);
+        setAvailableSlots([]);
+        return;
+      }
+
+      const baseHours = allowedHours.length > 0
+        ? allowedHours
+        : Array.from(
+            new Set([
+              ...availableHours,
+              ...pendingHours,
+              ...bookedHours,
+              ...generateTimeSlots(startHour, endHour).map((slot) => slot.hour),
+            ])
+          ).sort((a, b) => a - b);
+
+      const generatedSlots = baseHours.map((hour) => {
+        let status = 'available';
+        if (bookedHours.includes(hour)) {
+          status = 'confirmed';
+        } else if (pendingHours.includes(hour)) {
+          status = 'pending';
+        }
+
+        return {
+          hour,
+          time: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+          displayTime: `${String(hour).padStart(2, '0')}:00`,
+          status,
+          isBooked: status !== 'available',
+        };
+      });
+
+      setAvailableSlots(generatedSlots);
+    } catch (error) {
+      console.error('Failed to fetch available slots:', error);
+      setAvailableSlots(generateTimeSlots().map((slot) => ({ ...slot, isBooked: false })));
+    } finally {
+      setFetchingSlots(false);
+    }
+  };
+
   // Fetch therapist's available days on modal open
   useEffect(() => {
     const fetchAvailDays = async () => {
-      if (!therapist || !open) return;
+      if (!open || !therapistUserId) {
+        return;
+      }
+
       try {
-        const therapistUserId = therapist?.user?._id || therapist?.userId || therapist?._id;
         const today = new Date();
         const response = await sessionService.getAvailableSlots(therapistUserId, today);
         const data = response.data?.data || response.data || {};
@@ -48,54 +116,48 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
         console.error('Failed to fetch therapist availability:', error);
       }
     };
+
     fetchAvailDays();
-  }, [therapist, open]);
+  }, [open, therapistUserId]);
 
   // Fetch available slots for selected date
   useEffect(() => {
-    const fetchAvailable = async () => {
-      if (!selectedDate || !therapist) return;
-
-      setFetchingSlots(true);
-      setUnavailableDay(false);
-      try {
-        // Use userId if available, otherwise try direct ID
-        const therapistUserId = therapist?.user?._id || therapist?.userId || therapist?._id;
-        const response = await sessionService.getAvailableSlots(therapistUserId, selectedDate);
-        const data = response.data?.data || response.data || {};
-        const bookedHours = data.bookedHours || [];
-        const startHour = data.startHour ?? 9;
-        const endHour = data.endHour ?? 17;
-
-        if (data.availableDays) {
-          setTherapistAvailDays(data.availableDays);
-        }
-
-        // If the therapist is not available on this day
-        if (data.isAvailableDay === false) {
-          setUnavailableDay(true);
-          setAvailableSlots([]);
-          return;
-        }
-        
-        const allSlots = generateTimeSlots(startHour, endHour).map(slot => ({
-          ...slot,
-          isBooked: bookedHours.includes(slot.hour)
-        }));
-        setAvailableSlots(allSlots);
-      } catch (error) {
-        console.error('Failed to fetch available slots:', error);
-        // If fetch fails, show all slots as available
-        setAvailableSlots(generateTimeSlots().map(slot => ({ ...slot, isBooked: false })));
-      } finally {
-        setFetchingSlots(false);
-      }
-    };
-
-    if (open) {
-      fetchAvailable();
+    if (!open || !selectedDate) {
+      return;
     }
-  }, [selectedDate, therapist, open]);
+
+    fetchAvailableSlots(selectedDate);
+  }, [selectedDate, open]);
+
+  useEffect(() => {
+    if (!open || !selectedDate) {
+      return undefined;
+    }
+
+    const timer = setInterval(() => {
+      fetchAvailableSlots(selectedDate);
+    }, 15000);
+
+    return () => clearInterval(timer);
+  }, [open, selectedDate]);
+
+  useSessionRealtime({
+    onSlotUpdate: (payload) => {
+      if (!open || !selectedDate || !therapistUserId) {
+        return;
+      }
+
+      const isSameTherapist = payload?.therapistId === therapistUserId;
+      const payloadDate = payload?.sessionDate
+        ? format(new Date(payload.sessionDate), 'yyyy-MM-dd')
+        : null;
+      const selectedDateKey = format(selectedDate, 'yyyy-MM-dd');
+
+      if (isSameTherapist && payloadDate === selectedDateKey) {
+        fetchAvailableSlots(selectedDate);
+      }
+    },
+  });
 
   const handleDateSelect = (daysOffset) => {
     const date = addDays(new Date(), daysOffset);
@@ -112,14 +174,17 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     if (!selectedDate || !selectedTime) return;
 
     setLoading(true);
+    setAvailableSlots((prev) =>
+      prev.map((slot) =>
+        slot.hour === selectedTime.hour ? { ...slot, status: 'pending', isBooked: true } : slot
+      )
+    );
+
     try {
       const sessionDateTime = setHours(
         setMinutes(selectedDate, 0),
         selectedTime.hour
       );
-
-      // Use userId if available
-      const therapistUserId = therapist?.user?._id || therapist?.userId || therapist?._id;
 
       await onBook({
         therapistId: therapistUserId,
@@ -128,16 +193,16 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
       });
 
       toast.success('Slot reserved');
-
-      // Immediately mark the just-booked slot as unavailable in the current UI state.
-      setAvailableSlots((prev) =>
-        prev.map((slot) =>
-          slot.hour === selectedTime.hour ? { ...slot, isBooked: true } : slot
-        )
-      );
       setSelectedTime(null);
 
       onClose?.();
+    } catch (error) {
+      setAvailableSlots((prev) =>
+        prev.map((slot) =>
+          slot.hour === selectedTime.hour ? { ...slot, status: 'available', isBooked: false } : slot
+        )
+      );
+      toast.error(String(error || 'Failed to reserve slot'));
     } finally {
       setLoading(false);
     }
@@ -235,7 +300,8 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
                     }`}
                   >
                     {slot.time}
-                    {slot.isBooked && <span className="block text-[10px]">Booked</span>}
+                    {slot.status === 'pending' && <span className="block text-[10px]">Pending</span>}
+                    {slot.status === 'confirmed' && <span className="block text-[10px]">Booked</span>}
                   </button>
                 ))}
               </div>

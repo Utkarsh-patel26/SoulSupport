@@ -32,7 +32,14 @@ const sessionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'confirmed', 'completed', 'cancelled'],
+      enum: [
+        'pending',
+        'confirmed',
+        'cancelled_by_user',
+        'cancelled_by_therapist',
+        'completed',
+        'expired',
+      ],
       default: 'pending',
     },
     notes: {
@@ -41,6 +48,40 @@ const sessionSchema = new mongoose.Schema(
     },
     meetingLink: {
       type: String,
+    },
+    meetingRoomId: {
+      type: String,
+    },
+    meetingStatus: {
+      type: String,
+      enum: ['scheduled', 'active', 'completed', 'cancelled'],
+      default: 'scheduled',
+    },
+    meetingStartedAt: {
+      type: Date,
+      default: null,
+    },
+    meetingEndedAt: {
+      type: Date,
+      default: null,
+    },
+    sessionStatusUser: {
+      type: String,
+      enum: ['pending', 'completed', 'cancelled'],
+      default: 'pending',
+    },
+    sessionStatusTherapist: {
+      type: String,
+      enum: ['pending', 'completed', 'cancelled'],
+      default: 'pending',
+    },
+    cancellationReasonUser: {
+      type: String,
+      maxlength: 500,
+    },
+    cancellationReasonTherapist: {
+      type: String,
+      maxlength: 500,
     },
     cancelReason: {
       type: String,

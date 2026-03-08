@@ -10,8 +10,7 @@ export default function DashboardSessionsPage() {
   const { list } = useSessions(
     {},
     {
-      refetchInterval: 10000,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
     }
   );
   const { cancelSession } = useSessionMutations();

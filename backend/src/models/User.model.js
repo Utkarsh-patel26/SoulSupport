@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Full name is required'],
       trim: true,
     },
+    username: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      unique: true,
+      sparse: true,
+      match: [/^[a-z0-9_.-]{3,30}$/, 'Username must be 3-30 chars and contain only letters, numbers, _, ., -'],
+    },
     avatarUrl: {
       type: String,
       default: null,
@@ -34,6 +42,19 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       maxlength: 500,
+    },
+    location: {
+      type: String,
+      maxlength: 120,
+      trim: true,
+    },
+    mentalHealthGoals: {
+      type: [String],
+      default: [],
+    },
+    preferredTherapyTypes: {
+      type: [String],
+      default: [],
     },
     isEmailVerified: {
       type: Boolean,
@@ -46,6 +67,10 @@ const userSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
       default: null,
+    },
+    lastActive: {
+      type: Date,
+      default: Date.now,
     },
     passwordResetToken: String,
     passwordResetExpires: Date,

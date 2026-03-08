@@ -29,6 +29,16 @@ export const sessionService = {
     return response.data;
   },
 
+  async createSlotHold(data) {
+    const response = await api.post('/sessions/holds', data);
+    return response.data;
+  },
+
+  async confirmSlotHold(holdId, data = {}) {
+    const response = await api.post(`/sessions/holds/${holdId}/confirm`, data);
+    return response.data;
+  },
+
   async updateSession(id, data) {
     const response = await api.put(`/sessions/${id}`, data);
     return response.data;
@@ -36,6 +46,16 @@ export const sessionService = {
 
   async updateSessionStatus(id, data) {
     const response = await api.put(`/sessions/${id}/status`, data);
+    return response.data;
+  },
+
+  async getMeetingAccess(id) {
+    const response = await api.get(`/sessions/${id}/meeting`);
+    return response.data;
+  },
+
+  async updateCompletionStatus(id, data) {
+    const response = await api.put(`/sessions/${id}/completion-status`, data);
     return response.data;
   },
 

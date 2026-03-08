@@ -32,7 +32,7 @@ class RatingService {
         userId: review.userId,
         userName: review.reviewer.name,
         rating: review.rating,
-        text: review.reviewText,
+        text: review.comment || review.reviewText,
         date: review.createdAt,
       }));
 

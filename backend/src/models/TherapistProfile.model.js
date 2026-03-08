@@ -42,6 +42,10 @@ const therapistProfileSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    professionalPhotoUrl: {
+      type: String,
+      default: null,
+    },
     availability: {
       days: {
         type: [String],
@@ -64,6 +68,24 @@ const therapistProfileSchema = new mongoose.Schema(
         type: String,
         default: '17:00',
       },
+    },
+    weeklyAvailability: {
+      monday: { type: [String], default: [] },
+      tuesday: { type: [String], default: [] },
+      wednesday: { type: [String], default: [] },
+      thursday: { type: [String], default: [] },
+      friday: { type: [String], default: [] },
+      saturday: { type: [String], default: [] },
+      sunday: { type: [String], default: [] },
+    },
+    languages: {
+      type: [String],
+      default: [],
+    },
+    sessionPricing: {
+      type: Number,
+      min: 0,
+      default: 0,
     },
     isVerified: {
       type: Boolean,

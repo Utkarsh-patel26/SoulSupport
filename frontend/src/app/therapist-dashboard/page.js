@@ -14,8 +14,7 @@ function TherapistDashboardContent() {
   const { list } = useSessions(
     { role: 'therapist' },
     {
-      refetchInterval: 10000,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
     }
   );
   const [profile, setProfile] = useState(null);
@@ -224,6 +223,7 @@ function TherapistDashboardContent() {
                       <p className="font-medium text-gray-900">
                         {session.user?.name || 'Unknown Client'}
                       </p>
+                      <p className="text-xs text-gray-500">{session.user?.email || 'No email provided'}</p>
                       <p className="text-sm text-gray-600">
                         {new Date(session.sessionDate).toLocaleDateString()} at{' '}
                         {new Date(session.sessionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -234,16 +234,21 @@ function TherapistDashboardContent() {
                         session.status === 'confirmed' ? 'bg-sage-100 text-sage-600' :
                         session.status === 'pending' ? 'bg-coral-50 text-coral-600' :
                         session.status === 'completed' ? 'bg-soft-blue-100 text-soft-blue-600' :
-                        'bg-gray-100 text-gray-700'
+                        session.status === 'cancelled_by_user' || session.status === 'cancelled_by_therapist'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-100 text-gray-700'
                       }`}>
                         {session.status}
                       </span>
-                      <Link 
-                        href={`/therapist-dashboard/sessions/${session._id}`}
-                        className="text-primary hover:text-primary-hover text-sm font-medium"
-                      >
-                        View
-                      </Link>
+                      {session.status === 'confirmed' ? (
+                        <Link href={`/session/${session._id}`} className="text-primary hover:text-primary-hover text-sm font-medium">
+                          Join Meeting
+                        </Link>
+                      ) : (
+                        <Link href={`/therapist-dashboard/sessions`} className="text-primary hover:text-primary-hover text-sm font-medium">
+                          View
+                        </Link>
+                      )}
                     </div>
                   </div>
                 ))}

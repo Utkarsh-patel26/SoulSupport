@@ -13,8 +13,7 @@ import Link from 'next/link';
 export default function DashboardContent() {
   const { user } = useAuth();
   const liveQueryOptions = {
-    refetchInterval: 10000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
   };
 
   const { list: sessions } = useSessions({ limit: 200 }, liveQueryOptions);
@@ -24,6 +23,11 @@ export default function DashboardContent() {
 
   const upcomingSessionList = sessionList.filter(
     (s) => ['pending', 'confirmed'].includes(s.status) && new Date(s.sessionDate) > new Date()
+  );
+  const pastSessionList = sessionList.filter(
+    (s) =>
+      ['completed', 'cancelled_by_user', 'cancelled_by_therapist', 'expired'].includes(s.status) ||
+      new Date(s.sessionDate) <= new Date()
   );
   const upcomingSessions = upcomingSessionList.length;
   const completedSessions = sessionList.filter((s) => s.status === 'completed').length;
@@ -145,9 +149,48 @@ export default function DashboardContent() {
                           </div>
                         </div>
                       </div>
-                      <Link href="/dashboard/sessions">
-                        <Button size="sm" variant="outline" className="w-full sm:w-auto">Manage</Button>
-                      </Link>
+                      {session.status === 'confirmed' ? (
+                        <Link href={`/session/${session._id}`}>
+                          <Button size="sm" className="w-full sm:w-auto">Join Meeting</Button>
+                        </Link>
+                      ) : (
+                        <Link href="/dashboard/sessions">
+                          <Button size="sm" variant="outline" className="w-full sm:w-auto">Manage</Button>
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
+              <div>
+                <CardTitle>Past Sessions</CardTitle>
+                <CardDescription>Review completed and cancelled sessions.</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-6">
+              {pastSessionList.length === 0 ? (
+                <p className="text-sm text-text-muted">No past sessions yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {pastSessionList.slice(0, 4).map((session) => (
+                    <div key={session._id} className="flex items-center justify-between rounded-xl border border-border/60 p-3">
+                      <div>
+                        <p className="text-sm font-semibold text-charcoal">{session.therapist?.name || 'Therapist'}</p>
+                        <p className="text-xs text-text-muted">{new Date(session.sessionDate).toLocaleString()}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge tone={session.status === 'completed' ? 'success' : 'warning'}>{session.status}</Badge>
+                        {session.status === 'completed' && (
+                          <Link href={`/session/${session._id}`}>
+                            <Button size="sm" variant="outline">Review</Button>
+                          </Link>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>

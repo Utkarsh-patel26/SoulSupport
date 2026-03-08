@@ -9,5 +9,6 @@ router.use('/reviews', require('./review.routes'));
 router.use('/notifications', require('./notification.routes'));
 router.use('/resources', require('./resource.routes'));
 router.use('/users', require('./user.routes'));
+router.use('/profile', require('./profile.routes'));
 
 module.exports = router;

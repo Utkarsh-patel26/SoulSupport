@@ -25,6 +25,9 @@ exports.protect = asyncHandler(async (req, res, next) => {
       throw new ApiError(401, 'User not found or inactive');
     }
 
+    // Keep lastActive fresh without blocking the request path.
+    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch(() => {});
+
     req.user = user;
     next();
   } catch (error) {

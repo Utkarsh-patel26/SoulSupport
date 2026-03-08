@@ -2,8 +2,16 @@ const express = require('express');
 const router = express.Router();
 const reviewController = require('../controllers/review.controller');
 const { protect, restrictTo } = require('../middlewares/auth.middleware');
+const validate = require('../middlewares/validate.middleware');
+const { createReviewSchema } = require('../validators/review.validator');
 
-router.post('/', protect, restrictTo('user'), reviewController.createReview);
+router.post(
+  '/',
+  protect,
+  restrictTo('user'),
+  validate(createReviewSchema),
+  reviewController.createReview
+);
 
 router.get(
   '/therapist/:therapistId',

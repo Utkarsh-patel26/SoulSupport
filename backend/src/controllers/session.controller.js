@@ -1,20 +1,434 @@
 const Session = require('../models/Session.model');
+const SlotHold = require('../models/SlotHold.model');
 const User = require('../models/User.model');
 const TherapistProfile = require('../models/TherapistProfile.model');
+const jwt = require('jsonwebtoken');
 const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const notificationService = require('../services/notification.service');
 const emailService = require('../services/email.service');
 const ratingService = require('../services/rating.service');
+const realtimeService = require('../services/realtime.service');
 
-const DAY_NAMES = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+const DAY_NAMES = [
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+];
+const ACTIVE_BOOKING_STATUSES = ['pending', 'confirmed'];
+const TERMINAL_STATUSES = [
+  'cancelled_by_user',
+  'cancelled_by_therapist',
+  'completed',
+  'expired',
+];
+const HOLD_TIMEOUT_MINUTES = Number(process.env.SLOT_HOLD_MINUTES || 10);
 
-/**
- * @desc    Parse "HH:MM" to hour number
- */
 function parseHour(timeStr) {
-  return parseInt(timeStr.split(':')[0], 10);
+  return parseInt((timeStr || '00:00').split(':')[0], 10);
+}
+
+function normalizeToHour(dateValue) {
+  const date = new Date(dateValue);
+  date.setMinutes(0, 0, 0);
+  return date;
+}
+
+function getTokenFromRequest(req) {
+  if (req.headers.authorization?.startsWith('Bearer ')) {
+    return req.headers.authorization.split(' ')[1];
+  }
+
+  if (req.query?.token) {
+    return String(req.query.token);
+  }
+
+  return null;
+}
+
+async function resolveAuthenticatedUser(req) {
+  const token = getTokenFromRequest(req);
+  if (!token) {
+    throw new ApiError(401, 'Not authorized to access this route');
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (error) {
+    throw new ApiError(401, 'Invalid token');
+  }
+
+  const user = await User.findById(decoded.id).select('-password');
+  if (!user || !user.isActive) {
+    throw new ApiError(401, 'User not found or inactive');
+  }
+
+  return user;
+}
+
+function parseHourCandidate(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, Math.min(23, Math.floor(value)));
+  }
+
+  if (typeof value !== 'string') {
+    return null;
+  }
+
+  const hour = parseInt(value.split(':')[0], 10);
+  if (Number.isNaN(hour)) {
+    return null;
+  }
+
+  return Math.max(0, Math.min(23, hour));
+}
+
+function getDayHoursFromWeeklyAvailability(weeklyAvailability = {}, dayName) {
+  const rawSlots = weeklyAvailability?.[dayName];
+  if (!Array.isArray(rawSlots) || rawSlots.length === 0) {
+    return [];
+  }
+
+  return rawSlots
+    .map((slot) => parseHourCandidate(slot))
+    .filter((hour) => hour !== null);
+}
+
+function hasWeeklyAvailabilityOverrides(weeklyAvailability = {}) {
+  return DAY_NAMES.some((dayName) => {
+    const value = weeklyAvailability?.[dayName];
+    return Array.isArray(value) && value.length > 0;
+  });
+}
+
+function getAllowedHoursForDay(therapistProfile, dayName) {
+  const weeklyAvailability = therapistProfile.weeklyAvailability || {};
+  const hasWeeklyOverrides = hasWeeklyAvailabilityOverrides(weeklyAvailability);
+  const weeklyHours = getDayHoursFromWeeklyAvailability(weeklyAvailability, dayName);
+
+  if (hasWeeklyOverrides) {
+    return [...new Set(weeklyHours)].sort((a, b) => a - b);
+  }
+
+  const startHour = parseHour(therapistProfile.availability?.timeStart || '09:00');
+  const endHour = parseHour(therapistProfile.availability?.timeEnd || '17:00');
+
+  const hours = [];
+  for (let hour = startHour; hour < endHour; hour += 1) {
+    hours.push(hour);
+  }
+
+  return hours;
+}
+
+function getSessionWindowBounds(sessionDate, durationMinutes = 60) {
+  const start = new Date(sessionDate);
+  const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+  return { start, end };
+}
+
+function getHoldExpiryDate() {
+  return new Date(Date.now() + HOLD_TIMEOUT_MINUTES * 60 * 1000);
+}
+
+function formatAvailabilityRange(therapistProfile) {
+  return `${therapistProfile.availability?.timeStart || '09:00'} and ${
+    therapistProfile.availability?.timeEnd || '17:00'
+  }`;
+}
+
+function canAccessMeetingNow(session) {
+  const now = new Date();
+  const { start, end } = getSessionWindowBounds(
+    session.sessionDate,
+    session.durationMinutes || 60
+  );
+  const earlyJoinWindow = new Date(start.getTime() - 15 * 60 * 1000);
+  return now >= earlyJoinWindow && now <= end;
+}
+
+function buildJitsiRoom(sessionId) {
+  const roomId = `soulsupport-session-${sessionId}-${Date.now()}`;
+  return {
+    meetingRoomId: roomId,
+    meetingLink: `https://meet.jit.si/${roomId}`,
+  };
+}
+
+function buildConfirmBlockedMessage(status) {
+  if (status === 'cancelled_by_user') {
+    return 'Booking cannot be confirmed because it has already been cancelled by the user.';
+  }
+  if (status === 'cancelled_by_therapist') {
+    return 'Booking cannot be confirmed because it has already been cancelled by the therapist.';
+  }
+  if (status === 'completed') {
+    return 'Booking cannot be confirmed because it has already been completed.';
+  }
+  if (status === 'expired') {
+    return 'Booking cannot be confirmed because it has expired.';
+  }
+  if (status === 'confirmed') {
+    return 'Booking is already confirmed.';
+  }
+  return 'Invalid booking state transition.';
+}
+
+function isSessionExpired(session) {
+  const { end } = getSessionWindowBounds(
+    session.sessionDate,
+    session.durationMinutes || 60
+  );
+  return new Date() > end;
+}
+
+async function markExpiredIfNeeded(session) {
+  if (
+    !session ||
+    !ACTIVE_BOOKING_STATUSES.includes(session.status) ||
+    !isSessionExpired(session)
+  ) {
+    return session;
+  }
+
+  const expiredSession = await Session.findOneAndUpdate(
+    { _id: session._id, status: { $in: ACTIVE_BOOKING_STATUSES } },
+    {
+      $set: {
+        status: 'expired',
+        meetingStatus: 'cancelled',
+        meetingEndedAt: new Date(),
+      },
+    },
+    { new: true }
+  );
+
+  if (expiredSession) {
+    realtimeService.emitSessionUpdate({
+      therapistId: expiredSession.therapistId,
+      userId: expiredSession.userId,
+      session: expiredSession,
+      action: 'session_expired',
+    });
+
+    realtimeService.emitSlotUpdate({
+      therapistId: expiredSession.therapistId,
+      sessionDate: expiredSession.sessionDate,
+      slotHour: new Date(expiredSession.sessionDate).getHours(),
+      state: 'released',
+      sessionId: expiredSession._id,
+    });
+  }
+
+  return expiredSession || session;
+}
+
+async function expireSessionsMatchingFilter(baseFilter) {
+  const now = new Date();
+  const staleSessions = await Session.find({
+    ...baseFilter,
+    status: { $in: ACTIVE_BOOKING_STATUSES },
+    sessionDate: { $lt: now },
+  }).select('_id therapistId userId sessionDate');
+
+  if (!staleSessions.length) {
+    return;
+  }
+
+  const staleSessionIds = staleSessions.map((session) => session._id);
+  await Session.updateMany(
+    {
+      _id: { $in: staleSessionIds },
+      status: { $in: ACTIVE_BOOKING_STATUSES },
+    },
+    {
+      $set: {
+        status: 'expired',
+        meetingStatus: 'cancelled',
+        meetingEndedAt: now,
+      },
+    }
+  );
+
+  staleSessions.forEach((session) => {
+    realtimeService.emitSessionUpdate({
+      therapistId: session.therapistId,
+      userId: session.userId,
+      session: {
+        _id: session._id,
+        therapistId: session.therapistId,
+        userId: session.userId,
+        sessionDate: session.sessionDate,
+        status: 'expired',
+        meetingStatus: 'cancelled',
+      },
+      action: 'session_expired',
+    });
+
+    realtimeService.emitSlotUpdate({
+      therapistId: session.therapistId,
+      sessionDate: session.sessionDate,
+      slotHour: new Date(session.sessionDate).getHours(),
+      state: 'released',
+      sessionId: session._id,
+    });
+  });
+}
+
+async function getTherapistProfileByUserId(therapistId) {
+  const therapistProfile = await TherapistProfile.findOne({
+    userId: therapistId,
+  }).populate('userId');
+
+  if (!therapistProfile || !therapistProfile.userId) {
+    throw new ApiError(404, 'Therapist not found');
+  }
+
+  if (therapistProfile.userId.userType !== 'therapist') {
+    throw new ApiError(404, 'Therapist not found');
+  }
+
+  return therapistProfile;
+}
+
+async function expireStaleHolds(filter = {}) {
+  const now = new Date();
+  const staleHolds = await SlotHold.find({
+    ...filter,
+    status: 'active',
+    expiresAt: { $lte: now },
+  });
+
+  if (!staleHolds.length) {
+    return;
+  }
+
+  const staleIds = staleHolds.map((hold) => hold._id);
+  await SlotHold.updateMany(
+    { _id: { $in: staleIds }, status: 'active' },
+    { $set: { status: 'expired' } }
+  );
+
+  staleHolds.forEach((hold) => {
+    realtimeService.emitSlotUpdate({
+      therapistId: hold.therapistId,
+      sessionDate: hold.slotDate,
+      slotHour: new Date(hold.slotDate).getHours(),
+      state: 'released',
+      sessionId: hold._id,
+    });
+  });
+}
+
+async function validateTherapistSlot({ therapistId, sessionDateTime }) {
+  const therapistProfile = await getTherapistProfileByUserId(therapistId);
+  const sessionHour = sessionDateTime.getHours();
+
+  const bookingDay = DAY_NAMES[sessionDateTime.getDay()];
+  const availableDays = therapistProfile.availability?.days || [];
+
+  if (availableDays.length > 0 && !availableDays.includes(bookingDay)) {
+    throw new ApiError(
+      400,
+      `Therapist is not available on ${bookingDay}. Available days: ${availableDays.join(', ')}`
+    );
+  }
+
+  const allowedHours = getAllowedHoursForDay(therapistProfile, bookingDay);
+  if (allowedHours.length === 0 || !allowedHours.includes(sessionHour)) {
+    throw new ApiError(
+      400,
+      `Sessions must be booked between ${formatAvailabilityRange(therapistProfile)}`
+    );
+  }
+
+  return { therapistProfile, sessionHour, bookingDay, allowedHours };
+}
+
+async function createBookedSession({ therapistId, sessionDateTime, durationMinutes, notes, userId }) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, 'User not found');
+  }
+
+  const { therapistProfile } = await validateTherapistSlot({
+    therapistId,
+    sessionDateTime,
+  });
+
+  const existingSession = await Session.findOne({
+    therapistId,
+    sessionDate: sessionDateTime,
+    status: { $in: ACTIVE_BOOKING_STATUSES },
+  });
+
+  if (existingSession) {
+    throw new ApiError(409, 'Time slot already reserved');
+  }
+
+  let session;
+  try {
+    session = await Session.create({
+      therapistId,
+      userId,
+      therapist: {
+        name: therapistProfile.userId.fullName,
+        photoUrl: therapistProfile.photoUrl,
+        specializations: therapistProfile.specializations,
+      },
+      user: {
+        name: user.fullName,
+        email: user.email,
+        avatarUrl: user.avatarUrl,
+      },
+      sessionDate: sessionDateTime,
+      durationMinutes: durationMinutes || 60,
+      notes,
+      status: 'pending',
+      meetingStatus: 'scheduled',
+    });
+  } catch (error) {
+    if (error?.code === 11000) {
+      throw new ApiError(409, 'Time slot already reserved');
+    }
+
+    throw error;
+  }
+
+  realtimeService.emitSessionUpdate({
+    therapistId,
+    userId,
+    session,
+    action: 'session_booked',
+  });
+
+  realtimeService.emitSlotUpdate({
+    therapistId,
+    sessionDate: sessionDateTime,
+    slotHour: new Date(sessionDateTime).getHours(),
+    state: 'booked',
+    sessionId: session._id,
+  });
+
+  notificationService
+    .notifySessionBooked(therapistId, userId, session._id, user.fullName)
+    .catch(() => {});
+
+  emailService
+    .sendSessionBookingEmail(
+      therapistProfile.userId.email,
+      user.fullName,
+      sessionDateTime.toLocaleString()
+    )
+    .catch(() => {});
+
+  return session;
 }
 
 /**
@@ -30,15 +444,14 @@ exports.getSessions = asyncHandler(async (req, res) => {
       ? { therapistId: req.user._id }
       : { userId: req.user._id };
 
-  if (status) {
-    filter.status = status;
-  }
+  if (status) filter.status = status;
 
-  const skip = (page - 1) * limit;
+  await expireSessionsMatchingFilter(filter);
 
+  const skip = (Number(page) - 1) * Number(limit);
   const sessions = await Session.find(filter)
     .sort({ sessionDate: -1 })
-    .limit(parseInt(limit))
+    .limit(Number(limit))
     .skip(skip);
 
   const total = await Session.countDocuments(filter);
@@ -49,10 +462,10 @@ exports.getSessions = asyncHandler(async (req, res) => {
       {
         sessions,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: Number(page),
+          limit: Number(limit),
           total,
-          pages: Math.ceil(total / limit),
+          pages: Math.ceil(total / Number(limit)),
         },
       },
       'Sessions retrieved successfully'
@@ -61,9 +474,369 @@ exports.getSessions = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Get upcoming sessions
+ * @route   GET /api/sessions/upcoming
+ * @access  Private
+ */
+exports.getUpcoming = asyncHandler(async (req, res) => {
+  const filter =
+    req.user.userType === 'therapist'
+      ? { therapistId: req.user._id }
+      : { userId: req.user._id };
+
+  await expireSessionsMatchingFilter(filter);
+
+  const upcomingSessions = await Session.find({
+    ...filter,
+    sessionDate: { $gte: new Date() },
+    status: { $in: ['pending', 'confirmed'] },
+  })
+    .sort({ sessionDate: 1 })
+    .limit(20);
+
+  res.json(new ApiResponse(200, { sessions: upcomingSessions }, 'Upcoming sessions retrieved'));
+});
+
+/**
+ * @desc    Get available therapist slots by date
+ * @route   GET /api/sessions/available-slots/:therapistId
+ * @access  Public
+ */
+exports.getAvailableSlots = asyncHandler(async (req, res) => {
+  const { therapistId } = req.params;
+  const { date } = req.query;
+
+  if (!date) throw new ApiError(400, 'Date is required');
+
+  const therapistProfile = await getTherapistProfileByUserId(therapistId);
+  const [year, month, day] = String(date).split('-').map(Number);
+  const requestedDate = new Date(year, month - 1, day);
+  const requestedDay = DAY_NAMES[requestedDate.getDay()];
+
+  const availableDays = therapistProfile.availability?.days || [];
+  if (availableDays.length > 0 && !availableDays.includes(requestedDay)) {
+    return res.json(
+      new ApiResponse(
+        200,
+        { bookedHours: [], availableDays, isAvailableDay: false },
+        `Therapist is not available on ${requestedDay}`
+      )
+    );
+  }
+
+  const allowedHours = getAllowedHoursForDay(therapistProfile, requestedDay);
+
+  if (allowedHours.length === 0) {
+    return res.json(
+      new ApiResponse(
+        200,
+        { bookedHours: [], availableHours: [], availableDays, isAvailableDay: false },
+        `Therapist is not available on ${requestedDay}`
+      )
+    );
+  }
+
+  const startHour = Math.min(...allowedHours);
+  const endHour = Math.max(...allowedHours) + 1;
+
+  const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
+  const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+  await expireStaleHolds({
+    therapistId,
+    slotDate: { $gte: startOfDay, $lte: endOfDay },
+  });
+
+  const bookedSessions = await Session.find({
+    therapistId,
+    sessionDate: {
+      $gte: startOfDay,
+      $lte: endOfDay,
+    },
+    status: { $in: ACTIVE_BOOKING_STATUSES },
+  });
+
+  const bookedHours = bookedSessions.map((session) =>
+    new Date(session.sessionDate).getHours()
+  );
+
+  const activeHolds = await SlotHold.find({
+    therapistId,
+    slotDate: {
+      $gte: startOfDay,
+      $lte: endOfDay,
+    },
+    status: 'active',
+    expiresAt: { $gt: new Date() },
+  });
+
+  const pendingHours = activeHolds.map((hold) => new Date(hold.slotDate).getHours());
+
+  const unavailableHours = [...new Set([...bookedHours, ...pendingHours])];
+
+  const availableHours = allowedHours.filter((hour) => !unavailableHours.includes(hour));
+
+  res.json(
+    new ApiResponse(
+      200,
+      {
+        bookedHours,
+        pendingHours,
+        unavailableHours,
+        availableHours,
+        allowedHours,
+        startHour,
+        endHour,
+        availableDays,
+        isAvailableDay: true,
+      },
+      'Available slots retrieved successfully'
+    )
+  );
+});
+
+/**
+ * @desc    Create a new session
+ * @route   POST /api/sessions
+ * @access  Private (User only)
+ */
+exports.createSession = asyncHandler(async (req, res) => {
+  const { therapistId, sessionDate, durationMinutes, notes } = req.body;
+
+  if (req.user.userType !== 'user') {
+    throw new ApiError(403, 'Only users can book sessions');
+  }
+
+  const sessionDateTime = normalizeToHour(sessionDate);
+  await expireStaleHolds({ therapistId, slotDate: sessionDateTime });
+
+  const blockingHold = await SlotHold.findOne({
+    therapistId,
+    slotDate: sessionDateTime,
+    status: 'active',
+    expiresAt: { $gt: new Date() },
+    userId: { $ne: req.user._id },
+  });
+
+  if (blockingHold) {
+    throw new ApiError(409, 'Time slot is currently on hold. Please try another slot.');
+  }
+
+  const session = await createBookedSession({
+    therapistId,
+    sessionDateTime,
+    durationMinutes,
+    notes,
+    userId: req.user._id,
+  });
+
+  res
+    .status(201)
+    .json(new ApiResponse(201, { session }, 'Session booked successfully'));
+});
+
+/**
+ * @desc    Create temporary booking hold for a slot
+ * @route   POST /api/sessions/holds
+ * @access  Private (User only)
+ */
+exports.createSlotHold = asyncHandler(async (req, res) => {
+  const { therapistId, sessionDate, durationMinutes = 60 } = req.body;
+
+  if (req.user.userType !== 'user') {
+    throw new ApiError(403, 'Only users can create slot holds');
+  }
+
+  const slotDate = normalizeToHour(sessionDate);
+  await validateTherapistSlot({ therapistId, sessionDateTime: slotDate });
+  await expireStaleHolds({ therapistId, slotDate });
+
+  const existingSession = await Session.findOne({
+    therapistId,
+    sessionDate: slotDate,
+    status: { $in: ACTIVE_BOOKING_STATUSES },
+  });
+
+  if (existingSession) {
+    throw new ApiError(409, 'Time slot already reserved');
+  }
+
+  const existingOwnHold = await SlotHold.findOne({
+    therapistId,
+    slotDate,
+    userId: req.user._id,
+    status: 'active',
+    expiresAt: { $gt: new Date() },
+  });
+
+  if (existingOwnHold) {
+    existingOwnHold.expiresAt = getHoldExpiryDate();
+    await existingOwnHold.save();
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        { hold: existingOwnHold, holdTimeoutMinutes: HOLD_TIMEOUT_MINUTES },
+        'Slot hold refreshed'
+      )
+    );
+  }
+
+  const holdPayload = {
+    therapistId,
+    userId: req.user._id,
+    slotDate,
+    durationMinutes,
+    status: 'active',
+    expiresAt: getHoldExpiryDate(),
+  };
+
+  let hold;
+  try {
+    hold = await SlotHold.create(holdPayload);
+  } catch (error) {
+    if (error?.code === 11000) {
+      throw new ApiError(409, 'This slot is currently held by another user');
+    }
+    throw error;
+  }
+
+  realtimeService.emitSlotUpdate({
+    therapistId,
+    sessionDate: slotDate,
+    slotHour: slotDate.getHours(),
+    state: 'pending',
+    sessionId: hold._id,
+  });
+
+  res.status(201).json(
+    new ApiResponse(
+      201,
+      { hold, holdTimeoutMinutes: HOLD_TIMEOUT_MINUTES },
+      'Slot hold created successfully'
+    )
+  );
+});
+
+/**
+ * @desc    Confirm an active hold and convert it to a booking
+ * @route   POST /api/sessions/holds/:holdId/confirm
+ * @access  Private (User only)
+ */
+exports.confirmSlotHold = asyncHandler(async (req, res) => {
+  const { holdId } = req.params;
+  const { notes } = req.body;
+
+  if (req.user.userType !== 'user') {
+    throw new ApiError(403, 'Only users can confirm slot holds');
+  }
+
+  const hold = await SlotHold.findById(holdId);
+  if (!hold) {
+    throw new ApiError(404, 'Slot hold not found');
+  }
+
+  if (String(hold.userId) !== req.user.id.toString()) {
+    throw new ApiError(403, 'You are not authorized to confirm this slot hold');
+  }
+
+  if (hold.status !== 'active') {
+    throw new ApiError(409, `Slot hold cannot be confirmed from '${hold.status}' state`);
+  }
+
+  if (hold.expiresAt <= new Date()) {
+    hold.status = 'expired';
+    await hold.save();
+
+    realtimeService.emitSlotUpdate({
+      therapistId: hold.therapistId,
+      sessionDate: hold.slotDate,
+      slotHour: new Date(hold.slotDate).getHours(),
+      state: 'released',
+      sessionId: hold._id,
+    });
+
+    throw new ApiError(409, 'Slot hold expired. Please choose the slot again');
+  }
+
+  let session;
+  try {
+    session = await createBookedSession({
+      therapistId: hold.therapistId,
+      sessionDateTime: hold.slotDate,
+      durationMinutes: hold.durationMinutes || 60,
+      notes,
+      userId: req.user._id,
+    });
+  } catch (error) {
+    if (error?.statusCode === 409 || error?.code === 11000) {
+      hold.status = 'cancelled';
+      await hold.save();
+
+      realtimeService.emitSlotUpdate({
+        therapistId: hold.therapistId,
+        sessionDate: hold.slotDate,
+        slotHour: new Date(hold.slotDate).getHours(),
+        state: 'released',
+        sessionId: hold._id,
+      });
+    }
+
+    throw error;
+  }
+
+  hold.status = 'confirmed';
+  await hold.save();
+
+  res.status(201).json(
+    new ApiResponse(201, { session }, 'Slot hold confirmed and session booked successfully')
+  );
+});
+
+/**
+ * @desc    Get single session
+ * @route   GET /api/sessions/:id
+ * @access  Private
+ */
+exports.getSession = asyncHandler(async (req, res) => {
+  const session = await Session.findById(req.params.id);
+  if (!session) throw new ApiError(404, 'Session not found');
+  const normalizedSession = await markExpiredIfNeeded(session);
+
+  if (
+    normalizedSession.userId.toString() !== req.user.id.toString() &&
+    normalizedSession.therapistId.toString() !== req.user.id.toString()
+  ) {
+    throw new ApiError(403, 'Not authorized to view this session');
+  }
+
+  const now = new Date();
+  const { start, end } = getSessionWindowBounds(
+    normalizedSession.sessionDate,
+    normalizedSession.durationMinutes || 60
+  );
+
+  res.json(
+    new ApiResponse(
+      200,
+      {
+        session: normalizedSession,
+        meetingAccess: {
+          canJoinNow: canAccessMeetingNow(session),
+          startsAt: start,
+          endsAt: end,
+          isExpired: now > end,
+        },
+      },
+      'Session retrieved successfully'
+    )
+  );
+});
+
+/**
  * @desc    Update session details (reschedule / notes)
  * @route   PUT /api/sessions/:id
- * @access  Private (User or Therapist on the session)
+ * @access  Private
  */
 exports.updateSession = asyncHandler(async (req, res) => {
   const { sessionDate, durationMinutes, notes } = req.body;
@@ -78,11 +851,11 @@ exports.updateSession = asyncHandler(async (req, res) => {
     throw new ApiError(403, 'Not authorized to update this session');
   }
 
-  if (session.status === 'completed' || session.status === 'cancelled') {
+  if (TERMINAL_STATUSES.includes(session.status)) {
     throw new ApiError(400, 'Cannot update completed or cancelled sessions');
   }
 
-  if (sessionDate) session.sessionDate = new Date(sessionDate);
+  if (sessionDate) session.sessionDate = normalizeToHour(sessionDate);
   if (durationMinutes) session.durationMinutes = durationMinutes;
   if (notes !== undefined) session.notes = notes;
 
@@ -92,283 +865,299 @@ exports.updateSession = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc    Get upcoming sessions
- * @route   GET /api/sessions/upcoming
- * @access  Private
- */
-exports.getUpcoming = asyncHandler(async (req, res) => {
-  const filter =
-    req.user.userType === 'therapist'
-      ? { therapistId: req.user._id }
-      : { userId: req.user._id };
-
-  const sessions = await Session.find({
-    ...filter,
-    sessionDate: { $gte: new Date() },
-    status: { $in: ['pending', 'confirmed'] },
-  })
-    .sort({ sessionDate: 1 })
-    .limit(10);
-
-  res.json(new ApiResponse(200, { sessions }, 'Upcoming sessions retrieved'));
-});
-
-/**
- * @desc    Get available time slots for a therapist on a specific date
- * @route   GET /api/sessions/available-slots/:therapistId
- * @access  Public
- */
-exports.getAvailableSlots = asyncHandler(async (req, res) => {
-  const { therapistId } = req.params;
-  const { date } = req.query;
-
-  if (!date) {
-    throw new ApiError(400, 'Date is required');
-  }
-
-  // Check if therapist exists - try both direct user lookup and therapist profile lookup
-  let therapistUser = await User.findById(therapistId);
-  
-  if (!therapistUser) {
-    // Maybe it's a therapist profile lookup
-    const therapistProfile = await TherapistProfile.findOne({ userId: therapistId }).populate('userId');
-    if (!therapistProfile) {
-      throw new ApiError(404, 'Therapist not found');
-    }
-    therapistUser = therapistProfile.userId;
-  }
-
-  if (therapistUser.userType !== 'therapist') {
-    throw new ApiError(404, 'Therapist not found');
-  }
-
-  // Get therapist profile for availability
-  const therapistProfile = await TherapistProfile.findOne({ userId: therapistUser._id });
-
-  // Parse date string (YYYY-MM-DD)
-  const [year, month, day] = date.split('-').map(Number);
-  const requestedDate = new Date(year, month - 1, day);
-  const requestedDay = DAY_NAMES[requestedDate.getDay()];
-
-  // Check if therapist is available on this day
-  const availableDays = therapistProfile?.availability?.days || [];
-  if (availableDays.length > 0 && !availableDays.includes(requestedDay)) {
-    return res.json(
-      new ApiResponse(
-        200,
-        { bookedHours: [], availableDays, isAvailableDay: false },
-        `Therapist is not available on ${requestedDay}`
-      )
-    );
-  }
-
-  // Determine working hours from therapist profile
-  const startHour = parseHour(therapistProfile?.availability?.timeStart || '09:00');
-  const endHour = parseHour(therapistProfile?.availability?.timeEnd || '17:00');
-
-  const startOfDay = new Date(year, month - 1, day, 0, 0, 0, 0);
-  const endOfDay = new Date(year, month - 1, day, 23, 59, 59, 999);
-
-  // Find all booked sessions for this therapist on this date
-  const bookedSessions = await Session.find({
-    therapistId: therapistUser._id,
-    sessionDate: {
-      $gte: startOfDay,
-      $lte: endOfDay,
-    },
-    status: { $in: ['pending', 'confirmed'] },
-  });
-
-  // Extract booked hours
-  const bookedHours = bookedSessions.map((session) => {
-    const hour = new Date(session.sessionDate).getHours();
-    return hour;
-  });
-
-  res.json(
-    new ApiResponse(
-      200,
-      { bookedHours, startHour, endHour, availableDays, isAvailableDay: true },
-      'Available slots retrieved successfully'
-    )
-  );
-});
-
-/**
- * @desc    Create a new session (book)
- * @route   POST /api/sessions
- * @access  Private (User only)
- */
-exports.createSession = asyncHandler(async (req, res) => {
-  const { therapistId, sessionDate, durationMinutes, notes } = req.body;
-
-  // Prevent therapists from booking sessions
-  if (req.user.userType === 'therapist') {
-    throw new ApiError(403, 'Therapists cannot book sessions');
-  }
-
-  // Check if therapist exists
-  const therapistProfile = await TherapistProfile.findOne({
-    userId: therapistId,
-  }).populate('userId');
-
-  if (!therapistProfile) {
-    throw new ApiError(404, 'Therapist not found');
-  }
-
-  const sessionDateTime = new Date(sessionDate);
-  const sessionHour = sessionDateTime.getHours();
-
-  // Normalize to start of hour to prevent duplicate bookings within the same slot
-  sessionDateTime.setMinutes(0, 0, 0);
-
-  // Validate booking day against therapist's availability
-  const bookingDay = DAY_NAMES[sessionDateTime.getDay()];
-  const availableDays = therapistProfile.availability?.days || [];
-
-  if (availableDays.length > 0 && !availableDays.includes(bookingDay)) {
-    throw new ApiError(
-      400,
-      `Therapist is not available on ${bookingDay}. Available days: ${availableDays.join(', ')}`
-    );
-  }
-
-  // Validate time is within therapist's working hours
-  const startHour = parseHour(therapistProfile.availability?.timeStart || '09:00');
-  const endHour = parseHour(therapistProfile.availability?.timeEnd || '17:00');
-
-  if (sessionHour < startHour || sessionHour >= endHour) {
-    throw new ApiError(
-      400,
-      `Sessions must be booked between ${therapistProfile.availability?.timeStart || '09:00'} and ${therapistProfile.availability?.timeEnd || '17:00'}`
-    );
-  }
-
-  // Check for double-booking - same therapist, same hour slot
-  const existingSession = await Session.findOne({
-    therapistId: therapistProfile.userId._id,
-    sessionDate: sessionDateTime,
-    status: { $in: ['pending', 'confirmed'] },
-  });
-
-  if (existingSession) {
-    throw new ApiError(409, 'This time slot is already reserved. Please select another time.');
-  }
-
-  // Get user info
-  const user = await User.findById(req.user.id);
-
-  // Create session (use the actual therapist User ID, not the passed parameter)
-  const session = await Session.create({
-    therapistId: therapistProfile.userId._id,
-    userId: req.user._id,
-    therapist: {
-      name: therapistProfile.userId.fullName,
-      photoUrl: therapistProfile.photoUrl,
-      specializations: therapistProfile.specializations,
-    },
-    user: {
-      name: user.fullName,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-    },
-    sessionDate: sessionDateTime,
-    durationMinutes: durationMinutes || 60,
-    notes,
-    status: 'pending',
-  });
-
-  // Send notification and email (non-blocking)
-  notificationService.notifySessionBooked(
-    therapistId,
-    req.user._id,
-    session._id,
-    user.fullName
-  ).catch(err => console.error('Failed to send notification:', err));
-
-  emailService.sendSessionBookingEmail(
-    therapistProfile.userId.email,
-    user.fullName,
-    sessionDateTime.toLocaleString()
-  ).catch(err => console.error('Failed to send booking email:', err));
-
-  res
-    .status(201)
-    .json(new ApiResponse(201, { session }, 'Session booked successfully'));
-});
-
-/**
- * @desc    Get single session
- * @route   GET /api/sessions/:id
- * @access  Private
- */
-exports.getSession = asyncHandler(async (req, res) => {
-  const session = await Session.findById(req.params.id);
-
-  if (!session) {
-    throw new ApiError(404, 'Session not found');
-  }
-
-  // Check authorization
-  if (
-    session.userId.toString() !== req.user.id.toString() &&
-    session.therapistId.toString() !== req.user.id.toString()
-  ) {
-    throw new ApiError(403, 'Not authorized to view this session');
-  }
-
-  res.json(
-    new ApiResponse(200, { session }, 'Session retrieved successfully')
-  );
-});
-
-/**
  * @desc    Update session status
  * @route   PUT /api/sessions/:id/status
  * @access  Private (Therapist only)
  */
 exports.updateSessionStatus = asyncHandler(async (req, res) => {
-  const { status, meetingLink, cancelReason } = req.body;
+  const { status, cancelReason } = req.body;
 
-  const session = await Session.findById(req.params.id);
-
-  if (!session) {
-    throw new ApiError(404, 'Session not found');
+  if (!['confirmed', 'cancelled_by_therapist'].includes(status)) {
+    throw new ApiError(400, 'Therapist can only confirm or cancel bookings from this endpoint');
   }
 
-  if (session.therapistId.toString() !== req.user.id.toString()) {
+  const currentSession = await Session.findById(req.params.id);
+  if (!currentSession) throw new ApiError(404, 'Session not found');
+
+  if (currentSession.therapistId.toString() !== req.user.id.toString()) {
     throw new ApiError(403, 'Only therapist can update session status');
   }
 
-  session.status = status;
-  if (meetingLink) session.meetingLink = meetingLink;
-  if (cancelReason) session.cancelReason = cancelReason;
-  await session.save();
+  const normalizedSession = await markExpiredIfNeeded(currentSession);
 
-  // Send notifications (non-blocking)
   if (status === 'confirmed') {
-    notificationService.notifySessionConfirmed(
-      session.userId,
-      session.therapistId,
-      session._id,
-      session.therapist.name
-    ).catch(err => console.error('Failed to send confirmation notification:', err));
+    const generatedMeeting =
+      normalizedSession.meetingLink && normalizedSession.meetingRoomId
+        ? {
+            meetingLink: normalizedSession.meetingLink,
+            meetingRoomId: normalizedSession.meetingRoomId,
+          }
+        : buildJitsiRoom(normalizedSession._id);
 
-    emailService.sendSessionConfirmationEmail(
-      session.user.email,
-      session.therapist.name,
-      session.sessionDate.toLocaleString()
-    ).catch(err => console.error('Failed to send confirmation email:', err));
-  }
+    const confirmedSession = await Session.findOneAndUpdate(
+      {
+        _id: normalizedSession._id,
+        therapistId: req.user.id,
+        status: 'pending',
+      },
+      {
+        $set: {
+          status: 'confirmed',
+          meetingLink: generatedMeeting.meetingLink,
+          meetingRoomId: generatedMeeting.meetingRoomId,
+          meetingStatus: 'scheduled',
+          cancelReason: undefined,
+        },
+      },
+      { new: true }
+    );
 
-  if (status === 'completed') {
-    ratingService.incrementSessionCount(session.therapistId).catch(err => 
-      console.error('Failed to increment session count:', err)
+    if (!confirmedSession) {
+      const latestSession = await Session.findById(normalizedSession._id);
+      throw new ApiError(409, buildConfirmBlockedMessage(latestSession?.status));
+    }
+
+    notificationService
+      .notifySessionConfirmed(
+        confirmedSession.userId,
+        confirmedSession.therapistId,
+        confirmedSession._id,
+        confirmedSession.therapist.name
+      )
+      .catch(() => {});
+
+    emailService
+      .sendSessionConfirmationEmail(
+        confirmedSession.user.email,
+        confirmedSession.therapist.name,
+        confirmedSession.sessionDate.toLocaleString()
+      )
+      .catch(() => {});
+
+    realtimeService.emitSessionUpdate({
+      therapistId: confirmedSession.therapistId,
+      userId: confirmedSession.userId,
+      session: confirmedSession,
+      action: 'session_confirmed',
+    });
+
+    realtimeService.emitSlotUpdate({
+      therapistId: confirmedSession.therapistId,
+      sessionDate: confirmedSession.sessionDate,
+      slotHour: new Date(confirmedSession.sessionDate).getHours(),
+      state: 'booked',
+      sessionId: confirmedSession._id,
+    });
+
+    return res.json(
+      new ApiResponse(200, { session: confirmedSession }, 'Session status updated successfully')
     );
   }
 
+  if (status === 'cancelled_by_therapist' && !cancelReason) {
+    throw new ApiError(400, 'Cancellation reason is required when therapist cancels');
+  }
+
+  const cancelledSession = await Session.findOneAndUpdate(
+    {
+      _id: normalizedSession._id,
+      therapistId: req.user.id,
+      status: { $in: ACTIVE_BOOKING_STATUSES },
+    },
+    {
+      $set: {
+        status: 'cancelled_by_therapist',
+        meetingStatus: 'cancelled',
+        meetingEndedAt: new Date(),
+        cancelReason,
+        cancellationReasonTherapist: cancelReason,
+        sessionStatusTherapist: 'cancelled',
+      },
+    },
+    { new: true }
+  );
+
+  if (!cancelledSession) {
+    const latestSession = await Session.findById(normalizedSession._id);
+    throw new ApiError(
+      409,
+      `Booking cannot be cancelled because it is already in '${latestSession?.status}' state.`
+    );
+  }
+
+  notificationService
+    .notifySessionCancelled(cancelledSession.userId, cancelledSession._id, cancelReason)
+    .catch(() => {});
+
+  realtimeService.emitSessionUpdate({
+    therapistId: cancelledSession.therapistId,
+    userId: cancelledSession.userId,
+    session: cancelledSession,
+    action: 'session_cancelled_by_therapist',
+  });
+
+  realtimeService.emitSlotUpdate({
+    therapistId: cancelledSession.therapistId,
+    sessionDate: cancelledSession.sessionDate,
+    slotHour: new Date(cancelledSession.sessionDate).getHours(),
+    state: 'released',
+    sessionId: cancelledSession._id,
+  });
+
+  return res.json(
+    new ApiResponse(200, { session: cancelledSession }, 'Session status updated successfully')
+  );
+});
+
+/**
+ * @desc    Get meeting access details
+ * @route   GET /api/sessions/:id/meeting
+ * @access  Private
+ */
+exports.getMeetingAccess = asyncHandler(async (req, res) => {
+  const session = await Session.findById(req.params.id);
+  if (!session) throw new ApiError(404, 'Session not found');
+  const normalizedSession = await markExpiredIfNeeded(session);
+
+  const isParticipant =
+    normalizedSession.userId.toString() === req.user.id.toString() ||
+    normalizedSession.therapistId.toString() === req.user.id.toString();
+
+  if (!isParticipant) {
+    throw new ApiError(403, 'Only booked users can access meeting page');
+  }
+
+  if (normalizedSession.status !== 'confirmed') {
+    throw new ApiError(403, 'Meeting is available only for confirmed sessions');
+  }
+
+  if (!normalizedSession.meetingLink || !normalizedSession.meetingRoomId) {
+    throw new ApiError(400, 'Meeting has not been scheduled yet');
+  }
+
+  const isInSessionWindow = canAccessMeetingNow(normalizedSession);
+
+  if (!isInSessionWindow) {
+    throw new ApiError(403, 'Meeting link accessible only during session window');
+  }
+
+  if (!normalizedSession.meetingStartedAt) {
+    normalizedSession.meetingStartedAt = new Date();
+  }
+  normalizedSession.meetingStatus = 'active';
+  await normalizedSession.save();
+
   res.json(
-    new ApiResponse(200, { session }, 'Session status updated successfully')
+    new ApiResponse(
+      200,
+      {
+        meetingLink: normalizedSession.meetingLink,
+        meetingRoomId: normalizedSession.meetingRoomId,
+        session: normalizedSession,
+      },
+      'Meeting access granted'
+    )
+  );
+});
+
+/**
+ * @desc    Update completion status by participant
+ * @route   PUT /api/sessions/:id/completion-status
+ * @access  Private
+ */
+exports.updateCompletionStatus = asyncHandler(async (req, res) => {
+  const { status, cancellationReason } = req.body;
+
+  const session = await Session.findById(req.params.id);
+  if (!session) throw new ApiError(404, 'Session not found');
+  const normalizedSession = await markExpiredIfNeeded(session);
+
+  const isUser = normalizedSession.userId.toString() === req.user.id.toString();
+  const isTherapist = normalizedSession.therapistId.toString() === req.user.id.toString();
+
+  if (!isUser && !isTherapist) {
+    throw new ApiError(403, 'Not authorized to update this session');
+  }
+
+  if (normalizedSession.status !== 'confirmed') {
+    throw new ApiError(409, `Completion update is not allowed for '${normalizedSession.status}' sessions`);
+  }
+
+  if (
+    status === 'cancelled_by_user' ||
+    status === 'cancelled_by_therapist'
+  ) {
+    if (!cancellationReason) {
+      throw new ApiError(400, 'Cancellation reason is required when status is cancelled');
+    }
+
+    if (isUser && status !== 'cancelled_by_user') {
+      throw new ApiError(403, 'Users can only set cancellation status to cancelled_by_user');
+    }
+
+    if (isTherapist && status !== 'cancelled_by_therapist') {
+      throw new ApiError(403, 'Therapists can only set cancellation status to cancelled_by_therapist');
+    }
+  }
+
+  if (status === 'completed') {
+    if (isUser) normalizedSession.sessionStatusUser = 'completed';
+    if (isTherapist) normalizedSession.sessionStatusTherapist = 'completed';
+  }
+
+  if (status === 'cancelled_by_user') {
+    normalizedSession.status = 'cancelled_by_user';
+    normalizedSession.meetingStatus = 'cancelled';
+    normalizedSession.meetingEndedAt = new Date();
+    normalizedSession.sessionStatusUser = 'cancelled';
+    normalizedSession.cancelReason = cancellationReason;
+    normalizedSession.cancellationReasonUser = cancellationReason;
+  }
+
+  if (status === 'cancelled_by_therapist') {
+    normalizedSession.status = 'cancelled_by_therapist';
+    normalizedSession.meetingStatus = 'cancelled';
+    normalizedSession.meetingEndedAt = new Date();
+    normalizedSession.sessionStatusTherapist = 'cancelled';
+    normalizedSession.cancelReason = cancellationReason;
+    normalizedSession.cancellationReasonTherapist = cancellationReason;
+  }
+
+  if (
+    normalizedSession.sessionStatusUser === 'completed' &&
+    normalizedSession.sessionStatusTherapist === 'completed' &&
+    normalizedSession.status === 'confirmed'
+  ) {
+    const wasAlreadyCompleted = normalizedSession.status === 'completed';
+    normalizedSession.status = 'completed';
+    normalizedSession.meetingStatus = 'completed';
+    normalizedSession.meetingEndedAt = new Date();
+    if (!wasAlreadyCompleted) {
+      ratingService.incrementSessionCount(normalizedSession.therapistId).catch(() => {});
+    }
+  }
+
+  await normalizedSession.save();
+
+  realtimeService.emitSessionUpdate({
+    therapistId: normalizedSession.therapistId,
+    userId: normalizedSession.userId,
+    session: normalizedSession,
+    action: status === 'completed' ? 'session_completed_status_updated' : 'session_cancelled',
+  });
+
+  if (status === 'cancelled_by_user' || status === 'cancelled_by_therapist') {
+    realtimeService.emitSlotUpdate({
+      therapistId: normalizedSession.therapistId,
+      sessionDate: normalizedSession.sessionDate,
+      slotHour: new Date(normalizedSession.sessionDate).getHours(),
+      state: 'released',
+      sessionId: normalizedSession._id,
+    });
+  }
+
+  res.json(
+    new ApiResponse(200, { session: normalizedSession }, 'Session completion status updated')
   );
 });
 
@@ -381,34 +1170,94 @@ exports.cancelSession = asyncHandler(async (req, res) => {
   const { cancelReason } = req.body;
 
   const session = await Session.findById(req.params.id);
+  if (!session) throw new ApiError(404, 'Session not found');
+  const normalizedSession = await markExpiredIfNeeded(session);
 
-  if (!session) {
-    throw new ApiError(404, 'Session not found');
-  }
+  const isUserCancelling = normalizedSession.userId.toString() === req.user.id.toString();
+  const isTherapistCancelling = normalizedSession.therapistId.toString() === req.user.id.toString();
 
-  // Only user or therapist can cancel
-  if (
-    session.userId.toString() !== req.user.id.toString() &&
-    session.therapistId.toString() !== req.user.id.toString()
-  ) {
+  if (!isUserCancelling && !isTherapistCancelling) {
     throw new ApiError(403, 'Not authorized to cancel this session');
   }
 
-  session.status = 'cancelled';
-  session.cancelReason = cancelReason;
-  await session.save();
+  if (isTherapistCancelling && !cancelReason) {
+    throw new ApiError(400, 'Cancellation reason is required when therapist cancels');
+  }
 
-  // Notify the other party
-  const notifyUserId =
-    req.user.id.toString() === session.userId.toString()
-      ? session.therapistId
-      : session.userId;
+  const nextStatus = isUserCancelling
+    ? 'cancelled_by_user'
+    : 'cancelled_by_therapist';
 
-  await notificationService.notifySessionCancelled(
-    notifyUserId,
-    session._id,
-    cancelReason
+  const cancelledSession = await Session.findOneAndUpdate(
+    {
+      _id: normalizedSession._id,
+      status: { $in: ACTIVE_BOOKING_STATUSES },
+      ...(isUserCancelling ? { userId: req.user.id } : { therapistId: req.user.id }),
+    },
+    {
+      $set: {
+        status: nextStatus,
+        cancelReason,
+        meetingStatus: 'cancelled',
+        meetingEndedAt: new Date(),
+        ...(isUserCancelling
+          ? {
+              sessionStatusUser: 'cancelled',
+              cancellationReasonUser: cancelReason,
+            }
+          : {
+              sessionStatusTherapist: 'cancelled',
+              cancellationReasonTherapist: cancelReason,
+            }),
+      },
+    },
+    { new: true }
   );
 
-  res.json(new ApiResponse(200, { session }, 'Session cancelled successfully'));
+  if (!cancelledSession) {
+    const latestSession = await Session.findById(normalizedSession._id);
+    throw new ApiError(
+      409,
+      `Booking cannot be cancelled because it is already in '${latestSession?.status}' state.`
+    );
+  }
+
+  const notifyUserId = isUserCancelling
+    ? cancelledSession.therapistId
+    : cancelledSession.userId;
+
+  notificationService
+    .notifySessionCancelled(notifyUserId, cancelledSession._id, cancelReason)
+    .catch(() => {});
+
+  realtimeService.emitSessionUpdate({
+    therapistId: cancelledSession.therapistId,
+    userId: cancelledSession.userId,
+    session: cancelledSession,
+    action: 'session_cancelled',
+  });
+
+  realtimeService.emitSlotUpdate({
+    therapistId: cancelledSession.therapistId,
+    sessionDate: cancelledSession.sessionDate,
+    slotHour: new Date(cancelledSession.sessionDate).getHours(),
+    state: 'released',
+    sessionId: cancelledSession._id,
+  });
+
+  res.json(new ApiResponse(200, { session: cancelledSession }, 'Session cancelled successfully'));
 });
+
+/**
+ * @desc    Stream realtime session/slot updates (SSE)
+ * @route   GET /api/sessions/stream
+ * @access  Private (Bearer token header or token query param)
+ */
+exports.streamSessionEvents = async (req, res, next) => {
+  try {
+    const user = await resolveAuthenticatedUser(req);
+    realtimeService.subscribe(req, res, user);
+  } catch (error) {
+    next(error);
+  }
+};

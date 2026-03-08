@@ -11,16 +11,22 @@ export default function TherapistSessionsPage() {
   const { list } = useSessions(
     { role: 'therapist' },
     {
-      refetchInterval: 10000,
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: false,
     }
   );
-  const { updateStatus } = useSessionMutations();
+  const { updateStatus, cancelSession } = useSessionMutations();
   const sessions = list.data?.data?.sessions || list.data?.sessions || [];
 
-  const handleUpdate = async (id) => {
+  const handleConfirm = async (id) => {
     await updateStatus.mutateAsync({ id, data: { status: 'confirmed' } });
     toast.success('Session confirmed');
+  };
+
+  const handleCancel = async (id) => {
+    const reason = window.prompt('Cancellation reason (required):', 'Therapist unavailable');
+    if (!reason) return;
+    await cancelSession.mutateAsync({ id, reason });
+    toast.success('Session cancelled');
   };
 
   return (
@@ -28,7 +34,7 @@ export default function TherapistSessionsPage() {
       <h1 className="font-heading text-2xl font-bold text-charcoal">Manage sessions</h1>
       {list.isLoading && <LoadingSpinner label="Loading sessions..." />}
       {list.error && <ErrorMessage message={String(list.error)} />}
-      <SessionList sessions={sessions} onUpdate={handleUpdate} />
+      <SessionList sessions={sessions} onConfirm={handleConfirm} onCancel={handleCancel} />
     </AnimatedSection>
   );
 }
