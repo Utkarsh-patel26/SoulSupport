@@ -71,6 +71,48 @@ const WELLNESS_ARTICLES = [
   },
 ];
 
+const MEDITATIONS = [
+  {
+    title: "Peaceful Meditation — Spotify",
+    description: "Gentle ambient tracks for calm and focus.",
+    embed: "https://open.spotify.com/embed/playlist/37i9dQZF1DWZqd5JICZI0u?utm_source=generator",
+    link: "https://open.spotify.com/playlist/37i9dQZF1DWZqd5JICZI0u",
+  },
+  {
+    title: "Ambient Relaxation — Spotify",
+    description: "Relax and unwind with chill, ambient music.",
+    embed: "https://open.spotify.com/embed/playlist/37i9dQZF1DX3Ogo9pFvBkY?utm_source=generator",
+    link: "https://open.spotify.com/playlist/37i9dQZF1DX3Ogo9pFvBkY",
+  },
+  {
+    title: "Nature Sounds — Spotify",
+    description: "Sounds of birds, rain, and forest ambience.",
+    embed: "https://open.spotify.com/embed/playlist/37i9dQZF1DX4PP3DA4J0N8?utm_source=generator",
+    link: "https://open.spotify.com/playlist/37i9dQZF1DX4PP3DA4J0N8",
+  },
+];
+
+const VIDEOS = [
+  {
+    title: "5-Minute Meditation You Can Do Anywhere",
+    description: "Quick breathing and presence practice to reduce stress.",
+    embed: "https://www.youtube.com/embed/inpok4MKVLM",
+    link: "https://www.youtube.com/watch?v=inpok4MKVLM",
+  },
+  {
+    title: "Headspace | Mini Meditation: Breathe",
+    description: "Guided mini-meditation to help pause and reset.",
+    embed: "https://www.youtube.com/embed/YFSc7Ck0Ao0",
+    link: "https://www.youtube.com/watch?v=YFSc7Ck0Ao0",
+  },
+  {
+    title: "UCLA Mindful — 5-Minute Guided Meditation",
+    description: "A brief, evidence-based mindfulness practice.",
+    embed: "https://www.youtube.com/embed/ZToicYcHIOU",
+    link: "https://www.youtube.com/watch?v=ZToicYcHIOU",
+  },
+];
+
 export default function ResourcesPage() {
   return (
     <div className="min-h-screen bg-background text-charcoal pb-24">
@@ -181,6 +223,101 @@ export default function ResourcesPage() {
                   </CardContent>
                 </Card>
               </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Guided Meditation Audios */}
+      <section className="py-20 px-4 sm:px-6">
+        <div className="container mx-auto max-w-6xl">
+          <div className="mb-12">
+            <h2 className="font-heading text-h3 font-bold text-charcoal">Guided Meditation Audios</h2>
+            <p className="mt-2 text-base text-text-muted">
+              Press play to start a session. Curated playlists from Spotify.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {MEDITATIONS.map((item) => (
+              <Card key={item.title} className="flex h-full flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">{item.title}</CardTitle>
+                  <CardDescription>{item.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto">
+                  <div className="overflow-hidden rounded-xl border border-border/60">
+                    <iframe
+                      src={item.embed}
+                      width="100%"
+                      height="320"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      className="h-96 w-full border-0"
+                      title={item.title}
+                    />
+                  </div>
+                  <p className="mt-3 text-xs text-text-muted">
+                    If the player doesn&apos;t load,{' '}
+                    <a
+                      className="font-semibold text-primary hover:underline"
+                      href={item.link}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      open on Spotify
+                    </a>
+                    .
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Stress Management Videos */}
+      <section className="py-20 px-4 sm:px-6 bg-surface-alt/40 border-y border-border/50">
+        <div className="container mx-auto max-w-6xl">
+          <div className="mb-12">
+            <h2 className="font-heading text-h3 font-bold text-charcoal">Stress Management Videos</h2>
+            <p className="mt-2 text-base text-text-muted">
+              Short, effective practices you can try right now.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {VIDEOS.map((item) => (
+              <Card key={item.title} className="flex h-full flex-col">
+                <CardHeader>
+                  <CardTitle className="text-lg">{item.title}</CardTitle>
+                  <CardDescription>{item.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="mt-auto">
+                  <div className="overflow-hidden rounded-xl border border-border/60">
+                    <iframe
+                      src={item.embed}
+                      title={item.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      loading="lazy"
+                      className="aspect-video w-full border-0"
+                    />
+                  </div>
+                  <p className="mt-3 text-xs text-text-muted">
+                    If the video doesn&apos;t load,{' '}
+                    <a
+                      className="font-semibold text-primary hover:underline"
+                      href={item.link}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      watch on YouTube
+                    </a>
+                    .
+                  </p>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>

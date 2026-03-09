@@ -1,6 +1,6 @@
-import dynamic from 'next/dynamic';
+'use client';
 
-const ForumContent = dynamic(() => import('./ForumClient'), { ssr: false });
+import ForumContent from './ForumClient';
 
 export default function ForumPage() {
   return <ForumContent />;

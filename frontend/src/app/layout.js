@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import { Providers } from './providers';
 import { Header } from '@/components/layout/Header';
+import { FooterGate } from '@/components/layout/FooterGate';
 import { PrefetchRoutes } from '@/components/PrefetchRoutes';
 
 const heading = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-heading' });
@@ -26,6 +27,7 @@ export default function RootLayout({ children }) {
               <PrefetchRoutes />
               <Header />
               <main id="main-content" className="min-h-screen outline-none" tabIndex={-1}>{children}</main>
+              <FooterGate />
               <Toaster 
                 position="bottom-right" 
                 toastOptions={{
