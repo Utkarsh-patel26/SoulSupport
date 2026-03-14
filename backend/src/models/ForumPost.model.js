@@ -94,11 +94,10 @@ forumPostSchema.index({ userId: 1 });
 forumPostSchema.index({ likesCount: -1 });
 
 // Update comments count before save
-forumPostSchema.pre('save', function (next) {
+forumPostSchema.pre('save', function () {
   if (this.isModified('comments')) {
     this.commentsCount = this.comments.length;
   }
-  next();
 });
 
 module.exports = mongoose.model('ForumPost', forumPostSchema);

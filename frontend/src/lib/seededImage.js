@@ -10,19 +10,19 @@ function hashSeed(seed = '') {
   return Math.abs(hash);
 }
 
-export function getSeededPhotoUrl(seed = '', category = 'wellness', width = 900, height = 700) {
+function buildSeededPhotoUrl(seed = '', category = 'wellness', width = 900, height = 700) {
   const id = hashSeed(`${category}-${seed}`) % 1000;
   return `https://picsum.photos/seed/soulsupport-${category}-${id}/${width}/${height}`;
 }
 
-export function getSeededIllustrationUrl(seed = '', style = 'shapes') {
+function buildSeededIllustrationUrl(seed = '', style = 'shapes') {
   return `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(`soulsupport-${seed}`)}`;
 }
 
 export function getSeededFallbackUrls(seed = '', category = 'wellness') {
   return [
-    getSeededPhotoUrl(seed, category),
-    getSeededIllustrationUrl(seed, 'shapes'),
-    getSeededIllustrationUrl(`${seed}-alt`, 'identicon'),
+    buildSeededPhotoUrl(seed, category),
+    buildSeededIllustrationUrl(seed, 'shapes'),
+    buildSeededIllustrationUrl(`${seed}-alt`, 'identicon'),
   ];
 }

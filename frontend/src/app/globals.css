@@ -1,6 +1,7 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../../tailwind.config.js";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/typography";
 
 @layer base {
   :root {
@@ -16,17 +17,36 @@
   }
   
   body {
-    @apply bg-background text-foreground transition-colors duration-300 antialiased;
+    background: var(--bg);
+    color: var(--text-main);
+    transition: background-color 300ms, color 300ms;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Typography defaults */
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-heading;
+    letter-spacing: -0.025em;
+    font-family: var(--font-heading), Inter, sans-serif;
   }
 
   /* Accessibility skip link */
   .skip-to-content {
-    @apply absolute left-4 -top-20 z-50 rounded-md bg-primary px-4 py-2 text-white transition-all focus:top-4 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    position: absolute;
+    left: 1rem;
+    top: -5rem;
+    z-index: 50;
+    border-radius: 0.375rem;
+    background: #1FB6A6;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    transition: all 200ms;
+  }
+
+  .skip-to-content:focus {
+    top: 1rem;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(31, 182, 166, 0.45);
   }
 }
 

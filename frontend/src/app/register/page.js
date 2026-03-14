@@ -46,7 +46,7 @@ export default function RegisterPage() {
         <Card className="shadow-card border-border/50">
           <CardHeader className="text-center pb-2">
             <CardTitle className="text-h3 sm:text-h2 text-charcoal">
-              Get started — it's free
+              Get started - it&apos;s free
             </CardTitle>
             <CardDescription className="text-base text-text-muted mt-2">
               Join our community for accessible mental health support.

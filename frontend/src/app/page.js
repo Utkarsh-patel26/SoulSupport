@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, ShieldCheck, CalendarClock, Activity, BookOpen, HeartHandshake, MessageCircle, Users, Zap, Search, Play, Phone, Mail } from 'lucide-react';
+import { ArrowRight, ShieldCheck, CalendarClock, Activity, BookOpen, HeartHandshake, MessageCircle, Users, Zap, Search, Play } from 'lucide-react';
 import Link from 'next/link';
 import { SeededImage } from '@/components/ui/SeededImage';
 
@@ -58,7 +58,7 @@ const HeroSection = () => (
           variants={fadeInUp}
           className="text-lg lg:text-xl text-text-secondary mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed"
         >
-          Taking care of your mental health doesn't have to be a struggle. Get professional, confidential support tailored just for you.
+          Taking care of your mental health doesn&apos;t have to be a struggle. Get professional, confidential support tailored just for you.
         </motion.p>
         
         <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -326,58 +326,6 @@ const CTASection = () => (
   </section>
 );
 
-const Footer = () => (
-  <footer className="bg-white border-t border-border-light pt-16 pb-8 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-      <div className="md:col-span-1">
-        <h3 className="text-2xl font-bold text-brand mb-4">SoulSupport</h3>
-        <p className="text-text-secondary mb-6 text-sm">
-          Providing compassionate, safe, and professional mental health support to those who need it most.
-        </p>
-        <div className="flex space-x-4">
-           {/* Simple placeholder icons */}
-           <div className="w-8 h-8 rounded-full bg-brand-soft text-brand flex items-center justify-center hover:bg-brand hover:text-white transition-colors cursor-pointer border border-brand/10">in</div>
-           <div className="w-8 h-8 rounded-full bg-brand-soft text-brand flex items-center justify-center hover:bg-brand hover:text-white transition-colors cursor-pointer border border-brand/10">ig</div>
-        </div>
-      </div>
-      
-      <div>
-        <h4 className="font-bold text-text-dark mb-4">Services</h4>
-        <ul className="space-y-3 text-sm text-text-secondary">
-          <li><Link href="#" className="hover:text-brand transition-colors">Individual Therapy</Link></li>
-          <li><Link href="#" className="hover:text-brand transition-colors">Couples Therapy</Link></li>
-          <li><Link href="#" className="hover:text-brand transition-colors">Teen Counseling</Link></li>
-        </ul>
-      </div>
-      
-      <div>
-        <h4 className="font-bold text-text-dark mb-4">Company</h4>
-        <ul className="space-y-3 text-sm text-text-secondary">
-          <li><Link href="#" className="hover:text-brand transition-colors">About Us</Link></li>
-          <li><Link href="#" className="hover:text-brand transition-colors">Therapists</Link></li>
-          <li><Link href="#" className="hover:text-brand transition-colors">Contact</Link></li>
-        </ul>
-      </div>
-      
-      <div>
-        <h4 className="font-bold text-text-dark mb-4">Contact Us</h4>
-        <ul className="space-y-3 text-sm text-text-secondary">
-          <li className="flex items-center"><Phone className="w-4 h-4 mr-2" /> 1-800-SUPPORT</li>
-          <li className="flex items-center"><Mail className="w-4 h-4 mr-2" /> care@soulsupport.com</li>
-        </ul>
-      </div>
-    </div>
-    
-    <div className="max-w-7xl mx-auto border-t border-border-light pt-8 flex flex-col md:flex-row items-center justify-between text-text-secondary text-sm">
-      <p>&copy; {new Date().getFullYear()} SoulSupport. All rights reserved.</p>
-      <div className="flex gap-4 mt-4 md:mt-0">
-        <Link href="#" className="hover:text-brand">Privacy Policy</Link>
-        <Link href="#" className="hover:text-brand">Terms of Service</Link>
-      </div>
-    </div>
-  </footer>
-);
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-white font-sans text-text-dark selection:bg-brand-soft selection:text-brand flex flex-col">
@@ -387,7 +335,6 @@ export default function Home() {
       <ResourceGrid />
       <BenefitsCards />
       <CTASection />
-      <Footer />
     </div>
   );
 }

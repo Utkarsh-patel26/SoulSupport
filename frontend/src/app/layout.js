@@ -1,4 +1,5 @@
 import './globals.css';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationProvider } from '@/context/NotificationContext';
 import { Toaster } from 'react-hot-toast';
@@ -26,7 +27,9 @@ export default function RootLayout({ children }) {
             <NotificationProvider>
               <PrefetchRoutes />
               <Header />
-              <main id="main-content" className="min-h-screen outline-none" tabIndex={-1}>{children}</main>
+              <main id="main-content" className="min-h-screen outline-none" tabIndex={-1}>
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </main>
               <FooterGate />
               <Toaster 
                 position="bottom-right" 

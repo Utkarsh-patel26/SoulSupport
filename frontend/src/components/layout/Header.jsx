@@ -1,25 +1,39 @@
 "use client";
 
-import { useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { NotificationBell } from './NotificationBell';
 
-export function Header() {
+const NAV_LINKS = [
+  { name: 'Home', path: '/' },
+  { name: 'About', path: '/about' },
+  { name: 'Therapists', path: '/therapists' },
+  { name: 'Resources', path: '/resources' },
+  { name: 'Community', path: '/forum' },
+];
+
+function getDashboardHref(userType) {
+  if (userType === 'therapist') {
+    return '/therapist-dashboard';
+  }
+
+  if (userType === 'admin') {
+    return '/admin';
+  }
+
+  return '/dashboard';
+}
+
+function HeaderComponent() {
   const { user, logout, isAuthenticated } = useAuth();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Therapists', path: '/therapists' },
-    { name: 'Resources', path: '/resources' },
-    { name: 'Community', path: '/forum' },
-  ];
+  const dashboardHref = useMemo(() => getDashboardHref(user?.userType), [user?.userType]);
 
   return (
     <header className="sticky top-0 z-50 bg-surface/80 backdrop-blur-xl border-b border-border/40 transition-all duration-300">
@@ -36,7 +50,7 @@ export function Header() {
         </div>
         
         <nav className="hidden items-center gap-1 p-1.5 rounded-full bg-surface-alt/50 border border-border/50 md:flex">
-          {navLinks.map((link) => {
+          {NAV_LINKS.map((link) => {
             const isActive = pathname === link.path;
             return (
               <Link 
@@ -57,14 +71,16 @@ export function Header() {
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated ? (
             <div className="flex items-center gap-4 bg-surface-alt/50 pl-4 pr-1 py-1 rounded-full border border-border/50">
-              <Link href={user?.userType === 'therapist' ? '/therapist-dashboard' : '/dashboard'} prefetch={true} className="text-sm font-semibold text-charcoal hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md px-1">
+                <Link href={dashboardHref} prefetch={true} className="text-sm font-semibold text-charcoal hover:text-primary transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md px-1">
                  Dashboard
               </Link>
               <div className="h-4 w-px bg-border"></div>
+                <NotificationBell />
+                <div className="h-4 w-px bg-border"></div>
               <Button variant="ghost" size="sm" onClick={logout} className="text-text-muted hover:text-red-600 hover:bg-red-50 rounded-full px-3 py-1.5 text-xs">
                 Logout
               </Button>
-              <Link href={user?.userType === 'therapist' ? '/therapist-dashboard' : '/dashboard'} prefetch={true} className="outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full">
+              <Link href={dashboardHref} prefetch={true} className="outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full">
                 <Avatar name={user?.fullName || user?.email || 'User'} size={36} className="ring-2 ring-white shadow-sm" />
               </Link>
             </div>
@@ -102,7 +118,7 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border/50 bg-surface">
           <nav className="flex flex-col px-4 py-4 space-y-2">
-            {navLinks.map((link) => {
+            {NAV_LINKS.map((link) => {
               const isActive = pathname === link.path;
               return (
                 <Link
@@ -122,7 +138,7 @@ export function Header() {
             {isAuthenticated ? (
               <>
                 <Link 
-                  href={user?.userType === 'therapist' ? '/therapist-dashboard' : '/dashboard'} 
+                  href={dashboardHref} 
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="block px-4 py-3 rounded-xl text-base font-semibold text-text-secondary hover:bg-surface-alt"
                 >
@@ -151,3 +167,5 @@ export function Header() {
     </header>
   );
 }
+
+export const Header = memo(HeaderComponent);

@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
 import { requireUserFromRequest } from '@/lib/server-auth';
-import { ChatMessageModel } from '@/lib/server-models/ChatMessage';
-import { SessionModel } from '@/lib/server-models/Session';
-import { UserModel } from '@/lib/server-models/User';
 
 export const runtime = 'nodejs';
 
@@ -14,6 +10,78 @@ const THERAPIST_LIMIT = 12;
 const OPENROUTER_TIMEOUT_MS = 25000;
 const FALLBACK_MESSAGE =
   'I am having trouble reaching the AI service right now. I can still help with your appointments and therapists if you ask that directly, or you can try again in a moment.';
+const UPCOMING_SESSION_STATUSES = new Set(['pending', 'confirmed']);
+const ENDED_SESSION_STATUSES = new Set([
+  'cancelled_by_user',
+  'cancelled_by_therapist',
+  'expired',
+]);
+const SUPPORTED_CHAT_USER_TYPES = new Set(['user', 'therapist']);
+
+const memoryStore = globalThis.__soulSupportChatMemory || new Map();
+globalThis.__soulSupportChatMemory = memoryStore;
+
+function logChatRouteError(context, error) {
+  console.error(`[chat route] ${context}`, error);
+}
+
+function logChatRouteWarning(context, error) {
+  console.warn(`[chat route] ${context}`, error);
+}
+
+function getBearerToken(request) {
+  const header = request.headers.get('authorization') || '';
+  if (!header.startsWith('Bearer ')) {
+    return null;
+  }
+  return header.slice(7).trim();
+}
+
+function getApiBaseUrl() {
+  const raw = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL;
+  if (!raw) return null;
+  return raw.replace(/\/$/, '');
+}
+
+function getUserKey(user) {
+  return String(user?._id || user?.id || user?.email || 'anonymous');
+}
+
+async function fetchBackendJson(path, token) {
+  const apiBaseUrl = getApiBaseUrl();
+  if (!apiBaseUrl || !token) return null;
+
+  try {
+    const response = await fetch(`${apiBaseUrl}${path}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    logChatRouteWarning(`Failed backend fetch for ${path}`, error);
+    return null;
+  }
+}
+
+function extractSessions(payload) {
+  const sessions = payload?.data?.sessions;
+  return Array.isArray(sessions) ? sessions : [];
+}
+
+function extractTherapists(payload) {
+  const therapists = payload?.data?.therapists;
+  return Array.isArray(therapists) ? therapists : [];
+}
+
+function getHistory(userKey) {
+  const history = memoryStore.get(userKey);
+  return Array.isArray(history) ? history : [];
+}
 
 function toReadableDate(dateValue) {
   if (!dateValue) return 'N/A';
@@ -46,6 +114,14 @@ function summarizeHistory(history) {
   });
 }
 
+function getSessionDisplayName(session, userType, therapistNameMap) {
+  if (userType === 'therapist') {
+    return session?.user?.name || session?.user?.email || 'Client';
+  }
+
+  return session?.therapist?.name || therapistNameMap.get(String(session?.therapistId)) || 'Therapist';
+}
+
 function detectIntent(userMessage) {
   const normalized = userMessage.toLowerCase();
 
@@ -61,8 +137,16 @@ function detectIntent(userMessage) {
     return 'APPOINTMENTS';
   }
 
+  if (/show my pending session requests|pending session requests|pending requests/.test(normalized)) {
+    return 'THERAPIST_PENDING_REQUESTS';
+  }
+
   if (/who is my therapist tomorrow|therapist tomorrow|session tomorrow/.test(normalized)) {
     return 'THERAPIST_TOMORROW';
+  }
+
+  if (/who is my client tomorrow|client tomorrow|my schedule tomorrow/.test(normalized)) {
+    return 'CLIENT_TOMORROW';
   }
 
   if (/what is my name|what's my name|who am i/.test(normalized)) {
@@ -101,19 +185,41 @@ function buildIntentReply(intent, context) {
 
   if (intent === 'APPOINTMENTS') {
     if (!context.upcomingSessions.length) {
-      return 'You currently have no upcoming appointments. You can book one from Dashboard > Therapists.';
+      return context.userType === 'therapist'
+        ? 'You currently have no upcoming client sessions.'
+        : 'You currently have no upcoming appointments. You can book one from Dashboard > Therapists.';
     }
 
     const lines = context.upcomingSessions.slice(0, 8).map((s, idx) => {
-      const therapistName =
-        s?.therapist?.name || context.therapistNameMap.get(String(s.therapistId)) || 'Therapist';
-      return `${idx + 1}. ${toReadableDate(s.sessionDate)} with ${therapistName} (${s.status})`;
+      const participantName = getSessionDisplayName(s, context.userType, context.therapistNameMap);
+      return `${idx + 1}. ${toReadableDate(s.sessionDate)} with ${participantName} (${s.status})`;
     });
 
-    return ['Your upcoming appointments:', ...lines].join('\n');
+    return [context.userType === 'therapist' ? 'Your upcoming client sessions:' : 'Your upcoming appointments:', ...lines].join('\n');
+  }
+
+  if (intent === 'THERAPIST_PENDING_REQUESTS') {
+    if (context.userType !== 'therapist') {
+      return 'Pending session requests are only available on therapist accounts.';
+    }
+
+    if (!context.pendingSessions.length) {
+      return 'You do not have any pending session requests right now.';
+    }
+
+    const lines = context.pendingSessions.slice(0, 8).map((session, idx) => {
+      const clientName = getSessionDisplayName(session, context.userType, context.therapistNameMap);
+      return `${idx + 1}. ${toReadableDate(session.sessionDate)} with ${clientName}`;
+    });
+
+    return ['Your pending session requests:', ...lines].join('\n');
   }
 
   if (intent === 'THERAPIST_TOMORROW') {
+    if (context.userType !== 'user') {
+      return null;
+    }
+
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowDate = tomorrow.toDateString();
@@ -134,55 +240,77 @@ function buildIntentReply(intent, context) {
     return `Your therapist${therapistNames.length > 1 ? 's' : ''} tomorrow: ${therapistNames.join(', ')}.`;
   }
 
+  if (intent === 'CLIENT_TOMORROW') {
+    if (context.userType !== 'therapist') {
+      return null;
+    }
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDate = tomorrow.toDateString();
+    const tomorrowSessions = context.upcomingSessions.filter(
+      (s) => new Date(s.sessionDate).toDateString() === tomorrowDate
+    );
+
+    if (!tomorrowSessions.length) {
+      return 'You do not have any client sessions scheduled for tomorrow.';
+    }
+
+    const clientNames = dedupeNames(
+      tomorrowSessions.map((s) => getSessionDisplayName(s, context.userType, context.therapistNameMap))
+    );
+
+    return `Your client${clientNames.length > 1 ? 's' : ''} tomorrow: ${clientNames.join(', ')}.`;
+  }
+
   return null;
 }
 
 async function buildUserContext(user) {
   const now = new Date();
+  const token = user.__accessToken || null;
 
-  const [upcomingSessions, cancelledSessions, recentHistory, therapists] = await Promise.all([
-    SessionModel.find({
-      userId: user._id,
-      status: { $in: ['pending', 'confirmed'] },
-      sessionDate: { $gte: now },
-    })
-      .sort({ sessionDate: 1 })
-      .limit(8)
-      .lean(),
-    SessionModel.find({
-      userId: user._id,
-      status: { $in: ['cancelled_by_user', 'cancelled_by_therapist', 'expired'] },
-    })
-      .sort({ sessionDate: -1 })
-      .limit(8)
-      .lean(),
-    ChatMessageModel.find({ userId: user._id })
-      .sort({ timestamp: -1 })
-      .limit(HISTORY_LIMIT)
-      .lean(),
-    UserModel.find({ userType: 'therapist', isActive: true })
-      .select('fullName email bio')
-      .sort({ fullName: 1 })
-      .limit(THERAPIST_LIMIT)
-      .lean(),
+  const [sessionsPayload, therapistsPayload] = await Promise.all([
+    fetchBackendJson(`/sessions?limit=40`, token),
+    fetchBackendJson(`/therapists?limit=${THERAPIST_LIMIT}`, token),
   ]);
 
-  const therapistIds = [
-    ...new Set([...upcomingSessions, ...cancelledSessions].map((s) => String(s.therapistId))),
-  ];
+  const allSessions = extractSessions(sessionsPayload);
+  const therapists = extractTherapists(therapistsPayload);
 
-  const therapistUsers = therapistIds.length
-    ? await UserModel.find({ _id: { $in: therapistIds } })
-        .select('fullName bio')
-        .lean()
-    : [];
+  const upcomingSessions = allSessions
+    .filter((s) => UPCOMING_SESSION_STATUSES.has(s?.status) && new Date(s?.sessionDate) >= now)
+    .sort((a, b) => new Date(a.sessionDate) - new Date(b.sessionDate))
+    .slice(0, 8);
 
-  const therapistNameMap = new Map(therapistUsers.map((t) => [String(t._id), t.fullName]));
+  const pendingSessions = allSessions
+    .filter((s) => s?.status === 'pending' && new Date(s?.sessionDate) >= now)
+    .sort((a, b) => new Date(a.sessionDate) - new Date(b.sessionDate))
+    .slice(0, 8);
+
+  const cancelledSessions = allSessions
+    .filter((s) => ENDED_SESSION_STATUSES.has(s?.status))
+    .sort((a, b) => new Date(b.sessionDate) - new Date(a.sessionDate))
+    .slice(0, 8);
+
+  const userKey = getUserKey(user);
+  const recentHistory = getHistory(userKey).slice(-HISTORY_LIMIT);
+
+  const therapistNameMap = new Map(
+    therapists
+      .map((t) => {
+        const id = String(t._id || t.id || t.userId || '');
+        if (!id) return null;
+        return [id, t.user?.fullName || t.fullName || t.name || 'Therapist'];
+      })
+      .filter(Boolean)
+  );
+
   const therapistDirectory = therapists.map((t) => ({
-    fullName: t.fullName,
-    email: t.email,
-    specializations: [],
-    bio: t.bio || '',
+    fullName: t.user?.fullName || t.fullName || t.name || 'Therapist',
+    email: t.user?.email || t.email || '',
+    specializations: Array.isArray(t.specializations) ? t.specializations : [],
+    bio: t.user?.bio || t.bio || '',
   }));
 
   const upcomingSummary = summarizeSessions(upcomingSessions, therapistNameMap);
@@ -204,9 +332,11 @@ async function buildUserContext(user) {
   ];
 
   return {
+    userType: user.userType,
     userName: user.fullName,
     userEmail: user.email,
     upcomingSessions,
+    pendingSessions,
     cancelledSessions,
     chatHistory: recentHistory.slice().reverse(),
     therapists: therapistDirectory,
@@ -252,7 +382,9 @@ function maybeHandleSmartIntent(userMessage, context) {
   const normalized = userMessage.toLowerCase();
 
   if (/how do i cancel my session|cancel my session|cancel appointment/.test(normalized)) {
-    return 'To cancel a session: open Dashboard > Sessions, find the booking, click cancel, and add a reason if prompted. If cancellation is blocked near start time, contact support through Resources or your therapist in advance.';
+    return context.userType === 'therapist'
+      ? 'To cancel a client session: open Therapist Dashboard > Sessions, choose the booking, click cancel, and provide a cancellation reason when prompted.'
+      : 'To cancel a session: open Dashboard > Sessions, find the booking, click cancel, and add a reason if prompted. If cancellation is blocked near start time, contact support through Resources or your therapist in advance.';
   }
 
   if (/stress relief tips|anxiety tips|calm down/.test(normalized)) {
@@ -266,17 +398,32 @@ function maybeHandleSmartIntent(userMessage, context) {
     ].join('\n');
   }
 
+  if (context.userType === 'therapist' && /how do i manage my schedule|manage my schedule|schedule tips/.test(normalized)) {
+    return [
+      'To manage your schedule effectively:',
+      '1. Open Therapist Dashboard > Sessions to review pending and confirmed bookings.',
+      '2. Confirm pending requests quickly so clients know their slot is secured.',
+      '3. Keep your availability updated in Therapist Dashboard > Profile.',
+      '4. If you need to cancel, provide a clear reason so the client gets proper context.',
+    ].join('\n');
+  }
+
   return null;
 }
 
 async function saveMessage(userId, role, message) {
   if (!message?.trim()) return;
-  await ChatMessageModel.create({
-    userId,
+  const history = getHistory(userId);
+  history.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     role,
     message: message.trim(),
     timestamp: new Date(),
   });
+  if (history.length > HISTORY_LIMIT * 4) {
+    history.splice(0, history.length - HISTORY_LIMIT * 4);
+  }
+  memoryStore.set(userId, history);
 }
 
 export async function GET(request) {
@@ -285,20 +432,16 @@ export async function GET(request) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  if (auth.user.userType !== 'user') {
-    return NextResponse.json({ error: 'Chatbot is only available for user dashboard accounts' }, { status: 403 });
+  if (!SUPPORTED_CHAT_USER_TYPES.has(auth.user.userType)) {
+    return NextResponse.json({ error: 'Chatbot is not available for this account type' }, { status: 403 });
   }
 
-  await connectToDatabase();
-
-  const messages = await ChatMessageModel.find({ userId: auth.user._id })
-    .sort({ timestamp: -1 })
-    .limit(HISTORY_LIMIT)
-    .lean();
+  const userKey = getUserKey(auth.user);
+  const messages = getHistory(userKey).slice(-HISTORY_LIMIT);
 
   return NextResponse.json({
-    messages: messages.reverse().map((m) => ({
-      id: String(m._id),
+    messages: messages.map((m) => ({
+      id: m.id,
       role: m.role,
       message: m.message,
       timestamp: m.timestamp,
@@ -312,8 +455,8 @@ export async function POST(request) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
-  if (auth.user.userType !== 'user') {
-    return NextResponse.json({ error: 'Chatbot is only available for user dashboard accounts' }, { status: 403 });
+  if (!SUPPORTED_CHAT_USER_TYPES.has(auth.user.userType)) {
+    return NextResponse.json({ error: 'Chatbot is not available for this account type' }, { status: 403 });
   }
 
   const openrouterApiKey = process.env.OPENROUTER_API_KEY;
@@ -324,7 +467,8 @@ export async function POST(request) {
   let payload;
   try {
     payload = await request.json();
-  } catch {
+  } catch (error) {
+    logChatRouteWarning('Invalid request JSON payload', error);
     return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
   }
 
@@ -337,21 +481,23 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Message is too long (max 2000 characters)' }, { status: 400 });
   }
 
-  await connectToDatabase();
+  const token = getBearerToken(request);
+  const user = {
+    ...auth.user,
+    __accessToken: token,
+  };
 
-  const recentHistory = await ChatMessageModel.find({ userId: auth.user._id })
-    .sort({ timestamp: -1 })
-    .limit(HISTORY_LIMIT)
-    .lean();
+  const userKey = getUserKey(user);
+  const recentHistory = getHistory(userKey).slice(-HISTORY_LIMIT);
 
-  await saveMessage(auth.user._id, 'user', userMessage);
+  await saveMessage(userKey, 'user', userMessage);
 
-  const context = await buildUserContext(auth.user);
+  const context = await buildUserContext(user);
   const intent = detectIntent(userMessage);
   const intentReply = buildIntentReply(intent, context);
 
   if (intentReply) {
-    await saveMessage(auth.user._id, 'assistant', intentReply);
+    await saveMessage(userKey, 'assistant', intentReply);
     return NextResponse.json({
       message: intentReply,
       streamed: false,
@@ -362,7 +508,7 @@ export async function POST(request) {
   const smartReply = maybeHandleSmartIntent(userMessage, context);
 
   if (smartReply) {
-    await saveMessage(auth.user._id, 'assistant', smartReply);
+    await saveMessage(userKey, 'assistant', smartReply);
     return NextResponse.json({
       message: smartReply,
       streamed: false,
@@ -401,8 +547,9 @@ export async function POST(request) {
       }),
       signal: abortController.signal,
     });
-  } catch {
-    await saveMessage(auth.user._id, 'assistant', FALLBACK_MESSAGE);
+  } catch (error) {
+    logChatRouteError('OpenRouter request failed', error);
+    await saveMessage(userKey, 'assistant', FALLBACK_MESSAGE);
     return NextResponse.json({ message: FALLBACK_MESSAGE, streamed: false, source: 'fallback' });
   } finally {
     clearTimeout(timeout);
@@ -410,7 +557,7 @@ export async function POST(request) {
 
   if (!openRouterResponse.ok || !openRouterResponse.body) {
     const errorBody = await openRouterResponse.text().catch(() => '');
-    await saveMessage(auth.user._id, 'assistant', FALLBACK_MESSAGE);
+    await saveMessage(userKey, 'assistant', FALLBACK_MESSAGE);
     return NextResponse.json({
       message: FALLBACK_MESSAGE,
       streamed: false,
@@ -462,8 +609,8 @@ export async function POST(request) {
                 assistantText += token;
                 controller.enqueue(encoder.encode(token));
               }
-            } catch {
-              // Skip malformed provider chunks and continue stream.
+            } catch (error) {
+              logChatRouteWarning('Failed to parse streamed provider chunk', error);
             }
           }
         }
@@ -481,14 +628,14 @@ export async function POST(request) {
                 assistantText += token;
                 controller.enqueue(encoder.encode(token));
               }
-            } catch {
-              // Ignore trailing malformed JSON.
+            } catch (error) {
+              logChatRouteWarning('Failed to parse trailing streamed provider chunk', error);
             }
           }
         }
 
         const finalMessage = assistantText.trim() || FALLBACK_MESSAGE;
-        await saveMessage(auth.user._id, 'assistant', finalMessage);
+        await saveMessage(userKey, 'assistant', finalMessage);
 
         // If provider returned no tokens, send fallback token stream so UI does not look stuck.
         if (!assistantText.trim()) {
@@ -496,29 +643,29 @@ export async function POST(request) {
         }
 
         controller.close();
-      } catch (error) {
+      } catch {
         if (!assistantText.trim()) {
           try {
             controller.enqueue(encoder.encode(FALLBACK_MESSAGE));
-          } catch {
-            // no-op
+          } catch (enqueueError) {
+            logChatRouteWarning('Failed to enqueue fallback response token', enqueueError);
           }
         }
-        await saveMessage(auth.user._id, 'assistant', assistantText.trim() || FALLBACK_MESSAGE);
+        await saveMessage(userKey, 'assistant', assistantText.trim() || FALLBACK_MESSAGE);
         controller.close();
       } finally {
         try {
           await reader.cancel();
-        } catch {
-          // no-op
+        } catch (cancelError) {
+          logChatRouteWarning('Failed to cancel streamed response reader', cancelError);
         }
       }
     },
     async cancel() {
       try {
         await reader.cancel();
-      } catch {
-        // no-op
+      } catch (cancelError) {
+        logChatRouteWarning('Failed to cancel stream during consumer shutdown', cancelError);
       }
     },
   });

@@ -7,11 +7,17 @@ import { formatDate, formatTime } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 
+const CANCELLABLE_SESSION_STATUSES = new Set(['pending', 'confirmed']);
+
 export function SessionCard({ session, onUpdate, onCancel }) {
   const { user } = useAuth();
   const date = formatDate(session.sessionDate);
   const time = formatTime(session.sessionDate);
   const isTherapist = user?.userType === 'therapist';
+  const targetUserId =
+    typeof session.userId === 'string'
+      ? session.userId
+      : session.userId?._id;
   
   // Show therapist name for users, user name for therapists
   const displayName = user?.userType === 'therapist' 
@@ -26,11 +32,27 @@ export function SessionCard({ session, onUpdate, onCancel }) {
           {date} at {time} · {session.durationMinutes || 60} mins
         </p>
         <p className="text-xs text-slate-500">
-          {session.meetingLink ? 'Meeting link available' : 'Meeting link to be shared'}
+          {session.meetingLink ? (
+            <a
+              href={session.meetingLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline hover:text-primary-hover"
+            >
+              Join via meeting link ↗
+            </a>
+          ) : (
+            'Meeting link to be shared'
+          )}
         </p>
       </div>
       <div className="flex items-center gap-2">
         <SessionStatusBadge status={session.status} />
+        {isTherapist && targetUserId && (
+          <Link href={`/profile/${targetUserId}`}>
+            <Button variant="outline" size="sm">View Profile</Button>
+          </Link>
+        )}
         {session.status === 'confirmed' && (
           <Link href={`/session/${session._id}`}>
             <Button size="sm">Join Meeting</Button>
@@ -41,7 +63,7 @@ export function SessionCard({ session, onUpdate, onCancel }) {
             Confirm
           </Button>
         )}
-        {onCancel && ['pending', 'confirmed'].includes(session.status) && (
+        {onCancel && CANCELLABLE_SESSION_STATUSES.has(session.status) && (
           <Button variant="ghost" size="sm" onClick={() => onCancel(session._id)}>
             Cancel
           </Button>

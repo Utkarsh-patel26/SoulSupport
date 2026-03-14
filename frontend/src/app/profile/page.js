@@ -4,13 +4,14 @@ import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { profileService } from '@/services/profileService';
+import { PROFILE_QUERY_KEY } from '@/lib/queryKeys';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 
 function ProfileContent() {
   const { data, isLoading } = useQuery({
-    queryKey: ['my-profile'],
+    queryKey: PROFILE_QUERY_KEY,
     queryFn: profileService.getMyProfile,
   });
 

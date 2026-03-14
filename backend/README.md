@@ -17,7 +17,7 @@ Backend API for SoulSupport online therapy platform built with Node.js, Express,
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 22 LTS recommended
 - MongoDB (local or Atlas)
 - Cloudinary account
 - Email service (Gmail or SendGrid)

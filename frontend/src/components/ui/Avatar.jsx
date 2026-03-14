@@ -19,6 +19,8 @@ export function Avatar({ src, name = '', className, size = 40 }) {
         alt={name || 'avatar'}
         width={size}
         height={size}
+        loading="lazy"
+        sizes={`${size}px`}
         className="object-cover h-full w-full"
       />
     </div>

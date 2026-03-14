@@ -33,6 +33,15 @@ exports.updateSessionSchema = Joi.object({
   cancelReason: Joi.string().max(500),
 });
 
+exports.updateSessionStatusSchema = Joi.object({
+  status: Joi.string().valid('confirmed', 'cancelled_by_therapist').required(),
+  cancelReason: Joi.when('status', {
+    is: 'cancelled_by_therapist',
+    then: Joi.string().trim().min(1).max(500).required(),
+    otherwise: Joi.string().max(500).optional().allow(''),
+  }),
+});
+
 exports.updateSessionDetailsSchema = Joi.object({
   sessionDate: Joi.date().min('now'),
   durationMinutes: Joi.number().valid(30, 60, 90),

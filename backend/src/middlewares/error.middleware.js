@@ -1,11 +1,23 @@
 const ApiError = require('../utils/ApiError');
 
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, _next) => {
+  void _next;
   let error = { ...err };
   error.message = err.message;
 
-  // Log error for debugging
-  console.error(err);
+  // Avoid polluting dev logs with expected 4xx operational errors.
+  if (process.env.NODE_ENV !== 'test') {
+    const isOperationalClientError =
+      Boolean(err.isOperational) &&
+      Number(err.statusCode) >= 400 &&
+      Number(err.statusCode) < 500;
+
+    if (isOperationalClientError) {
+      console.warn(`${req.method} ${req.originalUrl} -> ${err.statusCode} ${err.message}`);
+    } else {
+      console.error(err);
+    }
+  }
 
   // Mongoose bad ObjectId
   if (err.name === 'CastError') {

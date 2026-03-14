@@ -12,10 +12,12 @@ export function useSessions(params, queryOptions = {}) {
 
 export function useSessionMutations() {
   const queryClient = useQueryClient();
+  const invalidateSessionQueries = () =>
+    queryClient.invalidateQueries({ queryKey: ['sessions'] });
 
   const createSession = useMutation({
     mutationFn: sessionService.createSession,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+    onSuccess: invalidateSessionQueries,
   });
 
   const createSlotHold = useMutation({
@@ -24,22 +26,27 @@ export function useSessionMutations() {
 
   const confirmSlotHold = useMutation({
     mutationFn: ({ holdId, data }) => sessionService.confirmSlotHold(holdId, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+    onSuccess: invalidateSessionQueries,
   });
 
   const updateStatus = useMutation({
     mutationFn: ({ id, data }) => sessionService.updateSessionStatus(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+    onSuccess: invalidateSessionQueries,
   });
 
   const cancelSession = useMutation({
     mutationFn: ({ id, reason }) => sessionService.cancelSession(id, reason),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+    onSuccess: invalidateSessionQueries,
+  });
+
+  const cancelSessionAsTherapist = useMutation({
+    mutationFn: ({ id, reason }) => sessionService.cancelSessionAsTherapist(id, reason),
+    onSuccess: invalidateSessionQueries,
   });
 
   const updateCompletionStatus = useMutation({
     mutationFn: ({ id, data }) => sessionService.updateCompletionStatus(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
+    onSuccess: invalidateSessionQueries,
   });
 
   return {
@@ -48,6 +55,7 @@ export function useSessionMutations() {
     confirmSlotHold,
     updateStatus,
     cancelSession,
+    cancelSessionAsTherapist,
     updateCompletionStatus,
   };
 }

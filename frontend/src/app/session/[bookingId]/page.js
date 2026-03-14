@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
@@ -56,11 +56,10 @@ function SessionMeetingContent() {
 
   const { data: sessionReview } = useSessionReview(bookingId);
 
-  const startsAt = useMemo(() => new Date(session?.sessionDate || 0), [session?.sessionDate]);
-  const endsAt = useMemo(() => {
-    if (!session?.sessionDate) return new Date(0);
-    return new Date(new Date(session.sessionDate).getTime() + (session.durationMinutes || 60) * 60 * 1000);
-  }, [session?.durationMinutes, session?.sessionDate]);
+  const startsAt = new Date(session?.sessionDate || 0);
+  const endsAt = session?.sessionDate
+    ? new Date(new Date(session.sessionDate).getTime() + (session.durationMinutes || 60) * 60 * 1000)
+    : new Date(0);
 
   const isBeforeStart = now < startsAt;
   const isDuringSession = now >= startsAt && now <= endsAt;

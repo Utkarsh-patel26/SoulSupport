@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -104,15 +105,38 @@ export default function LoginPage() {
            <h2 className="font-heading text-h3 font-bold text-charcoal mb-4">Connecting communities to compassionate care</h2>
            <p className="text-text-secondary text-base leading-relaxed mix-blend-multiply">Join thousands of students, verified therapists, and NGOs working together to build accessible emotional support for everyone.</p>
            
-           <div className="mt-8 flex items-center space-x-4">
-              <div className="flex -space-x-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-bold text-white shadow-sm ${i===1?'bg-primary':i===2?'bg-soft-blue-600':'bg-accent-hover'}`}>
-                    U{i}
-                  </div>
-                ))}
+           <div className="mt-8 flex items-center justify-between gap-6 rounded-2xl border border-white/70 bg-white/70 px-5 py-4 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex -space-x-3">
+                  {[
+                    { label: 'ST', className: 'bg-primary text-white' },
+                    { label: 'TH', className: 'bg-sky-500 text-white' },
+                    { label: 'NG', className: 'bg-amber-400 text-charcoal' },
+                  ].map((member) => (
+                    <div
+                      key={member.label}
+                      className={`flex h-11 w-11 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold shadow-sm ${member.className}`}
+                    >
+                      {member.label}
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold text-charcoal">Trusted by 10k+ members</p>
+                  <p className="text-xs text-slate-500">Students, therapists, and care partners</p>
+                </div>
               </div>
-              <p className="text-sm font-medium text-text-muted">Trusted by 10k+ members</p>
+
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
+                <ShieldCheck className="h-4 w-4" />
+                Verified network
+              </div>
+           </div>
+
+           <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">
+              <Sparkles className="h-4 w-4 text-primary" />
+              Secure sign-in for therapy, community, and admin access
            </div>
         </div>
       </div>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import api from '@/lib/api';
+import { therapistService } from '@/services/therapistService';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Avatar } from '@/components/ui/Avatar';
 import toast from 'react-hot-toast';
@@ -22,11 +22,39 @@ function formatPrice(value) {
   return `$${value}/hr`;
 }
 
+function normalizeTherapistsResponse(payload) {
+  if (!payload || typeof payload !== 'object') return [];
+
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.therapists)) return payload.therapists;
+  if (Array.isArray(payload.data?.therapists)) return payload.data.therapists;
+
+  return [];
+}
+
+function getTherapistUser(therapist) {
+  const userIdAsObject = therapist?.userId && typeof therapist.userId === 'object'
+    ? therapist.userId
+    : null;
+  return therapist?.user || userIdAsObject || null;
+}
+
+function getTherapistId(therapist) {
+  if (!therapist) return null;
+  if (therapist._id) return therapist._id;
+  if (typeof therapist.userId === 'string') return therapist.userId;
+  if (therapist.userId?._id) return therapist.userId._id;
+  return null;
+}
+
 function TherapistCard({ therapist, index }) {
-  const name = therapist?.user?.fullName || 'Therapist';
+  const user = getTherapistUser(therapist);
+  const therapistId = getTherapistId(therapist);
+  const name = user?.fullName || therapist?.fullName || 'Therapist';
   const rating = typeof therapist?.rating === 'number' ? therapist.rating.toFixed(1) : '0.0';
   const price = formatPrice(therapist?.hourlyRate);
   const reviewCount = therapist?.totalReviews || 0;
+  const isVerified = therapist?.isVerified === true;
   const specializations = Array.isArray(therapist?.specializations)
     ? therapist.specializations
     : [];
@@ -41,7 +69,7 @@ function TherapistCard({ therapist, index }) {
     >
       <div className="flex items-start gap-4">
         <Avatar
-          src={therapist?.user?.avatarUrl}
+          src={user?.avatarUrl || therapist?.photoUrl}
           name={name}
           size={64}
           className="ring-2 ring-brand/10"
@@ -86,22 +114,30 @@ function TherapistCard({ therapist, index }) {
       </div>
 
       <p className="mt-4 min-h-[48px] text-sm leading-relaxed text-text-secondary">
-        {therapist?.user?.bio || 'Experienced and compassionate therapist focused on practical, client-centered support.'}
+        {user?.bio || therapist?.bio || 'Experienced and compassionate therapist focused on practical, client-centered support.'}
       </p>
 
       <div className="mt-6 flex items-center justify-between">
-        <span className="inline-flex items-center gap-1 text-xs font-medium text-brand">
-          <BadgeCheck className="h-4 w-4" />
-          Verified profile
-        </span>
+        {isVerified ? (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-brand">
+            <BadgeCheck className="h-4 w-4" />
+            Verified profile
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-text-secondary">
+            Licensed therapist
+          </span>
+        )}
 
-        <Link
-          href={`/therapists/${therapist?._id}`}
-          className="inline-flex items-center gap-2 rounded-brand bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
-        >
-          View Profile
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+        {therapistId && (
+          <Link
+            href={`/therapists/${therapistId}`}
+            className="inline-flex items-center gap-2 rounded-brand bg-brand px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+          >
+            View Profile
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        )}
       </div>
     </motion.article>
   );
@@ -117,8 +153,8 @@ export default function TherapistsPage() {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get('/therapists');
-      setTherapists(response?.data?.data?.therapists || []);
+      const response = await therapistService.getTherapists();
+      setTherapists(normalizeTherapistsResponse(response));
     } catch (err) {
       setError('Failed to load therapists. Please try again.');
       toast.error('Failed to load therapists');
@@ -132,8 +168,9 @@ export default function TherapistsPage() {
   }, []);
 
   const filteredTherapists = therapists.filter((therapist) => {
-    const name = therapist?.user?.fullName?.toLowerCase() || '';
-    const bio = therapist?.user?.bio?.toLowerCase() || '';
+    const user = getTherapistUser(therapist);
+    const name = (user?.fullName || therapist?.fullName || '').toLowerCase();
+    const bio = (user?.bio || therapist?.bio || '').toLowerCase();
     const specs = Array.isArray(therapist?.specializations)
       ? therapist.specializations.join(' ').toLowerCase()
       : '';
@@ -228,7 +265,7 @@ export default function TherapistsPage() {
           {!loading && !error && therapists.length > 0 && filteredTherapists.length > 0 && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredTherapists.map((therapist, index) => (
-                <TherapistCard key={therapist._id} therapist={therapist} index={index} />
+                <TherapistCard key={getTherapistId(therapist) || `${index}`} therapist={therapist} index={index} />
               ))}
             </div>
           )}

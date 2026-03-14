@@ -1,19 +1,28 @@
 import api from '@/lib/api';
 
 export const resourceService = {
-  list(params = {}) {
-    return api.get('/resources', { params });
+  async getResources(params = {}) {
+    const response = await api.get('/resources', { params });
+    return response.data;
   },
-  get(id) {
-    return api.get(`/resources/${id}`);
+
+  async getResource(id) {
+    const response = await api.get(`/resources/${id}`);
+    return response.data;
   },
-  create(data) {
-    return api.post('/resources', data);
+
+  async createResource(data) {
+    const response = await api.post('/resources', data);
+    return response.data;
   },
-  update(id, data) {
-    return api.put(`/resources/${id}`, data);
+
+  async updateResource(id, data) {
+    const response = await api.put(`/resources/${id}`, data);
+    return response.data;
   },
-  remove(id) {
-    return api.delete(`/resources/${id}`);
+
+  async deleteResource(id) {
+    const response = await api.delete(`/resources/${id}`);
+    return response.data;
   },
 };

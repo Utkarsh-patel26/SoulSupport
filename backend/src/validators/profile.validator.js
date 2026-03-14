@@ -15,7 +15,6 @@ exports.updateProfileSchema = Joi.object({
   username: Joi.string().pattern(/^[a-z0-9_.-]{3,30}$/),
   bio: Joi.string().max(500).allow(''),
   location: Joi.string().max(120).allow(''),
-  email: Joi.string().email(),
   mentalHealthGoals: Joi.array().items(Joi.string().max(120)),
   preferredTherapyTypes: Joi.array().items(Joi.string().max(80)),
   specializations: Joi.array().items(

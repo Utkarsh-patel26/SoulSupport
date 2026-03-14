@@ -7,10 +7,11 @@ const {
   createSessionSchema,
   createSlotHoldSchema,
   confirmSlotHoldSchema,
-  updateSessionSchema,
+  updateSessionStatusSchema,
   updateSessionDetailsSchema,
   updateCompletionStatusSchema,
 } = require('../validators/session.validator');
+const { sanitizeFields } = require('../middlewares/sanitize.middleware');
 
 router.get('/', protect, sessionController.getSessions);
 router.get('/upcoming', protect, sessionController.getUpcoming);
@@ -38,6 +39,7 @@ router.post(
   protect,
   restrictTo('user'),
   validate(createSessionSchema),
+  sanitizeFields('notes'),
   sessionController.createSession
 );
 
@@ -47,6 +49,7 @@ router.put(
   '/:id',
   protect,
   validate(updateSessionDetailsSchema),
+  sanitizeFields('notes'),
   sessionController.updateSession
 );
 
@@ -54,7 +57,7 @@ router.put(
   '/:id/status',
   protect,
   restrictTo('therapist'),
-  validate(updateSessionSchema),
+  validate(updateSessionStatusSchema),
   sessionController.updateSessionStatus
 );
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
@@ -22,7 +22,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
   const therapistUserId = String(therapist?.user?._id || therapist?.userId || therapist?._id || '');
 
   // Generate time slots within the therapist's working hours
-  const generateTimeSlots = (startHour = 9, endHour = 17) => {
+  const generateTimeSlots = useCallback((startHour = 9, endHour = 17) => {
     const slots = [];
     for (let hour = startHour; hour < endHour; hour++) {
       slots.push({
@@ -32,9 +32,9 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
       });
     }
     return slots;
-  };
+  }, []);
 
-  const fetchAvailableSlots = async (dateValue) => {
+  const fetchAvailableSlots = useCallback(async (dateValue) => {
     if (!dateValue || !therapistUserId) {
       return;
     }
@@ -43,7 +43,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     setUnavailableDay(false);
     try {
       const response = await sessionService.getAvailableSlots(therapistUserId, dateValue);
-      const data = response.data?.data || response.data || {};
+      const data = response.data || {};
       const bookedHours = data.bookedHours || [];
       const pendingHours = data.pendingHours || [];
       const availableHours = Array.isArray(data.availableHours) ? data.availableHours : [];
@@ -96,7 +96,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     } finally {
       setFetchingSlots(false);
     }
-  };
+  }, [generateTimeSlots, therapistUserId]);
 
   // Fetch therapist's available days on modal open
   useEffect(() => {
@@ -108,7 +108,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
       try {
         const today = new Date();
         const response = await sessionService.getAvailableSlots(therapistUserId, today);
-        const data = response.data?.data || response.data || {};
+        const data = response.data || {};
         if (data.availableDays) {
           setTherapistAvailDays(data.availableDays);
         }
@@ -118,7 +118,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     };
 
     fetchAvailDays();
-  }, [open, therapistUserId]);
+  }, [open, therapistUserId, fetchAvailableSlots]);
 
   // Fetch available slots for selected date
   useEffect(() => {
@@ -127,7 +127,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     }
 
     fetchAvailableSlots(selectedDate);
-  }, [selectedDate, open]);
+  }, [selectedDate, open, fetchAvailableSlots]);
 
   useEffect(() => {
     if (!open || !selectedDate) {
@@ -139,7 +139,7 @@ export function BookingModal({ open, onClose, therapist, onBook }) {
     }, 15000);
 
     return () => clearInterval(timer);
-  }, [open, selectedDate]);
+  }, [open, selectedDate, fetchAvailableSlots]);
 
   useSessionRealtime({
     onSlotUpdate: (payload) => {

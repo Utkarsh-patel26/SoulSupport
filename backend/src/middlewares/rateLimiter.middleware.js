@@ -1,9 +1,15 @@
 const rateLimit = require('express-rate-limit');
+const {
+  RATE_WINDOW_AUTH_MS,
+  RATE_WINDOW_API_MS,
+  RATE_WINDOW_POST_MS,
+  RATE_WINDOW_LIST_MS,
+} = require('../config/constants');
 
 // General API limiter
 exports.apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: RATE_WINDOW_API_MS,
+  max: 100,
   message: 'Too many requests from this IP, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
@@ -11,15 +17,24 @@ exports.apiLimiter = rateLimit({
 
 // Auth limiter (stricter)
 exports.authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login attempts per windowMs
+  windowMs: RATE_WINDOW_AUTH_MS,
+  max: 5,
   message: 'Too many login attempts, please try again later',
   skipSuccessfulRequests: true,
 });
 
 // Post creation limiter
 exports.postLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit to 10 posts per hour
+  windowMs: RATE_WINDOW_POST_MS,
+  max: 10,
   message: 'Too many posts created, please try again later',
+});
+
+// Public listing endpoints — prevent bulk scraping
+exports.listLimiter = rateLimit({
+  windowMs: RATE_WINDOW_LIST_MS,
+  max: 60,
+  message: 'Too many listing requests, please slow down',
+  standardHeaders: true,
+  legacyHeaders: false,
 });

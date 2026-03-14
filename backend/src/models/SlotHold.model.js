@@ -32,7 +32,6 @@ const slotHoldSchema = new mongoose.Schema(
     expiresAt: {
       type: Date,
       required: true,
-      index: true,
     },
   },
   {

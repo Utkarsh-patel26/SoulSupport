@@ -14,7 +14,7 @@ exports.getNotifications = asyncHandler(async (req, res) => {
 
   const notifications = await Notification.find({ userId: req.user.id })
     .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
+    .limit(Number.parseInt(limit, 10))
     .skip(skip);
 
   const total = await Notification.countDocuments({ userId: req.user.id });
@@ -30,8 +30,8 @@ exports.getNotifications = asyncHandler(async (req, res) => {
         notifications,
         unreadCount,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: Number.parseInt(page, 10),
+          limit: Number.parseInt(limit, 10),
           total,
           pages: Math.ceil(total / limit),
         },

@@ -9,7 +9,22 @@ cloudinary.config({
 });
 
 class UploadService {
+  isConfigured() {
+    return Boolean(
+      process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET
+    );
+  }
+
   async uploadImage(file, folder = 'soulsupport') {
+    if (!this.isConfigured()) {
+      throw new ApiError(
+        503,
+        'Image upload service is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET.'
+      );
+    }
+
     try {
       return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
@@ -24,7 +39,7 @@ class UploadService {
           },
           (error, result) => {
             if (error) {
-              reject(new ApiError(500, 'Failed to upload image'));
+              reject(new ApiError(502, `Image upload failed: ${error.message}`));
             } else {
               resolve({
                 url: result.secure_url,
@@ -37,6 +52,10 @@ class UploadService {
         uploadStream.end(file.buffer);
       });
     } catch (error) {
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
       throw new ApiError(500, 'Failed to upload image');
     }
   }

@@ -14,8 +14,8 @@ export default function TherapistSessionsPage() {
       refetchOnWindowFocus: false,
     }
   );
-  const { updateStatus, cancelSession } = useSessionMutations();
-  const sessions = list.data?.data?.sessions || list.data?.sessions || [];
+  const { updateStatus, cancelSessionAsTherapist } = useSessionMutations();
+  const sessions = list.data?.data?.sessions ?? [];
 
   const handleConfirm = async (id) => {
     await updateStatus.mutateAsync({ id, data: { status: 'confirmed' } });
@@ -23,9 +23,10 @@ export default function TherapistSessionsPage() {
   };
 
   const handleCancel = async (id) => {
-    const reason = window.prompt('Cancellation reason (required):', 'Therapist unavailable');
+    const reasonInput = window.prompt('Cancellation reason (required):', 'Therapist unavailable');
+    const reason = (reasonInput || '').trim();
     if (!reason) return;
-    await cancelSession.mutateAsync({ id, reason });
+    await cancelSessionAsTherapist.mutateAsync({ id, reason });
     toast.success('Session cancelled');
   };
 

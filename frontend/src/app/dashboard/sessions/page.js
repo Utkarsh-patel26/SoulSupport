@@ -14,7 +14,7 @@ export default function DashboardSessionsPage() {
     }
   );
   const { cancelSession } = useSessionMutations();
-  const sessions = list.data?.data?.sessions || list.data?.sessions || [];
+  const sessions = list.data?.data?.sessions ?? [];
 
   return (
     <div className="space-y-4">

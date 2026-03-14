@@ -56,6 +56,38 @@ const userSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    notificationPreferences: {
+      emailSessionReminders: {
+        type: Boolean,
+        default: true,
+      },
+      emailCommunityReplies: {
+        type: Boolean,
+        default: true,
+      },
+      inAppSessionUpdates: {
+        type: Boolean,
+        default: true,
+      },
+      inAppForumActivity: {
+        type: Boolean,
+        default: true,
+      },
+      marketingEmails: {
+        type: Boolean,
+        default: false,
+      },
+    },
+    accountPreferences: {
+      privateProfile: {
+        type: Boolean,
+        default: false,
+      },
+      twoFactorEnabled: {
+        type: Boolean,
+        default: false,
+      },
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,
@@ -86,11 +118,10 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ userType: 1 });
 
 // Pre-save hook to hash password
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 
 // Instance method to compare password

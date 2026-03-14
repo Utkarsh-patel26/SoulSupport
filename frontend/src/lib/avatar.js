@@ -1,5 +1,3 @@
-export const AVATAR_COUNT = 8;
-
 function hashSeed(seed = '') {
   let hash = 0;
   const value = String(seed || 'soulsupport');
@@ -13,6 +11,6 @@ function hashSeed(seed = '') {
 }
 
 export function getDefaultAvatarPath(seed = '') {
-  const avatarNumber = (hashSeed(seed) % AVATAR_COUNT) + 1;
+  const avatarNumber = (hashSeed(seed) % 8) + 1;
   return `/images/avatars/avatar-${avatarNumber}.svg`;
 }

@@ -4,9 +4,11 @@
   "description": "Backend API for SoulSupport online therapy platform",
   "main": "src/server.js",
   "scripts": {
+    "build": "node -e \"require('./src/app'); console.log('Backend build check passed')\"",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest --watchAll --verbose",
+    "test": "jest --runInBand --coverage",
+    "test:watch": "jest --watchAll --verbose",
     "test:ci": "jest --runInBand --coverage"
   },
   "keywords": [
@@ -17,27 +19,26 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "bcrypt": "^5.1.1",
-    "cloudinary": "^2.9.0",
-    "cors": "^2.8.5",
-    "date-fns": "^2.30.0",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "express-mongo-sanitize": "^2.2.0",
-    "express-rate-limit": "^7.1.5",
-    "helmet": "^7.1.0",
-    "joi": "^17.11.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.0.0",
-    "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
-    "nodemailer": "^7.0.13",
-    "winston": "^3.11.0"
+    "bcrypt": "6.0.0",
+    "cloudinary": "2.9.0",
+    "cors": "2.8.6",
+    "dotenv": "17.3.1",
+    "express": "5.2.1",
+    "express-rate-limit": "8.3.1",
+    "helmet": "8.1.0",
+    "joi": "18.0.2",
+    "jsonwebtoken": "9.0.3",
+    "mongoose": "9.3.0",
+    "morgan": "1.10.1",
+    "multer": "2.1.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "8.0.2",
+    "sanitize-html": "^2.17.1"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.2",
-    "supertest": "^6.3.3"
+    "jest": "30.3.0",
+    "nodemon": "3.1.14",
+    "supertest": "7.2.2"
   },
   "directories": {
     "test": "tests"

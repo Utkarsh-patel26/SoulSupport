@@ -7,6 +7,35 @@ const emailService = require('../services/email.service');
 const crypto = require('crypto');
 const { getDefaultAvatarPath } = require('../utils/defaultAvatar');
 
+function createRawToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function hashToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+async function createTherapistProfileIfNeeded(userType, userId, avatarUrl) {
+  if (userType !== 'therapist') return;
+
+  await TherapistProfile.create({
+    userId,
+    qualifications: 'To be completed',
+    hourlyRate: 0,
+    specializations: [],
+    photoUrl: avatarUrl,
+  });
+}
+
+async function setEmailVerificationToken(user) {
+  const verifyToken = createRawToken();
+  user.emailVerificationToken = hashToken(verifyToken);
+  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+  await user.save();
+
+  return verifyToken;
+}
+
 /**
  * @desc    Register a new user
  * @route   POST /api/auth/register
@@ -30,32 +59,12 @@ exports.register = asyncHandler(async (req, res) => {
     avatarUrl,
   });
 
-  if (userType === 'therapist') {
-    await TherapistProfile.create({
-      userId: user._id,
-      qualifications: 'To be completed',
-      hourlyRate: 0,
-      specializations: [],
-      photoUrl: avatarUrl,
-    });
-  }
+  await createTherapistProfileIfNeeded(userType, user._id, avatarUrl);
 
   const token = user.generateAuthToken();
 
-  // email verification token
-  const verifyToken = crypto.randomBytes(32).toString('hex');
-  user.emailVerificationToken = crypto
-    .createHash('sha256')
-    .update(verifyToken)
-    .digest('hex');
-  user.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
-  await user.save();
-
-  try {
-    await emailService.sendVerificationEmail(user.email, verifyToken);
-  } catch (err) {
-    console.warn('Failed to send verification email (continuing):', err.message);
-  }
+  const verifyToken = await setEmailVerificationToken(user);
+  const emailVerificationEnabled = emailService.isEnabled();
 
   res.status(201).json(
     new ApiResponse(
@@ -63,11 +72,19 @@ exports.register = asyncHandler(async (req, res) => {
       {
         user: user.toJSON(),
         token,
-        emailVerificationSent: true,
+        emailVerificationSent: emailVerificationEnabled,
       },
       'Registration successful'
     )
   );
+
+  if (emailVerificationEnabled) {
+    emailService
+      .sendVerificationEmail(user.email, verifyToken)
+      .catch((err) => {
+        console.warn('Failed to send verification email (continuing):', err.message);
+      });
+  }
 });
 
 /**
@@ -146,11 +163,8 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'No user found with that email');
   }
 
-  const resetToken = crypto.randomBytes(32).toString('hex');
-  user.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex');
+  const resetToken = createRawToken();
+  user.passwordResetToken = hashToken(resetToken);
   user.passwordResetExpires = Date.now() + 60 * 60 * 1000; // 1 hour
   await user.save();
 
@@ -169,7 +183,7 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
 exports.resetPassword = asyncHandler(async (req, res) => {
   const { token, newPassword } = req.body;
 
-  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  const hashedToken = hashToken(token);
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
@@ -189,6 +203,26 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @desc    Validate a password-reset token (no side-effects)
+ * @route   GET /api/auth/validate-reset-token?token=xxx
+ * @access  Public
+ */
+exports.validateResetToken = asyncHandler(async (req, res) => {
+  const { token } = req.query;
+  if (!token) throw new ApiError(400, 'Token is required');
+
+  const hashedToken = hashToken(token);
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  }).select('_id');
+
+  if (!user) throw new ApiError(400, 'Invalid or expired reset token');
+
+  res.json(new ApiResponse(200, null, 'Token is valid'));
+});
+
+/**
  * @desc    Verify email
  * @route   POST /api/auth/verify-email
  * @access  Public (token-based)
@@ -196,7 +230,7 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 exports.verifyEmail = asyncHandler(async (req, res) => {
   const { token } = req.body;
 
-  const hashed = crypto.createHash('sha256').update(token).digest('hex');
+  const hashed = hashToken(token);
 
   const user = await User.findOne({
     emailVerificationToken: hashed,

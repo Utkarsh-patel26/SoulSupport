@@ -35,7 +35,7 @@ export async function requireUserFromRequest(request) {
       },
       cache: 'no-store',
     });
-  } catch (error) {
+  } catch {
     return { error: 'Unable to verify user session with backend', status: 502 };
   }
 

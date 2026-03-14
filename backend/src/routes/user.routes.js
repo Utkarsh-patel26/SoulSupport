@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/user.controller');
-const { protect, checkOwnership, restrictTo } = require('../middlewares/auth.middleware');
+const { protect, checkOwnership } = require('../middlewares/auth.middleware');
 const { uploadSingle } = require('../middlewares/upload.middleware');
 
 // Self or admin only

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { clearAuthToken, getAuthToken } from '@/lib/authToken';
+import { normalizeApiError } from '@/lib/apiError';
 
 const isClient = typeof window !== 'undefined';
 
@@ -14,7 +16,7 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (isClient) {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -29,10 +31,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && isClient) {
-      localStorage.removeItem('token');
+      clearAuthToken();
       window.location.href = '/login';
     }
-    return Promise.reject(error.response?.data?.error || 'Network error');
+    return Promise.reject(normalizeApiError(error));
   }
 );
 

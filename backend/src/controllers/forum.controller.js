@@ -23,7 +23,7 @@ exports.getPosts = asyncHandler(async (req, res) => {
 
   const posts = await ForumPost.find(filter)
     .sort(sort)
-    .limit(parseInt(limit))
+    .limit(Number.parseInt(limit, 10))
     .skip(skip);
 
   const total = await ForumPost.countDocuments(filter);

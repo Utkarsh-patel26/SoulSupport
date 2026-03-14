@@ -1,13 +1,8 @@
 ﻿/** @type {import('tailwindcss').Config} */
-import forms from '@tailwindcss/forms';
-import typography from '@tailwindcss/typography';
-
-export default {
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-  ],
+// Tailwind v4: content and plugins are configured via CSS directives in globals.css.
+// Only theme and darkMode are applied from this file via the @config directive.
+const config = {
+  darkMode: ['class'],
   theme: {
     extend: {
       colors: {
@@ -79,5 +74,7 @@ export default {
       },
     },
   },
-  plugins: [forms, typography],
+  // plugins: loaded via @plugin directives in globals.css
 };
+
+export default config;

@@ -41,7 +41,7 @@ export function useForum(params, postsQueryOptions = {}) {
   const likePost = useMutation({
     mutationFn: ({ postId, liked }) =>
       liked ? forumService.unlikePost(postId) : forumService.likePost(postId),
-    onMutate: async ({ postId, liked, userId }) => {
+    onMutate: async ({ postId, userId }) => {
       await queryClient.cancelQueries({ queryKey: postsQueryKey });
       const previousPosts = queryClient.getQueryData(postsQueryKey);
 

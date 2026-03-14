@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { therapistService } from '@/services/therapistService';
 
 export function useTherapists(params, queryOptions = {}) {
@@ -22,18 +22,3 @@ export function useTherapistReviews(id) {
   });
 }
 
-export function useTherapistMutations() {
-  const queryClient = useQueryClient();
-
-  const updateProfile = useMutation({
-    mutationFn: ({ id, data }) => therapistService.updateProfile(id, data),
-    onSuccess: (_, variables) => queryClient.invalidateQueries({ queryKey: ['therapist', variables.id] }),
-  });
-
-  const uploadPhoto = useMutation({
-    mutationFn: ({ id, file }) => therapistService.uploadPhoto(id, file),
-    onSuccess: (_, variables) => queryClient.invalidateQueries({ queryKey: ['therapist', variables.id] }),
-  });
-
-  return { updateProfile, uploadPhoto };
-}

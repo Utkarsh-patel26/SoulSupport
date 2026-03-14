@@ -8,6 +8,7 @@ const items = [
   { href: '/therapist-dashboard/sessions', label: 'Sessions' },
   { href: '/therapist-dashboard/profile', label: 'Profile' },
   { href: '/therapist-dashboard/reviews', label: 'Reviews' },
+  { href: '/therapist-dashboard/assistant', label: 'Assistant' },
 ];
 
 export default function TherapistDashboardLayout({ children }) {

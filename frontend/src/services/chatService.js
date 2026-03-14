@@ -1,6 +1,8 @@
+import { getAuthToken } from '@/lib/authToken';
+
 export const chatService = {
   async getHistory() {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = getAuthToken();
     if (!token) {
       throw new Error('You must be logged in');
     }
@@ -21,7 +23,7 @@ export const chatService = {
   },
 
   async sendMessage(message, onToken) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = getAuthToken();
     if (!token) {
       throw new Error('You must be logged in');
     }

@@ -10,5 +10,6 @@ router.use('/notifications', require('./notification.routes'));
 router.use('/resources', require('./resource.routes'));
 router.use('/users', require('./user.routes'));
 router.use('/profile', require('./profile.routes'));
+router.use('/admin', require('./admin.routes'));
 
 module.exports = router;

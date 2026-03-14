@@ -13,11 +13,18 @@ function formatTime(value) {
   });
 }
 
-const STARTER_PROMPTS = [
+const USER_PROMPTS = [
   'Show my upcoming appointments',
   'Who is my therapist tomorrow?',
   'How do I cancel my session?',
   'Give me stress relief tips',
+];
+
+const THERAPIST_PROMPTS = [
+  'How do I manage my schedule?',
+  'Tips for client engagement',
+  'Show my pending session requests',
+  'Self-care strategies for therapists',
 ];
 
 export function DashboardChatAssistant() {
@@ -29,7 +36,7 @@ export function DashboardChatAssistant() {
   const [error, setError] = useState('');
   const scrollRef = useRef(null);
 
-  const canUseChat = !!user && !isTherapist;
+  const canUseChat = !!user;
 
   const welcome = useMemo(
     () => ({
@@ -163,7 +170,7 @@ export function DashboardChatAssistant() {
       <Card>
         <CardHeader>
           <CardTitle>AI Assistant</CardTitle>
-          <CardDescription>This assistant is available only for logged-in users.</CardDescription>
+          <CardDescription>Please log in to use the assistant.</CardDescription>
         </CardHeader>
       </Card>
     );
@@ -178,7 +185,7 @@ export function DashboardChatAssistant() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex h-[70vh] max-h-[760px] min-h-[480px] flex-col rounded-xl border border-border bg-surface">
+        <div className="flex h-[calc(100vh-16rem)] min-h-[420px] max-h-[760px] flex-col overflow-hidden rounded-xl border border-border bg-surface sm:h-[70vh] sm:min-h-[480px]">
           <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-5">
             {loadingHistory ? (
               <p className="text-sm text-text-muted">Loading your chat history...</p>
@@ -219,15 +226,15 @@ export function DashboardChatAssistant() {
 
           <div className="border-t border-border p-3 sm:p-4">
             <div className="mb-3 flex flex-wrap gap-2">
-              {STARTER_PROMPTS.map((prompt) => (
+              {(isTherapist ? THERAPIST_PROMPTS : USER_PROMPTS).map((prompt) => (
                 <button
                   key={prompt}
                   type="button"
                   onClick={() => sendMessage(prompt)}
                   disabled={sending}
-                  className="rounded-full border border-border bg-surface-alt px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-charcoal disabled:opacity-60"
+                  className="max-w-full rounded-full border border-border bg-surface-alt px-3 py-1.5 text-left text-xs font-medium text-text-secondary transition-colors hover:border-primary/40 hover:text-charcoal disabled:opacity-60"
                 >
-                  {prompt}
+                  <span className="line-clamp-2 break-words">{prompt}</span>
                 </button>
               ))}
             </div>
@@ -237,7 +244,7 @@ export function DashboardChatAssistant() {
                 e.preventDefault();
                 sendMessage(input);
               }}
-              className="flex items-end gap-2"
+              className="flex flex-col gap-2 sm:flex-row sm:items-end"
             >
               <textarea
                 value={input}
@@ -248,7 +255,7 @@ export function DashboardChatAssistant() {
                 className="min-h-[48px] flex-1 resize-none rounded-xl border border-border bg-white px-3 py-2 text-sm text-charcoal outline-none transition-colors focus:border-primary"
                 disabled={sending}
               />
-              <Button type="submit" disabled={sending || !input.trim()}>
+              <Button type="submit" className="w-full sm:w-auto" disabled={sending || !input.trim()}>
                 {sending ? 'Sending...' : 'Send'}
               </Button>
             </form>

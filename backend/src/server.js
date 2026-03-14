@@ -1,11 +1,14 @@
 const app = require('./app');
 const connectDB = require('./config/db');
+const { startSessionCompletionJob } = require('./services/sessionCompletion.service');
 
 // Load env vars
 require('dotenv').config();
 
 // Connect to database
-connectDB();
+connectDB().then(() => {
+  startSessionCompletionJob();
+});
 
 const PORT = process.env.PORT || 5000;
 

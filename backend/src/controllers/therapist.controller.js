@@ -15,6 +15,39 @@ async function findTherapistByIdOrUser(id) {
   return therapist;
 }
 
+const PUBLIC_THERAPIST_USER_FIELDS = 'fullName avatarUrl bio';
+
+async function getVisibleTherapistUserIds() {
+  const users = await User.find({
+    userType: 'therapist',
+    isActive: true,
+    'accountPreferences.privateProfile': { $ne: true },
+  }).select('_id');
+
+  return users.map((user) => user._id);
+}
+
+function isVisiblePublicTherapist(therapist) {
+  return Boolean(therapist?.userId);
+}
+
+function serializeTherapistProfile(therapistDoc) {
+  if (!therapistDoc) {
+    return null;
+  }
+
+  const therapist = therapistDoc.toObject();
+  const populatedUser = therapist.userId && typeof therapist.userId === 'object'
+    ? therapist.userId
+    : null;
+
+  return {
+    ...therapist,
+    user: populatedUser,
+    userId: populatedUser?._id || therapist.userId,
+  };
+}
+
 /**
  * @desc    Get all therapists
  * @route   GET /api/therapists
@@ -29,34 +62,34 @@ exports.getTherapists = asyncHandler(async (req, res) => {
     limit = 12,
   } = req.query;
 
-  const filter = {}; // Removed isVerified requirement for now
+  const filter = { isVerified: true };
 
   if (specialization) {
     filter.specializations = specialization;
   }
 
   if (minRating) {
-    filter.rating = { $gte: parseFloat(minRating) };
+    filter.rating = { $gte: Number.parseFloat(minRating) };
   }
 
   if (maxRate) {
-    filter.hourlyRate = { $lte: parseFloat(maxRate) };
+    filter.hourlyRate = { $lte: Number.parseFloat(maxRate) };
   }
+
+  const visibleUserIds = await getVisibleTherapistUserIds();
+  filter.userId = { $in: visibleUserIds };
 
   const skip = (page - 1) * limit;
 
   const therapists = await TherapistProfile.find(filter)
-    .populate('userId', 'fullName email avatarUrl bio')
+    .populate('userId', PUBLIC_THERAPIST_USER_FIELDS)
     .sort({ rating: -1, totalReviews: -1 })
-    .limit(parseInt(limit))
+    .limit(Number.parseInt(limit, 10))
     .skip(skip);
 
-  // Transform to include user data
-  const transformedTherapists = therapists.map((t) => ({
-    _id: t._id,
-    user: t.userId,
-    ...t.toObject(),
-  }));
+  const transformedTherapists = therapists
+    .filter(isVisiblePublicTherapist)
+    .map(serializeTherapistProfile);
 
   const total = await TherapistProfile.countDocuments(filter);
 
@@ -81,17 +114,25 @@ exports.getTherapist = asyncHandler(async (req, res) => {
   const therapist = await findTherapistByIdOrUser(req.params.id);
 
   if (therapist) {
-    await therapist.populate('userId', 'fullName email avatarUrl bio');
+    await therapist.populate({
+      path: 'userId',
+      select: PUBLIC_THERAPIST_USER_FIELDS,
+      match: {
+        userType: 'therapist',
+        isActive: true,
+        'accountPreferences.privateProfile': { $ne: true },
+      },
+    });
   }
 
-  if (!therapist) {
+  if (!therapist || !isVisiblePublicTherapist(therapist)) {
     throw new ApiError(404, 'Therapist not found');
   }
 
   res.json(
     new ApiResponse(
       200,
-      { therapist: { ...therapist.toObject(), user: therapist.userId } },
+      { therapist: serializeTherapistProfile(therapist) },
       'Therapist retrieved successfully'
     )
   );
@@ -114,10 +155,12 @@ exports.getMyProfile = asyncHandler(async (req, res) => {
     throw new ApiError(404, 'Therapist profile not found');
   }
 
+  const serializedTherapist = serializeTherapistProfile(therapist);
+
   res.json(
     new ApiResponse(
       200,
-      { ...therapist.toObject(), user: therapist.userId },
+      { therapist: serializedTherapist, ...serializedTherapist },
       'Profile retrieved successfully'
     )
   );
@@ -151,20 +194,22 @@ exports.updateProfile = asyncHandler(async (req, res) => {
         ...(fullName !== undefined ? { fullName } : {}),
         ...(bio !== undefined ? { bio } : {}),
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
   }
 
   const updatedTherapist = await TherapistProfile.findByIdAndUpdate(
     therapist._id,
     updateData,
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).populate('userId', 'fullName email avatarUrl bio');
+
+  const serializedTherapist = serializeTherapistProfile(updatedTherapist);
 
   res.json(
     new ApiResponse(
       200,
-      { therapist: updatedTherapist },
+      { therapist: serializedTherapist, ...serializedTherapist },
       'Profile updated successfully'
     )
   );
@@ -215,12 +260,24 @@ exports.uploadPhoto = asyncHandler(async (req, res) => {
 exports.getReviews = asyncHandler(async (req, res) => {
   const therapist = await findTherapistByIdOrUser(req.params.id);
 
-  if (!therapist) {
+  if (therapist) {
+    await therapist.populate({
+      path: 'userId',
+      select: PUBLIC_THERAPIST_USER_FIELDS,
+      match: {
+        userType: 'therapist',
+        isActive: true,
+        'accountPreferences.privateProfile': { $ne: true },
+      },
+    });
+  }
+
+  if (!therapist || !isVisiblePublicTherapist(therapist)) {
     throw new ApiError(404, 'Therapist not found');
   }
 
   const Review = require('../models/Review.model');
-  const reviews = await Review.find({ therapistId: therapist.userId })
+  const reviews = await Review.find({ therapistId: therapist.userId, isVisible: true })
     .sort({ createdAt: -1 })
     .limit(20);
 
@@ -243,7 +300,19 @@ exports.checkAvailability = asyncHandler(async (req, res) => {
 
   const therapist = await findTherapistByIdOrUser(req.params.id);
 
-  if (!therapist) {
+  if (therapist) {
+    await therapist.populate({
+      path: 'userId',
+      select: PUBLIC_THERAPIST_USER_FIELDS,
+      match: {
+        userType: 'therapist',
+        isActive: true,
+        'accountPreferences.privateProfile': { $ne: true },
+      },
+    });
+  }
+
+  if (!therapist || !isVisiblePublicTherapist(therapist)) {
     throw new ApiError(404, 'Therapist not found');
   }
 

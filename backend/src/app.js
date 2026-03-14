@@ -1,17 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
 const morgan = require('morgan');
 const errorHandler = require('./middlewares/error.middleware');
 const { apiLimiter } = require('./middlewares/rateLimiter.middleware');
+const { mongoSanitizeCompat } = require('./middlewares/mongoSanitize.middleware');
 
 const app = express();
 
-const configuredOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+if (process.env.TRUST_PROXY) {
+  app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : process.env.TRUST_PROXY);
+}
+
+const configuredOrigins = new Set(
+  (process.env.FRONTEND_URL || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+);
 
 // Security middleware
 app.use(helmet());
@@ -22,7 +28,7 @@ app.use(
         return callback(null, true);
       }
 
-      const isConfiguredOrigin = configuredOrigins.includes(origin);
+      const isConfiguredOrigin = configuredOrigins.has(origin);
       const isLocalhostDevPort = /^http:\/\/localhost:\d+$/.test(origin);
 
       if (isConfiguredOrigin || isLocalhostDevPort) {
@@ -34,7 +40,6 @@ app.use(
     credentials: true,
   })
 );
-app.use(mongoSanitize());
 
 // Rate limiting
 app.use('/api/', apiLimiter);
@@ -42,6 +47,7 @@ app.use('/api/', apiLimiter);
 // Body parser with size limits
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+app.use(mongoSanitizeCompat);
 
 // Logging
 if (process.env.NODE_ENV === 'development') {

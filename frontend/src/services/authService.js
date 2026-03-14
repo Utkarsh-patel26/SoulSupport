@@ -1,11 +1,12 @@
 import api from '@/lib/api';
+import { clearAuthToken, getAuthToken, setAuthToken } from '@/lib/authToken';
 
 export const authService = {
   async register(data) {
     const response = await api.post('/auth/register', data);
     const payload = response.data?.data ?? response.data ?? {};
     if (payload?.token) {
-      localStorage.setItem('token', payload.token);
+      setAuthToken(payload.token);
     }
     return payload;
   },
@@ -14,13 +15,13 @@ export const authService = {
     const response = await api.post('/auth/login', { email, password });
     const payload = response.data?.data ?? response.data ?? {};
     if (payload?.token) {
-      localStorage.setItem('token', payload.token);
+      setAuthToken(payload.token);
     }
     return payload;
   },
 
   logout() {
-    localStorage.removeItem('token');
+    clearAuthToken();
     if (typeof window !== 'undefined') {
       window.location.href = '/login';
     }
@@ -39,11 +40,15 @@ export const authService = {
     return await api.post('/auth/reset-password', { token, newPassword });
   },
 
+  async validateResetToken(token) {
+    return await api.get('/auth/validate-reset-token', { params: { token } });
+  },
+
   async verifyEmail(token) {
     return await api.post('/auth/verify-email', { token });
   },
 
   isAuthenticated() {
-    return typeof window !== 'undefined' && !!localStorage.getItem('token');
+    return !!getAuthToken();
   },
 };

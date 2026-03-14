@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const ApiResponse = require('../utils/ApiResponse');
 const asyncHandler = require('../utils/asyncHandler');
 const uploadService = require('../services/upload.service');
+const { deleteUserAccountData } = require('../services/accountCleanup.service');
 
 // Get user profile
 exports.getUser = asyncHandler(async (req, res) => {
@@ -23,7 +24,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { fullName, bio },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   res.json(new ApiResponse(200, { user }, 'User updated successfully'));
@@ -35,7 +36,7 @@ exports.deleteUser = asyncHandler(async (req, res) => {
     throw new ApiError(403, 'You can only delete your own account');
   }
 
-  await User.findByIdAndDelete(req.params.id);
+  await deleteUserAccountData(req.params.id);
   res.json(new ApiResponse(200, null, 'User deleted successfully'));
 });
 
@@ -50,7 +51,7 @@ exports.updateAvatar = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.params.id,
     { avatarUrl: result.url },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   res.json(new ApiResponse(200, { user, avatarUrl: result.url }, 'Avatar updated successfully'));
@@ -61,13 +62,15 @@ exports.getUserStats = asyncHandler(async (req, res) => {
   if (req.user.id.toString() !== req.params.id) {
     throw new ApiError(403, 'You can only view your own stats');
   }
-  
-  const userId = req.params.id;
-  const user = await User.findById(userId);
-  if (!user) throw new ApiError(404, 'User not found');
 
-  const sessions = await Session.countDocuments({ userId });
-  const reviews = await Review.countDocuments({ userId });
+  const userId = req.params.id;
+  const userExists = await User.exists({ _id: userId });
+  if (!userExists) throw new ApiError(404, 'User not found');
+
+  const [sessions, reviews] = await Promise.all([
+    Session.countDocuments({ userId }),
+    Review.countDocuments({ userId }),
+  ]);
 
   res.json(new ApiResponse(200, { stats: { sessions, reviews } }, 'User stats retrieved successfully'));
 });

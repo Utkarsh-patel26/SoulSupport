@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 
 const NotificationContext = createContext();
@@ -23,10 +23,4 @@ export function NotificationProvider({ children }) {
       {children}
     </NotificationContext.Provider>
   );
-}
-
-export function useNotification() {
-  const ctx = useContext(NotificationContext);
-  if (!ctx) throw new Error('useNotification must be used within NotificationProvider');
-  return ctx;
 }

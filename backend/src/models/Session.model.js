@@ -83,9 +83,6 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       maxlength: 500,
     },
-    cancelReason: {
-      type: String,
-    },
   },
   {
     timestamps: true,

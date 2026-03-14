@@ -10,6 +10,14 @@ import { Badge } from '@/components/ui/Badge';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import Link from 'next/link';
 
+const UPCOMING_SESSION_STATUSES = new Set(['pending', 'confirmed']);
+const ARCHIVED_SESSION_STATUSES = new Set([
+  'completed',
+  'cancelled_by_user',
+  'cancelled_by_therapist',
+  'expired',
+]);
+
 export default function DashboardContent() {
   const { user } = useAuth();
   const liveQueryOptions = {
@@ -17,16 +25,14 @@ export default function DashboardContent() {
   };
 
   const { list: sessions } = useSessions({ limit: 200 }, liveQueryOptions);
-  let sessionList = [];
-  if (sessions?.data?.data?.sessions) sessionList = sessions.data.data.sessions;
-  else if (sessions?.data?.sessions) sessionList = sessions.data.sessions;
+  const sessionList = sessions?.data?.data?.sessions ?? [];
 
   const upcomingSessionList = sessionList.filter(
-    (s) => ['pending', 'confirmed'].includes(s.status) && new Date(s.sessionDate) > new Date()
+    (s) => UPCOMING_SESSION_STATUSES.has(s.status) && new Date(s.sessionDate) > new Date()
   );
   const pastSessionList = sessionList.filter(
     (s) =>
-      ['completed', 'cancelled_by_user', 'cancelled_by_therapist', 'expired'].includes(s.status) ||
+      ARCHIVED_SESSION_STATUSES.has(s.status) ||
       new Date(s.sessionDate) <= new Date()
   );
   const upcomingSessions = upcomingSessionList.length;
@@ -82,14 +88,14 @@ export default function DashboardContent() {
           <CardContent className="p-6">
             <div className="flex flex-col h-full justify-center">
               <p className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-3">Quick Actions</p>
-              <div className="flex gap-2">
-                <Link href="/therapists" className="flex-1">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                <Link href="/therapists" className="w-full">
                   <Button size="sm" className="w-full justify-center">Find Therapist</Button>
                 </Link>
-                <Link href="/forum" className="flex-1">
+                <Link href="/forum" className="w-full">
                   <Button size="sm" variant="outline" className="w-full justify-center">Community</Button>
                 </Link>
-                <Link href="/dashboard/assistant" className="flex-1">
+                <Link href="/dashboard/assistant" className="w-full">
                   <Button size="sm" variant="outline" className="w-full justify-center">AI Assistant</Button>
                 </Link>
               </div>
@@ -139,7 +145,7 @@ export default function DashboardContent() {
                           <p className="font-semibold text-charcoal group-hover:text-primary transition-colors">
                             {session.therapist?.user?.fullName || 'Therapist'}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
                             <Badge tone={session.status === 'confirmed' ? 'success' : 'warning'}>{session.status}</Badge>
                             <span className="text-sm text-text-secondary flex items-center gap-1">
                               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -181,7 +187,7 @@ export default function DashboardContent() {
               ) : (
                 <div className="space-y-3">
                   {pastSessionList.slice(0, 4).map((session) => (
-                    <div key={session._id} className="flex items-center justify-between rounded-xl border border-border/60 p-3">
+                    <div key={session._id} className="flex flex-col gap-3 rounded-xl border border-border/60 p-3 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-sm font-semibold text-charcoal">{session.therapist?.name || 'Therapist'}</p>
                         <p className="text-xs text-text-muted">{new Date(session.sessionDate).toLocaleString()}</p>

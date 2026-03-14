@@ -40,8 +40,8 @@ export function Modal({ open, title, description, onClose, children, actions }) 
       onClick={handleOverlayClick}
       className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal/40 backdrop-blur-sm p-4 sm:p-6 transition-opacity"
     >
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-surface shadow-card animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-start justify-between border-b border-border/50 px-6 py-5">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-surface shadow-card animate-in fade-in zoom-in-95 duration-200">
+        <div className="flex shrink-0 items-start justify-between border-b border-border/50 px-6 py-5">
           <div className="flex flex-col gap-1">
             <h2 id="modal-title" className="font-heading text-xl font-bold text-charcoal">{title}</h2>
             {description && (
@@ -56,11 +56,11 @@ export function Modal({ open, title, description, onClose, children, actions }) 
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
           </button>
         </div>
-        <div className="px-6 py-6 text-base text-text-secondary leading-relaxed">
+        <div className="overflow-y-auto px-6 py-6 text-base text-text-secondary leading-relaxed">
           {children}
         </div>
         {actions && (
-          <div className="flex items-center justify-end gap-3 border-t border-border/50 bg-surface-alt/30 px-6 py-4">
+          <div className="flex shrink-0 items-center justify-end gap-3 border-t border-border/50 bg-surface-alt/30 px-6 py-4">
             {actions}
           </div>
         )}

@@ -86,13 +86,14 @@ exports.getTherapistReviews = asyncHandler(async (req, res) => {
   const { page = 1, limit = 20 } = req.query;
   const skip = (page - 1) * limit;
 
-  const reviews = await Review.find({ therapistId: req.params.therapistId })
+  const reviews = await Review.find({ therapistId: req.params.therapistId, isVisible: true })
     .sort({ createdAt: -1 })
-    .limit(parseInt(limit))
+    .limit(Number.parseInt(limit, 10))
     .skip(skip);
 
   const total = await Review.countDocuments({
     therapistId: req.params.therapistId,
+    isVisible: true,
   });
 
   res.json(
@@ -101,8 +102,8 @@ exports.getTherapistReviews = asyncHandler(async (req, res) => {
       {
         reviews,
         pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
+          page: Number.parseInt(page, 10),
+          limit: Number.parseInt(limit, 10),
           total,
           pages: Math.ceil(total / limit),
         },

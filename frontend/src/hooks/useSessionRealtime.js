@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
+import { getAuthToken } from '@/lib/authToken';
 
 function getRealtimeUrl(token) {
   const apiBase = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api').replace(/\/$/, '');
@@ -13,7 +14,7 @@ export function useSessionRealtime({ onSessionUpdate, onSlotUpdate } = {}) {
       return undefined;
     }
 
-    const token = localStorage.getItem('token');
+    const token = getAuthToken();
     if (!token) {
       return undefined;
     }
@@ -27,7 +28,7 @@ export function useSessionRealtime({ onSessionUpdate, onSlotUpdate } = {}) {
 
       try {
         onSessionUpdate(JSON.parse(event.data));
-      } catch (error) {
+      } catch {
         // Ignore malformed realtime payloads.
       }
     };
@@ -39,17 +40,23 @@ export function useSessionRealtime({ onSessionUpdate, onSlotUpdate } = {}) {
 
       try {
         onSlotUpdate(JSON.parse(event.data));
-      } catch (error) {
+      } catch {
         // Ignore malformed realtime payloads.
       }
     };
 
+    const handleAuthError = () => {
+      stream.close();
+    };
+
     stream.addEventListener('session.updated', handleSessionUpdate);
     stream.addEventListener('slot.updated', handleSlotUpdate);
+    stream.addEventListener('auth.error', handleAuthError);
 
     return () => {
       stream.removeEventListener('session.updated', handleSessionUpdate);
       stream.removeEventListener('slot.updated', handleSlotUpdate);
+      stream.removeEventListener('auth.error', handleAuthError);
       stream.close();
     };
   }, [onSessionUpdate, onSlotUpdate]);

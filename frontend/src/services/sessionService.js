@@ -68,7 +68,16 @@ export const sessionService = {
   },
 
   async cancelSession(id, cancelReason) {
-    const response = await api.delete(`/sessions/${id}`, { data: { cancelReason } });
+    const payload = cancelReason ? { cancelReason } : undefined;
+    const response = await api.delete(`/sessions/${id}`, payload ? { data: payload } : undefined);
+    return response.data;
+  },
+
+  async cancelSessionAsTherapist(id, cancelReason) {
+    const response = await api.put(`/sessions/${id}/status`, {
+      status: 'cancelled_by_therapist',
+      cancelReason,
+    });
     return response.data;
   },
 };

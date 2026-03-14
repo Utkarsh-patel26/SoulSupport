@@ -12,8 +12,8 @@ export default function TherapistReviewsPage() {
   const id = user?._id;
   const { data: profileData } = useTherapist(id);
   const { data, isLoading, error } = useTherapistReviews(id);
-  const reviews = data?.data?.reviews || data?.reviews || [];
-  const therapist = profileData?.data?.therapist || profileData?.therapist;
+  const reviews = data?.data?.reviews ?? [];
+  const therapist = profileData?.data?.therapist;
 
   return (
     <AnimatedSection className="space-y-4">

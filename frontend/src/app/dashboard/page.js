@@ -1,12 +1,10 @@
-import dynamic from 'next/dynamic';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-const DashboardContent = dynamic(() => import('./DashboardClient'), { ssr: false });
+import DashboardContentLoader from './DashboardContentLoader';
 
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <DashboardContent />
+      <DashboardContentLoader />
     </ProtectedRoute>
   );
 }

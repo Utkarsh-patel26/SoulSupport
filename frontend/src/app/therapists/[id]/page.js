@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTherapist, useTherapistReviews } from '@/hooks/useTherapists';
 import { useAuth } from '@/hooks/useAuth';
@@ -19,18 +20,41 @@ const BookingModal = dynamic(
   { ssr: false, loading: () => null }
 );
 
+function getTherapistUser(therapist) {
+  const userIdAsObject = therapist?.userId && typeof therapist.userId === 'object'
+    ? therapist.userId
+    : null;
+  return therapist?.user || userIdAsObject || null;
+}
+
+function normalizeParamId(value) {
+  if (Array.isArray(value)) {
+    return value[0] || '';
+  }
+
+  return typeof value === 'string' ? value : '';
+}
+
+function getErrorMessage(error) {
+  if (!error) return '';
+  if (typeof error === 'string') return error;
+  if (typeof error?.message === 'string') return error.message;
+  return 'Unable to load therapist profile.';
+}
+
 export default function TherapistPage() {
   const params = useParams();
-  const therapistId = params?.id;
+  const therapistId = normalizeParamId(params?.id);
   const { user } = useAuth();
   const { data, isLoading, error } = useTherapist(therapistId);
   const { data: reviewsData } = useTherapistReviews(therapistId);
   const { createSlotHold, confirmSlotHold } = useSessionMutations();
   const [open, setOpen] = useState(false);
 
-  const therapist = data?.data?.therapist || data?.therapist;
-  const displayName = therapist?.fullName || therapist?.user?.fullName || 'Therapist';
-  const displayBio = therapist?.bio || therapist?.user?.bio || 'No bio provided yet.';
+  const therapist = data?.data?.therapist || data?.therapist || data?.data || null;
+  const therapistUser = getTherapistUser(therapist);
+  const displayName = therapist?.fullName || therapistUser?.fullName || 'Therapist';
+  const displayBio = therapist?.bio || therapistUser?.bio || 'No bio provided yet.';
   const displayQualifications = therapist?.qualifications || 'Licensed mental health professional';
   const displaySpecializations = Array.isArray(therapist?.specializations)
     ? therapist.specializations
@@ -40,17 +64,20 @@ export default function TherapistPage() {
     : [];
   const displayRating = typeof therapist?.rating === 'number' ? therapist.rating.toFixed(1) : '0.0';
   const roundedRating = Math.round(Number(displayRating));
-  const reviews = reviewsData?.data?.reviews || reviewsData?.reviews || [];
+  const reviews = reviewsData?.data?.reviews ?? [];
   const isTherapist = user?.userType === 'therapist';
+  const canBook = Boolean(user) && !isTherapist;
+  const errorMessage = getErrorMessage(error);
+  const showMissingState = !isLoading && !therapist;
 
   const handleBook = async (payload) => {
-    const therapistUserId = therapist?.user?._id || therapist?.userId;
+    const therapistUserId = therapistUser?._id || therapist?.userId;
     const holdResponse = await createSlotHold.mutateAsync({
       ...payload,
       therapistId: therapistUserId,
     });
 
-    const hold = holdResponse?.data?.hold || holdResponse?.hold;
+    const hold = holdResponse?.data?.hold;
     if (!hold?._id) {
       throw new Error('Unable to lock slot. Please try again.');
     }
@@ -66,11 +93,34 @@ export default function TherapistPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 space-y-6">
       {isLoading && <LoadingSpinner label="Loading therapist..." />}
-      {error && <ErrorMessage message={String(error)} />}
+      {error && <ErrorMessage message={errorMessage} />}
+      {showMissingState && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-soft">
+          <p className="font-heading text-2xl font-bold text-charcoal">Therapist not available</p>
+          <p className="mt-3 text-sm text-slate-600">
+            This profile could not be loaded. Public therapist pages only appear when the therapist is active,
+            verified, and not marked private.
+          </p>
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Link
+              href="/therapists"
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary-hover"
+            >
+              Browse therapists
+            </Link>
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
+            >
+              Back home
+            </Link>
+          </div>
+        </div>
+      )}
       {therapist && (
         <div className="space-y-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-soft">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Avatar src={therapist.photoUrl || therapist.user?.avatarUrl} name={displayName} size={72} />
+            <Avatar src={therapist.photoUrl || therapistUser?.avatarUrl} name={displayName} size={72} />
             <div className="space-y-1 sm:flex-1">
               <p className="font-heading text-2xl font-bold text-charcoal">{displayName}</p>
               <p className="text-sm text-slate-600">Therapist</p>
@@ -84,7 +134,14 @@ export default function TherapistPage() {
                 <span>{therapist?.totalSessions || 0} sessions</span>
               </div>
             </div>
-            {isTherapist ? (
+            {!user ? (
+              <Link
+                href="/login"
+                className="sm:ml-auto inline-flex items-center justify-center rounded-xl bg-primary px-6 py-2.5 text-base font-semibold text-white transition-all duration-300 hover:bg-primary-hover"
+              >
+                Log in to book
+              </Link>
+            ) : isTherapist ? (
               <div className="px-4 py-2 bg-gray-100 text-gray-600 rounded-md text-sm sm:ml-auto">
                 Therapists cannot book sessions
               </div>
@@ -165,7 +222,7 @@ export default function TherapistPage() {
       )}
 
       <BookingModal
-        open={open}
+        open={open && canBook}
         therapist={therapist}
         onClose={() => setOpen(false)}
         onBook={handleBook}

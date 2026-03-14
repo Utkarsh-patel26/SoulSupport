@@ -1,13 +1,18 @@
 import api from '@/lib/api';
 
 export const notificationService = {
-  list() {
-    return api.get('/notifications');
+  async getNotifications(params = {}) {
+    const response = await api.get('/notifications', { params });
+    return response.data;
   },
-  markRead(id) {
-    return api.put(`/notifications/${id}/read`);
+
+  async markAsRead(id) {
+    const response = await api.put(`/notifications/${id}/read`);
+    return response.data;
   },
-  remove(id) {
-    return api.delete(`/notifications/${id}`);
+
+  async deleteNotification(id) {
+    const response = await api.delete(`/notifications/${id}`);
+    return response.data;
   },
 };

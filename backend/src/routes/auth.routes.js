@@ -42,6 +42,8 @@ router.post(
   authController.resetPassword
 );
 
+router.get('/validate-reset-token', authController.validateResetToken);
+
 router.post(
   '/verify-email',
   validate(verifyEmailSchema),

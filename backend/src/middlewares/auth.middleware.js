@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User.model');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
+const logger = require('../utils/logger');
 
 /**
  * Protect routes - Verify JWT token
@@ -26,11 +27,17 @@ exports.protect = asyncHandler(async (req, res, next) => {
     }
 
     // Keep lastActive fresh without blocking the request path.
-    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch(() => {});
+    User.findByIdAndUpdate(user._id, { lastActive: new Date() }).catch((error) => {
+      logger.warn('Failed to update user lastActive timestamp', { userId: user._id, error: error.message });
+    });
 
     req.user = user;
     next();
   } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+
     throw new ApiError(401, 'Invalid token');
   }
 });
@@ -39,8 +46,10 @@ exports.protect = asyncHandler(async (req, res, next) => {
  * Restrict access to specific user types
  */
 exports.restrictTo = (...userTypes) => {
+  const allowedUserTypes = new Set(userTypes);
+
   return (req, res, next) => {
-    if (!userTypes.includes(req.user.userType)) {
+    if (!allowedUserTypes.has(req.user.userType)) {
       throw new ApiError(
         403,
         `User type ${req.user.userType} is not allowed to access this route`

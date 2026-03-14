@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Dropdown } from '@/components/ui/Dropdown';
 import { useAuth } from '@/hooks/useAuth';
 import toast from 'react-hot-toast';
 import { RichTextEditor } from '@/components/ui/RichTextEditor';
+import { forumService } from '@/services/forumService';
 
-const categories = [
+const FALLBACK_CATEGORIES = [
   { label: 'General', value: 'general' },
   { label: 'Anxiety', value: 'anxiety' },
   { label: 'Relationships', value: 'relationships' },
@@ -21,6 +23,18 @@ export function PostForm({ onCreate }) {
   const [category, setCategory] = useState('general');
   const [isAnonymous, setIsAnonymous] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const { data: categoriesData } = useQuery({
+    queryKey: ['forum-categories'],
+    queryFn: () => forumService.getCategories(),
+    staleTime: 5 * 60 * 1000,
+  });
+  const categories = Array.isArray(categoriesData?.data?.categories)
+    ? categoriesData.data.categories.map((c) => ({
+        label: c.charAt(0).toUpperCase() + c.slice(1),
+        value: c,
+      }))
+    : FALLBACK_CATEGORIES;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
