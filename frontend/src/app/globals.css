@@ -14,7 +14,7 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     background: var(--bg);
     color: var(--text-main);
@@ -23,13 +23,11 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Typography defaults */
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.025em;
     font-family: var(--font-heading), Inter, sans-serif;
   }
 
-  /* Accessibility skip link */
   .skip-to-content {
     position: absolute;
     left: 1rem;
@@ -49,7 +47,6 @@
   }
 }
 
-/* Animations */
 @keyframes blob {
   0% { transform: translate(0px, 0px) scale(1); }
   33% { transform: translate(30px, -50px) scale(1.1); }
@@ -69,12 +66,11 @@
   animation-delay: 4s;
 }
 
-/* Custom Utilities */
 .scrollbar-hide::-webkit-scrollbar {
-    display: none;
-}
-.scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  display: none;
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
