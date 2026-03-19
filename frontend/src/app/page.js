@@ -66,7 +66,7 @@ const HeroSection = () => (
             <span>Get Support Now</span>
             <ArrowRight className="w-5 h-5 ml-2" />
           </ButtonPrimary>
-          <Link href="/how-it-works">
+          <Link href="https://www.youtube.com/watch?v=QDia3e12czc">
             <motion.button 
               whileHover={{ y: -2 }}
               className="w-full sm:w-auto px-6 py-3 bg-white text-text-dark font-semibold rounded-brand shadow-sm border border-border-light hover:bg-gray-50 flex items-center justify-center transition-all"

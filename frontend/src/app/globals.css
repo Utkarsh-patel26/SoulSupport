@@ -1,7 +1,6 @@
-@import "tailwindcss";
-@config "../../tailwind.config.js";
-@plugin "@tailwindcss/forms";
-@plugin "@tailwindcss/typography";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   :root {

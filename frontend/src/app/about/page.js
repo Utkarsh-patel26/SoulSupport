@@ -349,7 +349,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <footer className="border-t border-border/70 bg-white py-14">
+        {/* <footer className="border-t border-border/70 bg-white py-14">
           <div className="container mx-auto max-w-6xl px-4">
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {FOOTER_COLUMNS.map((column) => (
@@ -371,7 +371,7 @@ export default function AboutPage() {
               SoulSupport © {new Date().getFullYear()}.
             </div>
           </div>
-        </footer>
+        </footer> */}
       </main>
     </div>
   );

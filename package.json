@@ -12,5 +12,10 @@
     "test": "npm run test --prefix backend && npm run test --prefix frontend",
     "lint": "npm run lint --prefix frontend",
     "preview": "npm run start --prefix frontend"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2"
   }
 }
