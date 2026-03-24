@@ -12,10 +12,11 @@ if (process.env.TRUST_PROXY) {
   app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : process.env.TRUST_PROXY);
 }
 
-const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:3000')
-  .split(',')
-  .map((origin) => origin.trim())
-  .filter(Boolean);
+const allowedOrigins = [
+  'https://soulsupport.utkarshcode.com',
+  'https://soul-support-hazel.vercel.app',
+  'http://localhost:3000',
+];
 
 // Security middleware
 app.use(helmet());
