@@ -68,37 +68,30 @@ const HOW_IT_WORKS = [
   },
 ];
 
-const TIMELINE = [
-  { year: "2021", event: "Platform idea" },
-  { year: "2022", event: "First pilot program" },
-  { year: "2024", event: "Expansion to partnerships" },
-  { year: "2026", event: "Scaled community access" },
-];
-
 const TEAM = [
   {
-    name: "Dr. Sarah Jenkins",
-    role: "Clinical Director",
-    seed: "sarah-jenkins",
-    credibility: "Leads clinical quality and evidence-informed care standards.",
+    name: "Utkarsh Patel",
+    role: "Founder & Lead Developer",
+    seed: "utkarsh-patel",
+    credibility: "Drives platform vision and core development.",
   },
   {
-    name: "Dr. Ahmed Khan",
-    role: "Head of Counseling",
-    seed: "ahmed-khan",
-    credibility: "Builds therapy frameworks focused on long-term outcomes.",
+    name: "Sanjay J",
+    role: "Backend Engineer",
+    seed: "sanjay-j",
+    credibility: "Builds scalable backend systems and API architecture.",
   },
   {
-    name: "Maya Patel",
-    role: "Community Lead",
-    seed: "maya-patel",
-    credibility: "Designs safe, accessible community support experiences.",
+    name: "Praneel Sindhole",
+    role: "Frontend Engineer",
+    seed: "praneel-sindhole",
+    credibility: "Crafts intuitive user interfaces and experiences.",
   },
   {
-    name: "Elena Rostova",
-    role: "Partnership Director",
-    seed: "elena-rostova",
-    credibility: "Expands NGO partnerships to reduce care access barriers.",
+    name: "Ojasvi Poonia",
+    role: "Full Stack Developer",
+    seed: "ojasvi-poonia",
+    credibility: "Bridges frontend and backend for seamless delivery.",
   },
 ];
 
@@ -267,27 +260,6 @@ export default function AboutPage() {
                   </article>
                 );
               })}
-            </div>
-          </div>
-        </section>
-
-        <section className="border-y border-border/70 bg-[#f9fcfc] py-20 sm:py-24">
-          <div className="container mx-auto max-w-5xl px-4">
-            <div className="text-center">
-              <h2 className="font-heading text-3xl font-bold text-charcoal sm:text-5xl">Our Story</h2>
-            </div>
-
-            <div className="mx-auto mt-12 max-w-3xl space-y-5">
-              {TIMELINE.map((item, idx) => (
-                <article key={item.year} className="relative rounded-[1.5rem] border border-border/70 bg-white p-6 pl-8 shadow-[0_12px_26px_rgba(15,23,42,0.04)]">
-                  <div className="absolute inset-y-0 left-0 w-1 rounded-l-[1.5rem] bg-primary/70" aria-hidden="true" />
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-primary">{item.year}</p>
-                  <p className="mt-2 text-base text-text-secondary">{item.event}</p>
-                  {idx < TIMELINE.length - 1 && (
-                    <div className="absolute -bottom-5 left-3 h-5 w-px bg-primary/35" aria-hidden="true" />
-                  )}
-                </article>
-              ))}
             </div>
           </div>
         </section>
