@@ -96,7 +96,7 @@ export default function DashboardContent() {
                   <Button size="sm" variant="outline" className="w-full justify-center">Community</Button>
                 </Link>
                 <Link href="/dashboard/assistant" className="w-full">
-                  <Button size="sm" variant="outline" className="w-full justify-center">AI Assistant</Button>
+                  <Button size="sm" variant="outline" className="w-full justify-center">Talk to SoulBot</Button>
                 </Link>
               </div>
             </div>
@@ -210,6 +210,23 @@ export default function DashboardContent() {
 
         {/* Sidebar Space (Resources/Tips) */}
         <div className="space-y-6">
+          <Card className="border-border/70 hover:border-primary/40 transition-colors">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="h-3 w-3 rounded-full bg-green-500 animate-pulse" />
+                <h3 className="font-heading text-lg font-bold text-charcoal">SoulBot</h3>
+              </div>
+              <p className="text-sm text-text-secondary mb-4 leading-relaxed">
+                Your mental wellness companion is always here to listen, provide support, and help you through challenges.
+              </p>
+              <Link href="/dashboard/assistant">
+                <Button className="w-full" variant="outline">
+                  Start Chatting
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
           <Card className="bg-gradient-to-br from-primary to-[#0f4637] text-white border-0 shadow-md">
             <CardContent className="p-6">
               <h3 className="font-heading text-lg font-bold mb-2">Need immediate help?</h3>
