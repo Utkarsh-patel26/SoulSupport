@@ -18,6 +18,8 @@ const allowedOrigins = [
   'http://localhost:3000',
 ];
 
+console.log('[CORS] Allowed origins:', allowedOrigins);
+
 // Security middleware
 app.use(helmet());
 app.use(
@@ -28,14 +30,21 @@ app.use(
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin)) {
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      console.warn(`CORS: blocked request from origin: ${origin}`);
+      // Allow any localhost port in development
+      if (/^http:\/\/localhost:\d+$/.test(origin)) {
+        return callback(null, true);
+      }
+
+      console.warn(`[CORS] Blocked: ${origin}`);
       return callback(null, false);
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
 
