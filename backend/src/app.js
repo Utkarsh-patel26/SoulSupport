@@ -7,9 +7,9 @@ const { mongoSanitizeCompat } = require('./middlewares/mongoSanitize.middleware'
 
 const app = express();
 
-if (process.env.TRUST_PROXY) {
-  app.set('trust proxy', process.env.TRUST_PROXY === 'true' ? 1 : process.env.TRUST_PROXY);
-}
+// Render (and most PaaS) sit behind a reverse proxy – trust it so
+// express-rate-limit reads the real client IP from X-Forwarded-For.
+app.set('trust proxy', process.env.TRUST_PROXY === 'true' || !process.env.TRUST_PROXY ? 1 : process.env.TRUST_PROXY);
 
 const allowedOrigins = [
   'https://soulsupport.utkarshcode.com',
@@ -21,7 +21,13 @@ const allowedOrigins = [
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  if (origin && allowedOrigins.includes(origin)) {
+  const isAllowed =
+    origin &&
+    (allowedOrigins.includes(origin) ||
+      /^http:\/\/localhost:\d+$/.test(origin) ||
+      /\.vercel\.app$/.test(origin));
+
+  if (isAllowed) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
