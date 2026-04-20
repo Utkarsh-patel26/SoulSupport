@@ -11,7 +11,7 @@ RUN npm ci
 COPY . .
 
 # Build Next.js application
-RUN npm run build
+RUN npx next build --webpack
 
 # Production stage
 FROM node:22-alpine AS runner
